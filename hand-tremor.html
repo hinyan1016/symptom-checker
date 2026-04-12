@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>手のふるえセルフチェック ― その症状、大丈夫？</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif;
+  background: #f0f4f8;
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.app-header {
+  background: linear-gradient(135deg, #1B3A5C, #2C5AA0);
+  color: #fff;
+  padding: 16px 20px;
+  text-align: center;
+}
+.app-header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+.app-header .series { font-size: 0.8rem; opacity: 0.8; }
+.disclaimer {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 12px 16px;
+  margin: 12px 16px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #856404;
+}
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+.step-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.step-number {
+  display: inline-block;
+  background: #2C5AA0;
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+.step-card h2 {
+  font-size: 1.1rem;
+  color: #1B3A5C;
+  margin-bottom: 12px;
+}
+.step-card p {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 12px;
+}
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #333;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.option-btn:hover { border-color: #2C5AA0; background: #f0f6ff; }
+.option-btn.selected { border-color: #2C5AA0; background: #e8f4fd; color: #1B3A5C; font-weight: bold; }
+.hidden { display: none; }
+.result-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+.result-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.badge-red { background: #f8d7da; color: #c0392b; }
+.badge-yellow { background: #fff3cd; color: #856404; }
+.badge-green { background: #d4edda; color: #155724; }
+.result-title { font-size: 1.2rem; color: #1B3A5C; margin-bottom: 8px; }
+.result-desc { font-size: 0.95rem; color: #555; margin-bottom: 16px; }
+.result-action {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.result-action strong { color: #2C5AA0; }
+.result-note {
+  font-size: 0.85rem;
+  color: #888;
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+  margin-top: 12px;
+}
+.restart-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: #2C5AA0;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 12px;
+}
+.restart-btn:hover { background: #1B3A5C; }
+.progress-bar {
+  height: 4px;
+  background: #dee2e6;
+  margin: 0 16px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: #2C5AA0;
+  transition: width 0.3s;
+  border-radius: 2px;
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="series">その症状、大丈夫？ #01</div>
+  <h1>手のふるえセルフチェック</h1>
+</div>
+
+<div class="disclaimer">
+  このツールは医療行為ではありません。結果は参考情報であり、診断に代わるものではありません。心配な場合は必ず医師にご相談ください。
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+<div class="container">
+  <!-- 質問群 -->
+  <div id="questionArea"></div>
+  <!-- 結果 -->
+  <div id="resultArea" class="hidden"></div>
+</div>
+
+<script>
+var questions = [
+  {
+    id: "timing",
+    title: "ふるえはいつ起きますか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "rest", label: "じっとしている時（テレビを見ている時、膝に手を置いている時など）" },
+      { id: "action", label: "手を使う時（コップを持つ、字を書く、箸を使うなど）" },
+      { id: "both", label: "どちらの時も震える" },
+      { id: "tension", label: "緊張した時だけ" },
+      { id: "unsure", label: "よくわからない" }
+    ]
+  },
+  {
+    id: "duration",
+    title: "ふるえはいつ頃から気になっていますか？",
+    subtitle: "",
+    options: [
+      { id: "sudden", label: "今日〜数日前から突然始まった" },
+      { id: "weeks", label: "数週間〜数ヶ月前から" },
+      { id: "years", label: "数年前から（徐々に）" },
+      { id: "occasional", label: "たまに起こるだけ" }
+    ]
+  },
+  {
+    id: "side",
+    title: "ふるえはどちら側ですか？",
+    subtitle: "",
+    options: [
+      { id: "one", label: "片側だけ（右手だけ、左手だけ）" },
+      { id: "both_sides", label: "両手とも" },
+      { id: "varies", label: "時によって違う" }
+    ]
+  },
+  {
+    id: "other_symptoms",
+    title: "ふるえ以外に気になる症状はありますか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "none", label: "ふるえだけで、他に気になることはない" },
+      { id: "slow", label: "動作が遅くなった・体がこわばる" },
+      { id: "speech", label: "ろれつが回りにくい・しゃべりにくい" },
+      { id: "weakness", label: "手足に力が入りにくい" },
+      { id: "other", label: "動悸・発汗・体重減少がある" }
+    ]
+  },
+  {
+    id: "daily_life",
+    title: "日常生活への影響はありますか？",
+    subtitle: "",
+    options: [
+      { id: "no_impact", label: "特に困っていない" },
+      { id: "mild", label: "少し気になるが、生活に大きな支障はない" },
+      { id: "moderate", label: "食事や字を書くのが少し難しい" },
+      { id: "severe", label: "食事・着替えなどに大きな支障がある" }
+    ]
+  },
+  {
+    id: "medication",
+    title: "最近、薬を新しく始めたり変更したりしましたか？",
+    subtitle: "",
+    options: [
+      { id: "yes_new", label: "はい、新しい薬を始めた" },
+      { id: "yes_changed", label: "はい、薬の量や種類が変わった" },
+      { id: "no_change", label: "いいえ、変わっていない" },
+      { id: "no_meds", label: "薬は飲んでいない" }
+    ]
+  }
+];
+
+var currentStep = 0;
+var answers = {};
+
+function renderQuestion() {
+  var area = document.getElementById("questionArea");
+  var q = questions[currentStep];
+  var pct = Math.round((currentStep / questions.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+
+  var html = '<div class="step-card">';
+  html += '<span class="step-number">質問 ' + (currentStep + 1) + ' / ' + questions.length + '</span>';
+  html += '<h2>' + q.title + '</h2>';
+  if (q.subtitle) { html += '<p>' + q.subtitle + '</p>'; }
+  html += '<div class="options">';
+  for (var i = 0; i < q.options.length; i++) {
+    var opt = q.options[i];
+    html += '<button class="option-btn" onclick="selectAnswer(\'' + q.id + '\',\'' + opt.id + '\')">' + opt.label + '</button>';
+  }
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+
+function selectAnswer(qId, optId) {
+  answers[qId] = optId;
+  currentStep++;
+  if (currentStep < questions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById("questionArea").classList.add("hidden");
+  document.getElementById("progressFill").style.width = "100%";
+
+  var urgency = calcUrgency();
+  var resultArea = document.getElementById("resultArea");
+  resultArea.classList.remove("hidden");
+  resultArea.innerHTML = buildResultHTML(urgency);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function calcUrgency() {
+  // 緊急（赤）: 突然＋ろれつ/脱力、または突然＋片側
+  if (answers.other_symptoms === "speech" || answers.other_symptoms === "weakness") {
+    if (answers.duration === "sudden") {
+      return "emergency";
+    }
+    return "urgent";
+  }
+  if (answers.duration === "sudden" && answers.side === "one") {
+    return "emergency";
+  }
+
+  // 早めに受診（黄）
+  if (answers.timing === "rest" && answers.other_symptoms === "slow") {
+    return "urgent"; // パーキンソン病疑い
+  }
+  if (answers.timing === "rest") {
+    return "urgent";
+  }
+  if (answers.daily_life === "severe") {
+    return "urgent";
+  }
+  if (answers.daily_life === "moderate") {
+    return "soon";
+  }
+  if (answers.other_symptoms === "slow") {
+    return "urgent";
+  }
+  if (answers.other_symptoms === "other") {
+    return "soon"; // 甲状腺疑い
+  }
+  if (answers.duration === "weeks" && answers.daily_life !== "no_impact") {
+    return "soon";
+  }
+
+  // 薬剤性疑い
+  if (answers.medication === "yes_new" || answers.medication === "yes_changed") {
+    return "medication";
+  }
+
+  // 様子見OK（緑）
+  return "watch";
+}
+
+function buildResultHTML(urgency) {
+  var data = {
+    emergency: {
+      badge: "badge-red",
+      badgeText: "すぐ受診してください",
+      title: "緊急性が高い可能性があります",
+      desc: "突然の震えに加え、ろれつの困難や力が入らないなどの症状がある場合、脳血管障害（脳卒中）の可能性があります。",
+      action: "<strong>119番に電話して救急搬送を依頼してください。</strong>脳神経内科・脳神経外科がある病院への搬送をお願いしましょう。",
+      dept: "救急外来（脳神経内科・脳神経外科）"
+    },
+    urgent: {
+      badge: "badge-red",
+      badgeText: "早めに受診をおすすめします",
+      title: "専門医の診察が必要な可能性があります",
+      desc: "安静時の震えや、動作の遅れ・体のこわばりなどを伴う場合、パーキンソン病などの可能性があります。早めに脳神経内科を受診されることをおすすめします。",
+      action: "<strong>1〜2週間以内に脳神経内科を受診しましょう。</strong>近くにない場合は、かかりつけ医に紹介状を書いてもらいましょう。",
+      dept: "脳神経内科"
+    },
+    soon: {
+      badge: "badge-yellow",
+      badgeText: "受診を検討してください",
+      title: "医師に相談することをおすすめします",
+      desc: "生活に支障が出ている、または甲状腺など他の原因が考えられる場合があります。適切な検査と治療で改善できることが多いです。",
+      action: "<strong>まずは脳神経内科またはかかりつけの内科を受診しましょう。</strong>甲状腺の病気が疑われる場合は内科・内分泌科でも対応できます。",
+      dept: "脳神経内科 または 内科"
+    },
+    medication: {
+      badge: "badge-yellow",
+      badgeText: "主治医に相談してください",
+      title: "薬の影響の可能性があります",
+      desc: "新しい薬を始めた後や薬の量が変わった後にふるえが出た場合、薬の副作用の可能性があります。",
+      action: "<strong>自己判断で薬を中止せず、処方した主治医に相談してください。</strong>薬の種類や量を調整することで改善する場合があります。",
+      dept: "処方元の主治医"
+    },
+    watch: {
+      badge: "badge-green",
+      badgeText: "様子を見ても大丈夫です",
+      title: "今のところ緊急性は低そうです",
+      desc: "緊張時のみの震えや、生活に支障のない軽い震えは、多くの場合心配いりません。ストレスや疲労、カフェインの摂りすぎなどが原因のこともあります。",
+      action: "<strong>まずは生活習慣を見直してみましょう。</strong>十分な睡眠、カフェインの摂取量の調整、ストレス管理を心がけてください。症状が悪化した場合は受診をおすすめします。",
+      dept: "悪化した場合：脳神経内科"
+    }
+  };
+
+  var d = data[urgency];
+  var html = '<div class="result-card">';
+  html += '<span class="result-badge ' + d.badge + '">' + d.badgeText + '</span>';
+  html += '<h2 class="result-title">' + d.title + '</h2>';
+  html += '<p class="result-desc">' + d.desc + '</p>';
+  html += '<div class="result-action">' + d.action + '</div>';
+  html += '<div class="result-action"><strong>推奨診療科：</strong>' + d.dept + '</div>';
+
+  // 回答サマリー
+  html += '<div class="result-note">';
+  html += '<strong>あなたの回答：</strong><br>';
+  html += 'ふるえのタイミング：' + getLabelFor("timing", answers.timing) + '<br>';
+  html += 'いつ頃から：' + getLabelFor("duration", answers.duration) + '<br>';
+  html += 'どちら側：' + getLabelFor("side", answers.side) + '<br>';
+  html += '他の症状：' + getLabelFor("other_symptoms", answers.other_symptoms) + '<br>';
+  html += '生活への影響：' + getLabelFor("daily_life", answers.daily_life) + '<br>';
+  html += '薬の変更：' + getLabelFor("medication", answers.medication);
+  html += '<br><br>※ このチェック結果を印刷して受診時にお持ちいただくと、医師への説明がスムーズです。';
+  html += '</div>';
+  html += '</div>';
+
+  html += '<button class="restart-btn" onclick="restart()">もう一度チェックする</button>';
+
+  return html;
+}
+
+function getLabelFor(qId, optId) {
+  for (var i = 0; i < questions.length; i++) {
+    if (questions[i].id === qId) {
+      for (var j = 0; j < questions[i].options.length; j++) {
+        if (questions[i].options[j].id === optId) {
+          return questions[i].options[j].label;
+        }
+      }
+    }
+  }
+  return "";
+}
+
+function restart() {
+  currentStep = 0;
+  answers = {};
+  document.getElementById("resultArea").classList.add("hidden");
+  document.getElementById("resultArea").innerHTML = "";
+  document.getElementById("questionArea").classList.remove("hidden");
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// 初期化
+renderQuestion();
+</script>
+
+</body>
+</html>

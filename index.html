@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>その症状、大丈夫？ ― セルフチェックツール一覧</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif;
+  background: #f0f4f8;
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.app-header {
+  background: linear-gradient(135deg, #1B3A5C, #2C5AA0);
+  color: #fff;
+  padding: 24px 20px;
+  text-align: center;
+}
+.app-header h1 { font-size: 1.5rem; margin-bottom: 8px; }
+.app-header p { font-size: 0.9rem; opacity: 0.85; }
+.container { max-width: 600px; margin: 0 auto; padding: 16px; }
+.disclaimer {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 12px 16px;
+  margin: 12px 0 16px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #856404;
+}
+.tool-card {
+  display: block;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 12px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  text-decoration: none;
+  color: #333;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-left: 4px solid #2C5AA0;
+}
+.tool-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+.tool-emoji { font-size: 1.5rem; margin-bottom: 4px; }
+.tool-name { font-size: 1.1rem; font-weight: bold; color: #1B3A5C; margin-bottom: 4px; }
+.tool-desc { font-size: 0.9rem; color: #666; }
+.tool-tag {
+  display: inline-block;
+  background: #e8f4fd;
+  color: #2C5AA0;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-top: 8px;
+}
+.footer {
+  text-align: center;
+  padding: 24px 16px;
+  font-size: 0.8rem;
+  color: #999;
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>その症状、大丈夫？</h1>
+  <p>脳神経内科医監修 セルフチェックツール</p>
+</div>
+
+<div class="container">
+  <div class="disclaimer">
+    これらのツールは医療行為ではありません。結果は参考情報であり、診断に代わるものではありません。心配な場合は必ず医師にご相談ください。
+  </div>
+
+  <a class="tool-card" href="hand-tremor.html">
+    <div class="tool-emoji">✋</div>
+    <div class="tool-name">手のふるえセルフチェック</div>
+    <div class="tool-desc">手の震えの原因と緊急度をチェック。パーキンソン病？本態性振戦？受診の目安がわかります。</div>
+    <span class="tool-tag">6つの質問</span>
+  </a>
+
+  <!-- 今後のツールはここに追加 -->
+
+</div>
+
+<div class="footer">
+  医知創造ラボ ― 脳神経内科医がAIで紡ぐ最新医療情報<br>
+  &copy; 2026 All rights reserved.
+</div>
+
+</body>
+</html>
