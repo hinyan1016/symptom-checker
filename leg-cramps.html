@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>足のつりセルフチェック ― その症状、大丈夫？</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif;
+  background: #f0f4f8;
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.app-header {
+  background: linear-gradient(135deg, #1B3A5C, #2C5AA0);
+  color: #fff;
+  padding: 16px 20px;
+  text-align: center;
+}
+.app-header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+.app-header .series { font-size: 0.8rem; opacity: 0.8; }
+.disclaimer {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 12px 16px;
+  margin: 12px 16px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #856404;
+}
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+.step-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.step-number {
+  display: inline-block;
+  background: #2C5AA0;
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+.step-card h2 {
+  font-size: 1.1rem;
+  color: #1B3A5C;
+  margin-bottom: 12px;
+}
+.step-card p {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 12px;
+}
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #333;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.option-btn:hover { border-color: #2C5AA0; background: #f0f6ff; }
+.option-btn.selected { border-color: #2C5AA0; background: #e8f4fd; color: #1B3A5C; font-weight: bold; }
+.hidden { display: none; }
+.result-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+.result-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.badge-red { background: #f8d7da; color: #c0392b; }
+.badge-yellow { background: #fff3cd; color: #856404; }
+.badge-green { background: #d4edda; color: #155724; }
+.result-title { font-size: 1.2rem; color: #1B3A5C; margin-bottom: 8px; }
+.result-desc { font-size: 0.95rem; color: #555; margin-bottom: 16px; }
+.result-action {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.result-action strong { color: #2C5AA0; }
+.result-note {
+  font-size: 0.85rem;
+  color: #888;
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+  margin-top: 12px;
+}
+.restart-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: #2C5AA0;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 12px;
+}
+.restart-btn:hover { background: #1B3A5C; }
+.progress-bar {
+  height: 4px;
+  background: #dee2e6;
+  margin: 0 16px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: #2C5AA0;
+  transition: width 0.3s;
+  border-radius: 2px;
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="series">その症状、大丈夫？ #05</div>
+  <h1>足のつりセルフチェック</h1>
+</div>
+
+<div class="disclaimer">
+  このツールは医療行為ではありません。結果は参考情報であり、診断に代わるものではありません。心配な場合は必ず医師にご相談ください。
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+<div class="container">
+  <!-- 質問群 -->
+  <div id="questionArea"></div>
+  <!-- 結果 -->
+  <div id="resultArea" class="hidden"></div>
+</div>
+
+<script>
+var questions = [
+  {
+    id: "frequency",
+    title: "足がつる頻度はどのくらいですか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "rare", label: "月に1〜2回以下" },
+      { id: "weekly", label: "週に1回くらい" },
+      { id: "frequent", label: "週に2回以上" },
+      { id: "daily", label: "ほぼ毎日" }
+    ]
+  },
+  {
+    id: "timing",
+    title: "足がつるのはどんな時ですか？",
+    subtitle: "",
+    options: [
+      { id: "sleep", label: "寝ている時・明け方" },
+      { id: "exercise", label: "運動中・運動後" },
+      { id: "walking", label: "歩いている時（休むと楽になる）" },
+      { id: "anytime", label: "特に決まっていない・いつでもつる" }
+    ]
+  },
+  {
+    id: "location",
+    title: "つる場所はどこですか？",
+    subtitle: "",
+    options: [
+      { id: "calf", label: "ふくらはぎだけ" },
+      { id: "foot", label: "足の裏・足指" },
+      { id: "thigh", label: "太ももにも広がる" },
+      { id: "multiple", label: "足以外（手・腕など）もつることがある" }
+    ]
+  },
+  {
+    id: "other_symptoms",
+    title: "足のつり以外に気になる症状はありますか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "none", label: "つるだけで、他に気になることはない" },
+      { id: "numbness", label: "しびれやピリピリ感がある" },
+      { id: "weakness", label: "足の力が入りにくい・筋肉が痩せてきた" },
+      { id: "swelling", label: "足がむくむ・腫れて熱を持つ" },
+      { id: "backpain", label: "腰痛がある" }
+    ]
+  },
+  {
+    id: "risk_factors",
+    title: "以下に当てはまるものはありますか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "dehydration", label: "水分をあまり摂らない・汗をよくかく" },
+      { id: "diabetes", label: "糖尿病がある、または血糖値が高いと言われた" },
+      { id: "thyroid", label: "甲状腺の病気がある" },
+      { id: "none", label: "特に当てはまるものはない" }
+    ]
+  },
+  {
+    id: "medication",
+    title: "現在飲んでいる薬はありますか？",
+    subtitle: "",
+    options: [
+      { id: "diuretic", label: "利尿薬を飲んでいる" },
+      { id: "statin", label: "コレステロールの薬（スタチン）を飲んでいる" },
+      { id: "other_meds", label: "その他の薬を飲んでいる" },
+      { id: "no_meds", label: "薬は飲んでいない" }
+    ]
+  }
+];
+
+var currentStep = 0;
+var answers = {};
+
+function renderQuestion() {
+  var area = document.getElementById("questionArea");
+  var q = questions[currentStep];
+  var pct = Math.round((currentStep / questions.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+
+  var html = '<div class="step-card">';
+  html += '<span class="step-number">' + "\u8CEA\u554F " + (currentStep + 1) + ' / ' + questions.length + '</span>';
+  html += '<h2>' + q.title + '</h2>';
+  if (q.subtitle) { html += '<p>' + q.subtitle + '</p>'; }
+  html += '<div class="options">';
+  for (var i = 0; i < q.options.length; i++) {
+    var opt = q.options[i];
+    html += '<button class="option-btn" onclick="selectAnswer(\'' + q.id + '\',\'' + opt.id + '\')">' + opt.label + '</button>';
+  }
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+
+function selectAnswer(qId, optId) {
+  answers[qId] = optId;
+  currentStep++;
+  if (currentStep < questions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById("questionArea").classList.add("hidden");
+  document.getElementById("progressFill").style.width = "100%";
+
+  var urgency = calcUrgency();
+  var resultArea = document.getElementById("resultArea");
+  resultArea.classList.remove("hidden");
+  resultArea.innerHTML = buildResultHTML(urgency);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function calcUrgency() {
+  // 緊急（赤）: 筋力低下・筋萎縮、または足の腫れ・熱
+  if (answers.other_symptoms === "weakness") {
+    return "emergency";
+  }
+  if (answers.other_symptoms === "swelling") {
+    return "emergency_dvt";
+  }
+
+  // 早めに受診（黄〜赤）
+  if (answers.other_symptoms === "numbness") {
+    if (answers.risk_factors === "diabetes") {
+      return "urgent_neuropathy";
+    }
+    return "urgent";
+  }
+  if (answers.timing === "walking" && answers.other_symptoms === "backpain") {
+    return "urgent_spinal";
+  }
+  if (answers.timing === "walking") {
+    return "urgent_spinal";
+  }
+  if (answers.frequency === "daily" || answers.frequency === "frequent") {
+    if (answers.location === "multiple") {
+      return "urgent";
+    }
+    return "soon";
+  }
+
+  // 薬剤性疑い
+  if (answers.medication === "diuretic" || answers.medication === "statin") {
+    return "medication";
+  }
+
+  // 生活習慣・脱水
+  if (answers.risk_factors === "dehydration") {
+    return "lifestyle";
+  }
+  if (answers.risk_factors === "thyroid") {
+    return "soon_thyroid";
+  }
+
+  // 様子見OK
+  return "watch";
+}
+
+function buildResultHTML(urgency) {
+  var data = {
+    emergency: {
+      badge: "badge-red",
+      badgeText: "\u3059\u3050\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u7DCB\u6025\u6027\u304C\u9AD8\u3044\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u8DB3\u306E\u3064\u308A\u306B\u52A0\u3048\u3066\u3001\u7B4B\u529B\u4F4E\u4E0B\u3084\u7B4B\u8089\u304C\u75E9\u305B\u3066\u304D\u305F\u5834\u5408\u3001\u904B\u52D5\u795E\u7D4C\u306E\u75BE\u60A3\uFF08ALS\u306A\u3069\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u65E9\u6025\u306B\u5C02\u9580\u533B\u306E\u8A3A\u5BDF\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      action: "<strong>\u3067\u304D\u308B\u3060\u3051\u65E9\u304F\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u795E\u7D4C\u4F1D\u5C0E\u691C\u67FB\u3084\u7B4B\u96FB\u56F3\u306A\u3069\u306E\u7CBE\u67FB\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    emergency_dvt: {
+      badge: "badge-red",
+      badgeText: "\u3059\u3050\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u6DF1\u90E8\u9759\u8108\u8840\u6813\u75C7\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u8DB3\u304C\u30D1\u30F3\u30D1\u30F3\u306B\u816B\u308C\u3066\u71B1\u3092\u6301\u3064\u5834\u5408\u3001\u8DB3\u306E\u6DF1\u3044\u9759\u8108\u306B\u8840\u6813\uFF08\u8840\u306E\u304B\u305F\u307E\u308A\uFF09\u304C\u3067\u304D\u3066\u3044\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u8840\u6813\u304C\u80BA\u306B\u98DB\u3076\u3068\u5371\u967A\u3067\u3059\u3002",
+      action: "<strong>\u4ECA\u65E5\u4E2D\u306B\u533B\u7642\u6A5F\u95A2\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u8D77\u304D\u4E0A\u304C\u308C\u306A\u3044\u30FB\u606F\u82E6\u3057\u3044\u5834\u5408\u306F\u6551\u6025\u8ECA\u3092\u547C\u3093\u3067\u304F\u3060\u3055\u3044\u3002",
+      dept: "\u8840\u7BA1\u5916\u79D1 \u307E\u305F\u306F \u6551\u6025\u5916\u6765"
+    },
+    urgent_neuropathy: {
+      badge: "badge-red",
+      badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059",
+      title: "\u7CD6\u5C3F\u75C5\u6027\u795E\u7D4C\u969C\u5BB3\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u7CD6\u5C3F\u75C5\u306B\u3088\u308B\u672B\u68A2\u795E\u7D4C\u969C\u5BB3\u3067\u306F\u3001\u8DB3\u306E\u3057\u3073\u308C\u3084\u30D4\u30EA\u30D4\u30EA\u611F\u306B\u52A0\u3048\u3066\u7B4B\u3051\u3044\u308C\u3093\u304C\u8D77\u304D\u3084\u3059\u304F\u306A\u308A\u307E\u3059\u3002\u8840\u7CD6\u30B3\u30F3\u30C8\u30ED\u30FC\u30EB\u3068\u795E\u7D4C\u969C\u5BB3\u306E\u6CBB\u7642\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      action: "<strong>\u304B\u304B\u308A\u3064\u3051\u306E\u5185\u79D1\u307E\u305F\u306F\u7CD6\u5C3F\u75C5\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u307E\u3057\u3087\u3046\u3002</strong>\u795E\u7D4C\u969C\u5BB3\u306E\u8A55\u4FA1\u306B\u306F\u8133\u795E\u7D4C\u5185\u79D1\u3078\u306E\u7D39\u4ECB\u3082\u6709\u7528\u3067\u3059\u3002",
+      dept: "\u7CD6\u5C3F\u75C5\u5185\u79D1 \u30FB \u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    urgent: {
+      badge: "badge-red",
+      badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059",
+      title: "\u5C02\u9580\u533B\u306E\u8A3A\u5BDF\u304C\u5FC5\u8981\u306A\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u3057\u3073\u308C\u3092\u4F34\u3046\u983B\u7E41\u306A\u7B4B\u3051\u3044\u308C\u3093\u306F\u3001\u795E\u7D4C\u306E\u554F\u984C\u304C\u96A0\u308C\u3066\u3044\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u539F\u56E0\u3092\u7279\u5B9A\u3059\u308B\u305F\u3081\u306E\u691C\u67FB\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059\u3002",
+      action: "<strong>1\u301C2\u9031\u9593\u4EE5\u5185\u306B\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u307E\u3057\u3087\u3046\u3002</strong>\u8840\u6DB2\u691C\u67FB\u3084\u795E\u7D4C\u4F1D\u5C0E\u691C\u67FB\u3067\u539F\u56E0\u3092\u8ABF\u3079\u307E\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    urgent_spinal: {
+      badge: "badge-yellow",
+      badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u8170\u90E8\u810A\u67F1\u7BA1\u72ED\u7A84\u75C7\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u6B69\u3044\u3066\u3044\u308B\u3068\u8DB3\u304C\u3064\u3063\u305F\u308A\u3057\u3073\u308C\u305F\u308A\u3057\u3001\u4F11\u3080\u3068\u697D\u306B\u306A\u308B\u7279\u5FB4\u306F\u3001\u8170\u306E\u795E\u7D4C\u304C\u5727\u8FEB\u3055\u308C\u3066\u3044\u308B\u30B5\u30A4\u30F3\u3067\u3059\u3002\u9069\u5207\u306A\u6CBB\u7642\u3067\u6539\u5584\u3067\u304D\u308B\u3053\u3068\u304C\u591A\u3044\u3067\u3059\u3002",
+      action: "<strong>\u6574\u5F62\u5916\u79D1\u307E\u305F\u306F\u8133\u795E\u7D4C\u5916\u79D1\u3092\u53D7\u8A3A\u3057\u307E\u3057\u3087\u3046\u3002</strong>MRI\u691C\u67FB\u3067\u795E\u7D4C\u306E\u5727\u8FEB\u3092\u78BA\u8A8D\u3067\u304D\u307E\u3059\u3002",
+      dept: "\u6574\u5F62\u5916\u79D1 \u30FB \u8133\u795E\u7D4C\u5916\u79D1"
+    },
+    soon: {
+      badge: "badge-yellow",
+      badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u539F\u56E0\u3092\u8ABF\u3079\u308B\u3053\u3068\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059",
+      desc: "\u983B\u7E41\u306B\u8DB3\u304C\u3064\u308B\u5834\u5408\u3001\u96FB\u89E3\u8CEA\u7570\u5E38\u3084\u795E\u7D4C\u306E\u554F\u984C\u304C\u96A0\u308C\u3066\u3044\u308B\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u3002\u8840\u6DB2\u691C\u67FB\u3067\u30DF\u30CD\u30E9\u30EB\u5024\u3092\u78BA\u8A8D\u3059\u308B\u3060\u3051\u3067\u3082\u539F\u56E0\u304C\u5206\u304B\u308B\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u3002",
+      action: "<strong>\u304B\u304B\u308A\u3064\u3051\u306E\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u307E\u3057\u3087\u3046\u3002</strong>\u8840\u6DB2\u691C\u67FB\u3067\u30AB\u30EA\u30A6\u30E0\u30FB\u30DE\u30B0\u30CD\u30B7\u30A6\u30E0\u30FB\u8840\u7CD6\u5024\u3092\u78BA\u8A8D\u3067\u304D\u307E\u3059\u3002",
+      dept: "\u5185\u79D1\uFF08\u304B\u304B\u308A\u3064\u3051\u533B\uFF09"
+    },
+    soon_thyroid: {
+      badge: "badge-yellow",
+      badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u7532\u72B6\u816A\u6A5F\u80FD\u306E\u691C\u67FB\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059",
+      desc: "\u7532\u72B6\u816A\u306E\u75C5\u6C17\u304C\u3042\u308B\u5834\u5408\u3001\u7B4B\u8089\u306E\u3051\u3044\u308C\u3093\u3084\u3053\u308F\u3070\u308A\u304C\u8D77\u304D\u3084\u3059\u304F\u306A\u308A\u307E\u3059\u3002\u7532\u72B6\u816A\u30DB\u30EB\u30E2\u30F3\u306E\u30EC\u30D9\u30EB\u3092\u78BA\u8A8D\u3057\u3001\u6CBB\u7642\u3092\u8ABF\u6574\u3059\u308B\u3053\u3068\u3067\u6539\u5584\u304C\u671F\u5F85\u3067\u304D\u307E\u3059\u3002",
+      action: "<strong>\u7532\u72B6\u816A\u306E\u4E3B\u6CBB\u533B\u307E\u305F\u306F\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u307E\u3057\u3087\u3046\u3002</strong>\u8840\u6DB2\u691C\u67FB\u3067\u7532\u72B6\u816A\u30DB\u30EB\u30E2\u30F3\u5024\u3092\u78BA\u8A8D\u3067\u304D\u307E\u3059\u3002",
+      dept: "\u5185\u79D1 \u30FB \u5185\u5206\u6CCC\u79D1"
+    },
+    medication: {
+      badge: "badge-yellow",
+      badgeText: "\u4E3B\u6CBB\u533B\u306B\u76F8\u8AC7\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u85AC\u306E\u5F71\u97FF\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u5229\u5C3F\u85AC\u3084\u30B9\u30BF\u30C1\u30F3\u306A\u3069\u306E\u85AC\u306F\u3001\u96FB\u89E3\u8CEA\u30D0\u30E9\u30F3\u30B9\u306E\u5909\u5316\u3084\u7B4B\u8089\u3078\u306E\u5F71\u97FF\u306B\u3088\u308A\u8DB3\u304C\u3064\u308A\u3084\u3059\u304F\u306A\u308B\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u3002",
+      action: "<strong>\u81EA\u5DF1\u5224\u65AD\u3067\u85AC\u3092\u4E2D\u6B62\u305B\u305A\u3001\u51E6\u65B9\u3057\u305F\u4E3B\u6CBB\u533B\u306B\u76F8\u8AC7\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u85AC\u306E\u7A2E\u985E\u3084\u91CF\u3092\u8ABF\u6574\u3059\u308B\u3053\u3068\u3067\u6539\u5584\u3059\u308B\u5834\u5408\u304C\u3042\u308A\u307E\u3059\u3002",
+      dept: "\u51E6\u65B9\u5143\u306E\u4E3B\u6CBB\u533B"
+    },
+    lifestyle: {
+      badge: "badge-green",
+      badgeText: "\u751F\u6D3B\u7FD2\u6163\u306E\u898B\u76F4\u3057\u3067\u6539\u5584\u3067\u304D\u307E\u3059",
+      title: "\u8131\u6C34\u304C\u539F\u56E0\u306E\u53EF\u80FD\u6027\u304C\u9AD8\u3044\u3067\u3059",
+      desc: "\u6C34\u5206\u4E0D\u8DB3\u306F\u8DB3\u306E\u3064\u308A\u306E\u6700\u3082\u591A\u3044\u539F\u56E0\u306E\u4E00\u3064\u3067\u3059\u3002\u7279\u306B\u5C31\u5BDD\u4E2D\u306F\u6C57\u3092\u304B\u3044\u3066\u4F53\u5185\u306E\u6C34\u5206\u304C\u6E1B\u308A\u307E\u3059\u3002",
+      action: "<strong>\u5C31\u5BDD\u524D\u306B\u30B3\u30C3\u30D7\u4E00\u676F\u306E\u6C34\u3092\u98F2\u307F\u307E\u3057\u3087\u3046\u3002</strong>\u65E5\u4E2D\u3082\u3053\u307E\u3081\u306A\u6C34\u5206\u88DC\u7D66\u3092\u5FC3\u304C\u3051\u3001\u30DF\u30CD\u30E9\u30EB\uFF08\u30DE\u30B0\u30CD\u30B7\u30A6\u30E0\u30FB\u30AB\u30EA\u30A6\u30E0\uFF09\u3092\u610F\u8B58\u3057\u305F\u98DF\u4E8B\u3082\u52B9\u679C\u7684\u3067\u3059\u3002",
+      dept: "\u6539\u5584\u3057\u306A\u3044\u5834\u5408\uFF1A\u5185\u79D1"
+    },
+    watch: {
+      badge: "badge-green",
+      badgeText: "\u69D8\u5B50\u3092\u898B\u3066\u3082\u5927\u4E08\u592B\u3067\u3059",
+      title: "\u4ECA\u306E\u3068\u3053\u308D\u7DCB\u6025\u6027\u306F\u4F4E\u305D\u3046\u3067\u3059",
+      desc: "\u6708\u306B1\u301C2\u56DE\u7A0B\u5EA6\u3067\u3001\u4ED6\u306E\u75C7\u72B6\u304C\u306A\u3044\u5834\u5408\u306F\u3001\u75B2\u52B4\u3084\u8131\u6C34\u306A\u3069\u65E5\u5E38\u7684\u306A\u539F\u56E0\u306B\u3088\u308B\u3082\u306E\u304C\u307B\u3068\u3093\u3069\u3067\u3059\u3002",
+      action: "<strong>\u751F\u6D3B\u7FD2\u6163\u306E\u898B\u76F4\u3057\u3067\u4E88\u9632\u3067\u304D\u307E\u3059\u3002</strong>\u6C34\u5206\u88DC\u7D66\u30FB\u30B9\u30C8\u30EC\u30C3\u30C1\u30FB\u4FDD\u6E29\u3092\u5FC3\u304C\u3051\u307E\u3057\u3087\u3046\u3002\u75C7\u72B6\u304C\u60AA\u5316\u3057\u305F\u5834\u5408\u306F\u53D7\u8A3A\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059\u3002",
+      dept: "\u60AA\u5316\u3057\u305F\u5834\u5408\uFF1A\u5185\u79D1"
+    }
+  };
+
+  var d = data[urgency];
+  var html = '<div class="result-card">';
+  html += '<span class="result-badge ' + d.badge + '">' + d.badgeText + '</span>';
+  html += '<h2 class="result-title">' + d.title + '</h2>';
+  html += '<p class="result-desc">' + d.desc + '</p>';
+  html += '<div class="result-action">' + d.action + '</div>';
+  html += '<div class="result-action"><strong>' + "\u63A8\u5968\u8A3A\u7642\u79D1\uFF1A" + '</strong>' + d.dept + '</div>';
+
+  // 回答サマリー
+  html += '<div class="result-note">';
+  html += '<strong>' + "\u3042\u306A\u305F\u306E\u56DE\u7B54\uFF1A" + '</strong><br>';
+  html += "\u983B\u5EA6\uFF1A" + getLabelFor("frequency", answers.frequency) + '<br>';
+  html += "\u30BF\u30A4\u30DF\u30F3\u30B0\uFF1A" + getLabelFor("timing", answers.timing) + '<br>';
+  html += "\u5834\u6240\uFF1A" + getLabelFor("location", answers.location) + '<br>';
+  html += "\u4ED6\u306E\u75C7\u72B6\uFF1A" + getLabelFor("other_symptoms", answers.other_symptoms) + '<br>';
+  html += "\u30EA\u30B9\u30AF\u56E0\u5B50\uFF1A" + getLabelFor("risk_factors", answers.risk_factors) + '<br>';
+  html += "\u85AC\uFF1A" + getLabelFor("medication", answers.medication);
+  html += '<br><br>' + "\u203B \u3053\u306E\u30C1\u30A7\u30C3\u30AF\u7D50\u679C\u3092\u5370\u5237\u3057\u3066\u53D7\u8A3A\u6642\u306B\u304A\u6301\u3061\u3044\u305F\u3060\u304F\u3068\u3001\u533B\u5E2B\u3078\u306E\u8AAC\u660E\u304C\u30B9\u30E0\u30FC\u30BA\u3067\u3059\u3002";
+  html += '</div>';
+  html += '</div>';
+
+  html += '<button class="restart-btn" onclick="restart()">' + "\u3082\u3046\u4E00\u5EA6\u30C1\u30A7\u30C3\u30AF\u3059\u308B" + '</button>';
+
+  return html;
+}
+
+function getLabelFor(qId, optId) {
+  for (var i = 0; i < questions.length; i++) {
+    if (questions[i].id === qId) {
+      for (var j = 0; j < questions[i].options.length; j++) {
+        if (questions[i].options[j].id === optId) {
+          return questions[i].options[j].label;
+        }
+      }
+    }
+  }
+  return "";
+}
+
+function restart() {
+  currentStep = 0;
+  answers = {};
+  document.getElementById("resultArea").classList.add("hidden");
+  document.getElementById("resultArea").innerHTML = "";
+  document.getElementById("questionArea").classList.remove("hidden");
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// 初期化
+renderQuestion();
+</script>
+
+</body>
+</html>
