@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>嚥下セルフチェック ― その症状、大丈夫？</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif;
+  background: #f0f4f8;
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.app-header {
+  background: linear-gradient(135deg, #1B3A5C, #2C5AA0);
+  color: #fff;
+  padding: 16px 20px;
+  text-align: center;
+}
+.app-header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+.app-header .series { font-size: 0.8rem; opacity: 0.8; }
+.disclaimer {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 12px 16px;
+  margin: 12px 16px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #856404;
+}
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+.step-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.step-number {
+  display: inline-block;
+  background: #2C5AA0;
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+.step-card h2 {
+  font-size: 1.1rem;
+  color: #1B3A5C;
+  margin-bottom: 12px;
+}
+.step-card p {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 12px;
+}
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #333;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.option-btn:hover { border-color: #2C5AA0; background: #f0f6ff; }
+.option-btn.selected { border-color: #2C5AA0; background: #e8f4fd; color: #1B3A5C; font-weight: bold; }
+.hidden { display: none; }
+.result-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+.result-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.badge-red { background: #f8d7da; color: #c0392b; }
+.badge-yellow { background: #fff3cd; color: #856404; }
+.badge-green { background: #d4edda; color: #155724; }
+.result-title { font-size: 1.2rem; color: #1B3A5C; margin-bottom: 8px; }
+.result-desc { font-size: 0.95rem; color: #555; margin-bottom: 16px; }
+.result-action {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.result-action strong { color: #2C5AA0; }
+.result-note {
+  font-size: 0.85rem;
+  color: #888;
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+  margin-top: 12px;
+}
+.restart-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: #2C5AA0;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 12px;
+}
+.restart-btn:hover { background: #1B3A5C; }
+.progress-bar {
+  height: 4px;
+  background: #dee2e6;
+  margin: 0 16px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: #2C5AA0;
+  transition: width 0.3s;
+  border-radius: 2px;
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="series">その症状、大丈夫？ #08</div>
+  <h1>嚥下セルフチェック</h1>
+</div>
+
+<div class="disclaimer">
+  このツールは医療行為ではありません。結果は参考情報であり、診断に代わるものではありません。心配な場合は必ず医師にご相談ください。
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+<div class="container">
+  <div id="questionArea"></div>
+  <div id="resultArea" class="hidden"></div>
+</div>
+
+<script>
+var questions = [
+  {
+    id: "main_symptom",
+    title: "最も気になる症状はどれですか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "choking", label: "食事中にむせることが増えた" },
+      { id: "stuck", label: "食べ物がのどに引っかかる感じがする" },
+      { id: "pill", label: "薬の錠剤が飲みにくくなった" },
+      { id: "liquid", label: "水やお茶でむせやすい" },
+      { id: "time", label: "食事に時間がかかるようになった" },
+      { id: "voice", label: "食後に声がかすれる" }
+    ]
+  },
+  {
+    id: "onset",
+    title: "症状はいつ頃から始まりましたか？",
+    subtitle: "",
+    options: [
+      { id: "sudden", label: "突然始まった（今日〜数日前）" },
+      { id: "weeks", label: "数週間かけて徐々に悪化" },
+      { id: "months", label: "数ヶ月以上かけてゆっくり進行" },
+      { id: "fluctuating", label: "良くなったり悪くなったりする" }
+    ]
+  },
+  {
+    id: "red_flags",
+    title: "以下のいずれかに当てはまりますか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "stroke_signs", label: "めまい・ろれつ障害・片側の麻痺がある" },
+      { id: "breathing", label: "食べ物がのどに詰まって呼吸が苦しくなった" },
+      { id: "fever", label: "原因不明の発熱を繰り返す" },
+      { id: "weight_loss", label: "体重が急に減っている" },
+      { id: "none", label: "いずれも当てはまらない" }
+    ]
+  },
+  {
+    id: "associated",
+    title: "嚥下障害に加えて、他の症状はありますか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "weakness", label: "手足の筋力低下やしゃべりにくさがある" },
+      { id: "ptosis", label: "まぶたが下がる・物が二重に見える" },
+      { id: "tremor", label: "手がふるえる・動作がゆっくりになった" },
+      { id: "reflux", label: "胸やけ・酸っぱいものが上がってくる" },
+      { id: "none_assoc", label: "嚥下障害だけで他に症状はない" }
+    ]
+  },
+  {
+    id: "timing",
+    title: "むせやすいタイミングはありますか？",
+    subtitle: "",
+    options: [
+      { id: "meal_end", label: "食事の後半にむせが増える" },
+      { id: "liquid_only", label: "水分（水・お茶・汁物）でむせる" },
+      { id: "solid", label: "固形物が飲み込みにくい" },
+      { id: "anytime", label: "食事に関係なくむせることがある" },
+      { id: "no_pattern", label: "特にパターンはない" }
+    ]
+  },
+  {
+    id: "rsst",
+    title: "30秒間につばを何回飲み込めますか？",
+    subtitle: "反復唾液嚥下テスト：30秒間にできるだけ何回もつばを飲み込んでみてください",
+    options: [
+      { id: "normal", label: "3回以上飲み込めた" },
+      { id: "borderline", label: "2回だった" },
+      { id: "impaired", label: "1回以下だった" },
+      { id: "not_done", label: "試していない・わからない" }
+    ]
+  }
+];
+
+var currentStep = 0;
+var answers = {};
+
+function renderQuestion() {
+  var area = document.getElementById("questionArea");
+  var q = questions[currentStep];
+  var pct = Math.round((currentStep / questions.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+
+  var html = '<div class="step-card">';
+  html += '<span class="step-number">' + "\u8CEA\u554F " + (currentStep + 1) + " / " + questions.length + '</span>';
+  html += '<h2>' + q.title + '</h2>';
+  if (q.subtitle) { html += '<p>' + q.subtitle + '</p>'; }
+  html += '<div class="options">';
+  for (var i = 0; i < q.options.length; i++) {
+    var opt = q.options[i];
+    html += '<button class="option-btn" onclick="selectAnswer(\'' + q.id + '\',\'' + opt.id + '\')">' + opt.label + '</button>';
+  }
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+
+function selectAnswer(qId, optId) {
+  answers[qId] = optId;
+  currentStep++;
+  if (currentStep < questions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById("questionArea").classList.add("hidden");
+  document.getElementById("progressFill").style.width = "100%";
+
+  var urgency = calcUrgency();
+  var resultArea = document.getElementById("resultArea");
+  resultArea.classList.remove("hidden");
+  resultArea.innerHTML = buildResultHTML(urgency);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function calcUrgency() {
+  // 緊急: 脳卒中徴候
+  if (answers.red_flags === "stroke_signs") {
+    return "emergency_stroke";
+  }
+  // 緊急: 窒息
+  if (answers.red_flags === "breathing") {
+    return "emergency_choking";
+  }
+
+  // 繰り返す発熱 → 誤嚥性肺炎
+  if (answers.red_flags === "fever") {
+    return "urgent_aspiration";
+  }
+  // 体重減少
+  if (answers.red_flags === "weight_loss") {
+    return "urgent_weight";
+  }
+
+  // 突然発症
+  if (answers.onset === "sudden") {
+    return "urgent_sudden";
+  }
+
+  // ALS等の神経変性疾患の疑い
+  if (answers.associated === "weakness") {
+    return "urgent_neuro";
+  }
+
+  // 重症筋無力症の疑い
+  if (answers.associated === "ptosis") {
+    return "urgent_mg";
+  }
+  if (answers.timing === "meal_end" && answers.onset === "fluctuating") {
+    return "urgent_mg";
+  }
+
+  // パーキンソン病の疑い
+  if (answers.associated === "tremor") {
+    return "urgent_parkinson";
+  }
+
+  // 逆流性食道炎
+  if (answers.associated === "reflux") {
+    return "soon_reflux";
+  }
+
+  // 嚥下テスト異常
+  if (answers.rsst === "impaired") {
+    return "soon_impaired";
+  }
+  if (answers.rsst === "borderline") {
+    return "soon_borderline";
+  }
+
+  // 徐々に進行
+  if (answers.onset === "months" || answers.onset === "weeks") {
+    return "soon_gradual";
+  }
+
+  // 水分でむせる
+  if (answers.timing === "liquid_only" || answers.main_symptom === "liquid") {
+    return "soon_liquid";
+  }
+
+  // その他
+  return "watch";
+}
+
+function buildResultHTML(urgency) {
+  var data = {
+    emergency_stroke: {
+      badge: "badge-red",
+      badgeText: "\u3059\u3050\u306B119\u756A\u3078\u96FB\u8A71\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u8133\u5352\u4E2D\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u7A81\u7136\u306E\u56A5\u4E0B\u969C\u5BB3\u306B\u3081\u307E\u3044\u30FB\u308D\u308C\u3064\u969C\u5BB3\u30FB\u7247\u5074\u306E\u9EBB\u75FA\u3092\u4F34\u3046\u5834\u5408\u3001\u8133\u5352\u4E2D\uFF08\u7279\u306B\u30EF\u30EC\u30F3\u30D9\u30EB\u30B0\u75C7\u5019\u7FA4\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u4E00\u523B\u3092\u4E89\u3046\u7DCA\u6025\u4E8B\u614B\u3067\u3059\u3002",
+      action: "<strong>\u4ECA\u3059\u3050119\u756A\u306B\u96FB\u8A71\u3057\u3066\u6551\u6025\u642C\u9001\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u8133\u5352\u4E2D\u306F\u767A\u75C7\u304B\u3089\u306E\u6642\u9593\u304C\u6CBB\u7642\u6210\u7E3E\u3092\u5DE6\u53F3\u3057\u307E\u3059\u3002",
+      dept: "\u6551\u6025\u79D1\uFF08119\u756A\uFF09"
+    },
+    emergency_choking: {
+      badge: "badge-red",
+      badgeText: "\u7DCA\u6025\u5BFE\u5FDC\u304C\u5FC5\u8981\u3067\u3059",
+      title: "\u7A92\u606F\u306E\u5371\u967A\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u98DF\u3079\u7269\u304C\u306E\u3069\u306B\u8A70\u307E\u3063\u3066\u547C\u5438\u304C\u82E6\u3057\u3044\u5834\u5408\u3001\u7A92\u606F\u306E\u5371\u967A\u304C\u3042\u308A\u307E\u3059\u3002\u305F\u3060\u3061\u306B\u5BFE\u5FDC\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      action: "<strong>\u3059\u3050\u306B119\u756A\u306B\u96FB\u8A71\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u610F\u8B58\u304C\u3042\u308B\u5834\u5408\u306F\u80CC\u90E8\u53E9\u6253\u6CD5\u3084\u8179\u90E8\u7A81\u304D\u4E0A\u3052\u6CD5\uFF08\u30CF\u30A4\u30E0\u30EA\u30C3\u30D2\u6CD5\uFF09\u3092\u8A66\u307F\u3066\u304F\u3060\u3055\u3044\u3002",
+      dept: "\u6551\u6025\u79D1\uFF08119\u756A\uFF09"
+    },
+    urgent_aspiration: {
+      badge: "badge-red",
+      badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u8AA4\u5606\u6027\u80BA\u708E\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u7E70\u308A\u8FD4\u3059\u767A\u71B1\u3084\u539F\u56E0\u4E0D\u660E\u306E\u80BA\u708E\u306F\u3001\u4E0D\u9855\u6027\u8AA4\u5606\uFF08\u3080\u305B\u305A\u306B\u8AA4\u5606\u3059\u308B\u300C\u30B5\u30A4\u30EC\u30F3\u30C8\u30A2\u30B9\u30D4\u30EC\u30FC\u30B7\u30E7\u30F3\u300D\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u56A5\u4E0B\u6A5F\u80FD\u306E\u8A55\u4FA1\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      action: "<strong>\u8033\u9F3B\u54BD\u5589\u79D1\u307E\u305F\u306F\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u56A5\u4E0B\u5185\u8996\u93E1\u691C\u67FB\uFF08VE\uFF09\u3067\u56A5\u4E0B\u6A5F\u80FD\u3092\u8A55\u4FA1\u3057\u307E\u3057\u3087\u3046\u3002\u53E3\u8154\u30B1\u30A2\u3082\u91CD\u8981\u3067\u3059\u3002",
+      dept: "\u8033\u9F3B\u54BD\u5589\u79D1 \u30FB \u5185\u79D1"
+    },
+    urgent_weight: {
+      badge: "badge-red",
+      badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u4F53\u91CD\u6E1B\u5C11\u306E\u539F\u56E0\u7CBE\u67FB\u304C\u5FC5\u8981\u3067\u3059",
+      desc: "\u56A5\u4E0B\u969C\u5BB3\u306B\u4F34\u3046\u4F53\u91CD\u6E1B\u5C11\u306F\u3001\u6804\u990A\u6442\u53D6\u4E0D\u8DB3\u3060\u3051\u3067\u306A\u304F\u3001\u98DF\u9053\u304C\u3093\u306A\u3069\u306E\u53EF\u80FD\u6027\u3082\u3042\u308A\u307E\u3059\u3002\u539F\u56E0\u306E\u7279\u5B9A\u304C\u6025\u304C\u308C\u307E\u3059\u3002",
+      action: "<strong>1\u301C2\u9031\u9593\u4EE5\u5185\u306B\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u307E\u3057\u3087\u3046\u3002</strong>\u4E0A\u90E8\u6D88\u5316\u7BA1\u5185\u8996\u93E1\u3084\u8840\u6DB2\u691C\u67FB\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      dept: "\u5185\u79D1 \u30FB \u6D88\u5316\u5668\u5185\u79D1"
+    },
+    urgent_sudden: {
+      badge: "badge-red",
+      badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u7A81\u7136\u767A\u75C7\u306E\u56A5\u4E0B\u969C\u5BB3\u306F\u539F\u56E0\u7CBE\u67FB\u304C\u5FC5\u8981\u3067\u3059",
+      desc: "\u7A81\u7136\u59CB\u307E\u3063\u305F\u56A5\u4E0B\u969C\u5BB3\u306F\u3001\u8133\u5352\u4E2D\u3084\u8133\u5E79\u306E\u75C5\u5909\u306A\u3069\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u539F\u56E0\u306E\u7279\u5B9A\u304C\u6025\u304C\u308C\u307E\u3059\u3002",
+      action: "<strong>\u3067\u304D\u308B\u3060\u3051\u65E9\u304F\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u982D\u90E8MRI\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    urgent_neuro: {
+      badge: "badge-red",
+      badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u795E\u7D4C\u5909\u6027\u75BE\u60A3\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u56A5\u4E0B\u969C\u5BB3\u306B\u52A0\u3048\u3066\u7B4B\u529B\u4F4E\u4E0B\u3084\u3057\u3083\u3079\u308A\u306B\u304F\u3055\u304C\u9032\u884C\u3057\u3066\u3044\u308B\u5834\u5408\u3001ALS\uFF08\u7B4B\u840E\u7E2E\u6027\u5074\u7D22\u786C\u5316\u75C7\uFF09\u306A\u3069\u306E\u795E\u7D4C\u5909\u6027\u75BE\u60A3\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u795E\u7D4C\u4F1D\u5C0E\u691C\u67FB\u3084\u7B4B\u96FB\u56F3\u3067\u8A55\u4FA1\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    urgent_mg: {
+      badge: "badge-yellow",
+      badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u91CD\u75C7\u7B4B\u7121\u529B\u75C7\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u56A5\u4E0B\u969C\u5BB3\u306B\u307E\u3076\u305F\u306E\u4E0B\u5782\u3084\u8907\u8996\u3092\u4F34\u3046\u5834\u5408\u3001\u307E\u305F\u306F\u98DF\u4E8B\u306E\u5F8C\u534A\u306B\u3080\u305B\u304C\u5897\u3048\u308B\u5834\u5408\u3001\u91CD\u75C7\u7B4B\u7121\u529B\u75C7\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u6CBB\u7642\u3067\u6539\u5584\u3067\u304D\u307E\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u6297\u30A2\u30BB\u30C1\u30EB\u30B3\u30EA\u30F3\u53D7\u5BB9\u4F53\u6297\u4F53\u691C\u67FB\u3067\u8A3A\u65AD\u3067\u304D\u307E\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    urgent_parkinson: {
+      badge: "badge-yellow",
+      badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u30D1\u30FC\u30AD\u30F3\u30BD\u30F3\u75C5\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u56A5\u4E0B\u969C\u5BB3\u306B\u624B\u306E\u3075\u308B\u3048\u3084\u52D5\u4F5C\u306E\u7DE9\u6162\u3092\u4F34\u3046\u5834\u5408\u3001\u30D1\u30FC\u30AD\u30F3\u30BD\u30F3\u75C5\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u8AA4\u5606\u6027\u80BA\u708E\u4E88\u9632\u306E\u305F\u3081\u3001\u65E9\u671F\u304B\u3089\u306E\u56A5\u4E0B\u8A55\u4FA1\u304C\u91CD\u8981\u3067\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u56A5\u4E0B\u8A55\u4FA1\u3068\u30D1\u30FC\u30AD\u30F3\u30BD\u30F3\u75C5\u306E\u8A3A\u65AD\u3092\u4F75\u305B\u3066\u884C\u3048\u307E\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    soon_reflux: {
+      badge: "badge-yellow",
+      badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u9006\u6D41\u6027\u98DF\u9053\u708E\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u80F8\u3084\u3051\u3084\u9178\u3063\u3071\u3044\u3082\u306E\u304C\u4E0A\u304C\u3063\u3066\u304F\u308B\u75C7\u72B6\u304C\u3042\u308B\u5834\u5408\u3001\u80C3\u9178\u306E\u9006\u6D41\u304C\u56A5\u4E0B\u306E\u9055\u548C\u611F\u306E\u539F\u56E0\u304B\u3082\u3057\u308C\u307E\u305B\u3093\u3002\u80C3\u9178\u3092\u6291\u3048\u308B\u85AC\u3067\u6539\u5584\u3059\u308B\u3053\u3068\u304C\u591A\u3044\u3067\u3059\u3002",
+      action: "<strong>\u6D88\u5316\u5668\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u5FC5\u8981\u306B\u5FDC\u3058\u3066\u4E0A\u90E8\u6D88\u5316\u7BA1\u5185\u8996\u93E1\u3092\u53D7\u3051\u307E\u3057\u3087\u3046\u3002",
+      dept: "\u6D88\u5316\u5668\u5185\u79D1"
+    },
+    soon_impaired: {
+      badge: "badge-yellow",
+      badgeText: "\u53D7\u8A3A\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059",
+      title: "\u56A5\u4E0B\u6A5F\u80FD\u306E\u4F4E\u4E0B\u304C\u7591\u308F\u308C\u307E\u3059",
+      desc: "\u53CD\u5FA9\u5504\u6DB2\u56A5\u4E0B\u30C6\u30B9\u30C8\u304C1\u56DE\u4EE5\u4E0B\u306E\u5834\u5408\u3001\u56A5\u4E0B\u6A5F\u80FD\u304C\u4F4E\u4E0B\u3057\u3066\u3044\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u8AA4\u5606\u6027\u80BA\u708E\u306E\u30EA\u30B9\u30AF\u3092\u6E1B\u3089\u3059\u305F\u3081\u3001\u5C02\u9580\u7684\u306A\u56A5\u4E0B\u8A55\u4FA1\u3092\u53D7\u3051\u307E\u3057\u3087\u3046\u3002",
+      action: "<strong>\u8033\u9F3B\u54BD\u5589\u79D1\u307E\u305F\u306F\u30EA\u30CF\u30D3\u30EA\u30C6\u30FC\u30B7\u30E7\u30F3\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u56A5\u4E0B\u5185\u8996\u93E1\u691C\u67FB\uFF08VE\uFF09\u3067\u8A55\u4FA1\u3057\u3066\u3082\u3089\u3044\u307E\u3057\u3087\u3046\u3002",
+      dept: "\u8033\u9F3B\u54BD\u5589\u79D1 \u30FB \u30EA\u30CF\u30D3\u30EA\u79D1"
+    },
+    soon_borderline: {
+      badge: "badge-yellow",
+      badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u56A5\u4E0B\u6A5F\u80FD\u304C\u3084\u3084\u4F4E\u4E0B\u3057\u3066\u3044\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u53CD\u5FA9\u5504\u6DB2\u56A5\u4E0B\u30C6\u30B9\u30C8\u304C2\u56DE\u306E\u5834\u5408\u3001\u56A5\u4E0B\u6A5F\u80FD\u306E\u4F4E\u4E0B\u304C\u59CB\u307E\u3063\u3066\u3044\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u4ED6\u306E\u75C7\u72B6\u3082\u3042\u308B\u5834\u5408\u306F\u3001\u56A5\u4E0B\u8A55\u4FA1\u3092\u53D7\u3051\u308B\u3053\u3068\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059\u3002",
+      action: "<strong>\u53E3\u8154\u30B1\u30A2\u3092\u5F39\u5316\u3057\u3001\u60AA\u5316\u3059\u308B\u3088\u3046\u3067\u3042\u308C\u3070\u53D7\u8A3A\u3057\u307E\u3057\u3087\u3046\u3002</strong>\u304B\u304B\u308A\u3064\u3051\u533B\u306B\u76F8\u8AC7\u3057\u3066\u304F\u3060\u3055\u3044\u3002",
+      dept: "\u304B\u304B\u308A\u3064\u3051\u533B \u30FB \u8033\u9F3B\u54BD\u5589\u79D1"
+    },
+    soon_gradual: {
+      badge: "badge-yellow",
+      badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u56A5\u4E0B\u969C\u5BB3\u306E\u539F\u56E0\u7CBE\u67FB\u3092\u53D7\u3051\u307E\u3057\u3087\u3046",
+      desc: "\u6570\u9031\u9593\u301C\u6570\u30F6\u6708\u304B\u3051\u3066\u5F90\u3005\u306B\u60AA\u5316\u3057\u3066\u3044\u308B\u56A5\u4E0B\u969C\u5BB3\u306F\u3001\u300C\u5E74\u306E\u305B\u3044\u300D\u3060\u3051\u3067\u306A\u304F\u3001\u8133\u795E\u7D4C\u306E\u75C5\u6C17\u3084\u98DF\u9053\u306E\u554F\u984C\u304C\u96A0\u308C\u3066\u3044\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002",
+      action: "<strong>\u304B\u304B\u308A\u3064\u3051\u533B\u306B\u76F8\u8AC7\u3057\u3001\u5FC5\u8981\u306B\u5FDC\u3058\u3066\u8133\u795E\u7D4C\u5185\u79D1\u3084\u8033\u9F3B\u54BD\u5589\u79D1\u3092\u53D7\u8A3A\u3057\u307E\u3057\u3087\u3046\u3002</strong>",
+      dept: "\u304B\u304B\u308A\u3064\u3051\u533B \u2192 \u8133\u795E\u7D4C\u5185\u79D1 / \u8033\u9F3B\u54BD\u5589\u79D1"
+    },
+    soon_liquid: {
+      badge: "badge-yellow",
+      badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u6C34\u5206\u3067\u306E\u3080\u305B\u306F\u56A5\u4E0B\u53CD\u5C04\u306E\u4F4E\u4E0B\u306E\u30B5\u30A4\u30F3\u3067\u3059",
+      desc: "\u6C34\u5206\u306F\u56FA\u5F62\u7269\u3088\u308A\u6D41\u308C\u304C\u901F\u304F\u3001\u56A5\u4E0B\u53CD\u5C04\u306E\u30BF\u30A4\u30DF\u30F3\u30B0\u304C\u5408\u308F\u306A\u3044\u3068\u8AA4\u5606\u3057\u3084\u3059\u3044\u3067\u3059\u3002\u3068\u308D\u307F\u3092\u3064\u3051\u308B\u3053\u3068\u3067\u4E88\u9632\u3067\u304D\u307E\u3059\u304C\u3001\u539F\u56E0\u306E\u78BA\u8A8D\u3082\u5927\u5207\u3067\u3059\u3002",
+      action: "<strong>\u3068\u308D\u307F\u3092\u3064\u3051\u3066\u4E88\u9632\u3057\u3064\u3064\u3001\u304B\u304B\u308A\u3064\u3051\u533B\u306B\u76F8\u8AC7\u3057\u307E\u3057\u3087\u3046\u3002</strong>\u60AA\u5316\u3059\u308B\u5834\u5408\u306F\u56A5\u4E0B\u8A55\u4FA1\u3092\u53D7\u3051\u3066\u304F\u3060\u3055\u3044\u3002",
+      dept: "\u304B\u304B\u308A\u3064\u3051\u533B \u30FB \u8033\u9F3B\u54BD\u5589\u79D1"
+    },
+    watch: {
+      badge: "badge-green",
+      badgeText: "\u69D8\u5B50\u3092\u898B\u3066\u3082\u5927\u4E08\u592B\u3067\u3059",
+      title: "\u4ECA\u306E\u3068\u3053\u308D\u7DCA\u6025\u6027\u306F\u4F4E\u305D\u3046\u3067\u3059",
+      desc: "\u7DCA\u6025\u306E\u5371\u967A\u30B5\u30A4\u30F3\u306F\u898B\u3089\u308C\u307E\u305B\u3093\u3002\u52A0\u9F62\u306B\u3088\u308B\u8EFD\u5EA6\u306E\u56A5\u4E0B\u6A5F\u80FD\u4F4E\u4E0B\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u53E3\u8154\u30B1\u30A2\u3092\u5F39\u5316\u3057\u3001\u60AA\u5316\u3057\u305F\u5834\u5408\u306F\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002",
+      action: "<strong>\u53E3\u8154\u30B1\u30A2\u3092\u5F39\u5316\u3057\u3001\u3086\u3063\u304F\u308A\u5C11\u91CF\u305A\u3064\u98DF\u3079\u307E\u3057\u3087\u3046\u3002</strong>\u3080\u305B\u304C\u5897\u3048\u308B\u30FB\u60AA\u5316\u3059\u308B\u5834\u5408\u306F\u304B\u304B\u308A\u3064\u3051\u533B\u306B\u76F8\u8AC7\u3057\u3066\u304F\u3060\u3055\u3044\u3002",
+      dept: "\u60AA\u5316\u3057\u305F\u5834\u5408\uFF1A\u304B\u304B\u308A\u3064\u3051\u533B"
+    }
+  };
+
+  var d = data[urgency];
+  var html = '<div class="result-card">';
+  html += '<span class="result-badge ' + d.badge + '">' + d.badgeText + '</span>';
+  html += '<h2 class="result-title">' + d.title + '</h2>';
+  html += '<p class="result-desc">' + d.desc + '</p>';
+  html += '<div class="result-action">' + d.action + '</div>';
+  html += '<div class="result-action"><strong>' + "\u63A8\u5968\u8A3A\u7642\u79D1\uFF1A" + '</strong>' + d.dept + '</div>';
+
+  html += '<div class="result-note">';
+  html += '<strong>' + "\u3042\u306A\u305F\u306E\u56DE\u7B54\uFF1A" + '</strong><br>';
+  html += "\u4E3B\u306A\u75C7\u72B6\uFF1A" + getLabelFor("main_symptom", answers.main_symptom) + '<br>';
+  html += "\u767A\u75C7\u6642\u671F\uFF1A" + getLabelFor("onset", answers.onset) + '<br>';
+  html += "\u5371\u967A\u306A\u30B5\u30A4\u30F3\uFF1A" + getLabelFor("red_flags", answers.red_flags) + '<br>';
+  html += "\u4ED8\u968F\u75C7\u72B6\uFF1A" + getLabelFor("associated", answers.associated) + '<br>';
+  html += "\u3080\u305B\u306E\u30BF\u30A4\u30DF\u30F3\u30B0\uFF1A" + getLabelFor("timing", answers.timing) + '<br>';
+  html += "\u56A5\u4E0B\u30C6\u30B9\u30C8\uFF1A" + getLabelFor("rsst", answers.rsst);
+  html += '<br><br>' + "\u203B \u3053\u306E\u30C1\u30A7\u30C3\u30AF\u7D50\u679C\u3092\u5370\u5237\u3057\u3066\u53D7\u8A3A\u6642\u306B\u304A\u6301\u3061\u3044\u305F\u3060\u304F\u3068\u3001\u533B\u5E2B\u3078\u306E\u8AAC\u660E\u304C\u30B9\u30E0\u30FC\u30BA\u3067\u3059\u3002";
+  html += '</div>';
+  html += '</div>';
+
+  html += '<button class="restart-btn" onclick="restart()">' + "\u3082\u3046\u4E00\u5EA6\u30C1\u30A7\u30C3\u30AF\u3059\u308B" + '</button>';
+
+  return html;
+}
+
+function getLabelFor(qId, optId) {
+  for (var i = 0; i < questions.length; i++) {
+    if (questions[i].id === qId) {
+      for (var j = 0; j < questions[i].options.length; j++) {
+        if (questions[i].options[j].id === optId) {
+          return questions[i].options[j].label;
+        }
+      }
+    }
+  }
+  return "";
+}
+
+function restart() {
+  currentStep = 0;
+  answers = {};
+  document.getElementById("resultArea").classList.add("hidden");
+  document.getElementById("resultArea").innerHTML = "";
+  document.getElementById("questionArea").classList.remove("hidden");
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+renderQuestion();
+</script>
+
+</body>
+</html>
