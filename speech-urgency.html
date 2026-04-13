@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>ろれつ緊急度セルフチェック ― その症状、大丈夫？</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif;
+  background: #f0f4f8;
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.app-header {
+  background: linear-gradient(135deg, #1B3A5C, #2C5AA0);
+  color: #fff;
+  padding: 16px 20px;
+  text-align: center;
+}
+.app-header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+.app-header .series { font-size: 0.8rem; opacity: 0.8; }
+.disclaimer {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 12px 16px;
+  margin: 12px 16px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #856404;
+}
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+.step-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.step-number {
+  display: inline-block;
+  background: #2C5AA0;
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+.step-card h2 {
+  font-size: 1.1rem;
+  color: #1B3A5C;
+  margin-bottom: 12px;
+}
+.step-card p {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 12px;
+}
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #333;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.option-btn:hover { border-color: #2C5AA0; background: #f0f6ff; }
+.option-btn.selected { border-color: #2C5AA0; background: #e8f4fd; color: #1B3A5C; font-weight: bold; }
+.hidden { display: none; }
+.result-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+.result-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.badge-red { background: #f8d7da; color: #c0392b; }
+.badge-yellow { background: #fff3cd; color: #856404; }
+.badge-green { background: #d4edda; color: #155724; }
+.result-title { font-size: 1.2rem; color: #1B3A5C; margin-bottom: 8px; }
+.result-desc { font-size: 0.95rem; color: #555; margin-bottom: 16px; }
+.result-action {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.result-action strong { color: #2C5AA0; }
+.result-note {
+  font-size: 0.85rem;
+  color: #888;
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+  margin-top: 12px;
+}
+.restart-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: #2C5AA0;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 12px;
+}
+.restart-btn:hover { background: #1B3A5C; }
+.progress-bar {
+  height: 4px;
+  background: #dee2e6;
+  margin: 0 16px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: #2C5AA0;
+  transition: width 0.3s;
+  border-radius: 2px;
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="series">その症状、大丈夫？ #02</div>
+  <h1>ろれつ緊急度セルフチェック</h1>
+</div>
+
+<div class="disclaimer">
+  このツールは医療行為ではありません。結果は参考情報であり、診断に代わるものではありません。心配な場合は必ず医師にご相談ください。
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+<div class="container">
+  <div id="questionArea"></div>
+  <div id="resultArea" class="hidden"></div>
+</div>
+
+<script>
+var questions = [
+  {
+    id: "onset",
+    title: "ろれつの異常はいつから始まりましたか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "sudden", label: "今日〜数時間前から突然始まった" },
+      { id: "today_gradual", label: "今日気づいたが、いつからかはっきりしない" },
+      { id: "days", label: "数日〜数週間前から徐々に悪くなっている" },
+      { id: "months", label: "数ヶ月前から少しずつ悪くなっている" },
+      { id: "occasional", label: "疲れた時だけ、すぐ元に戻る" }
+    ]
+  },
+  {
+    id: "face",
+    title: "顔に異常はありますか？",
+    subtitle: "鏡で確認してみてください",
+    options: [
+      { id: "droop", label: "片側の口角が下がっている、または顔が歪んでいる" },
+      { id: "numb", label: "顔の片側がしびれる感じがある" },
+      { id: "none", label: "顔には特に異常はない" }
+    ]
+  },
+  {
+    id: "limbs",
+    title: "手足に異常はありますか？",
+    subtitle: "両腕を前に伸ばして確認してみてください",
+    options: [
+      { id: "weak_one", label: "片方の手足に力が入りにくい、またはしびれる" },
+      { id: "weak_both", label: "両方の手足に力が入りにくい" },
+      { id: "none", label: "手足には特に異常はない" }
+    ]
+  },
+  {
+    id: "other_symptoms",
+    title: "他に気になる症状はありますか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "headache", label: "激しい頭痛がある" },
+      { id: "consciousness", label: "意識がぼんやりする、または目の前が暗くなる" },
+      { id: "swallow", label: "飲み込みにくい、むせやすい" },
+      { id: "voice", label: "声が小さくなった、抑揚がなくなった" },
+      { id: "eyelid", label: "まぶたが下がる" },
+      { id: "none", label: "特にない" }
+    ]
+  },
+  {
+    id: "resolved",
+    title: "症状はまだ続いていますか？",
+    subtitle: "",
+    options: [
+      { id: "ongoing", label: "はい、今も続いている" },
+      { id: "resolved", label: "一時的に起きたが、今は完全に戻った" },
+      { id: "fluctuate", label: "良くなったり悪くなったりを繰り返している" }
+    ]
+  }
+];
+
+var currentStep = 0;
+var answers = {};
+
+function renderQuestion() {
+  var area = document.getElementById("questionArea");
+  var q = questions[currentStep];
+  var pct = Math.round((currentStep / questions.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+
+  var html = '<div class="step-card">';
+  html += '<span class="step-number">' + (currentStep + 1) + ' / ' + questions.length + '</span>';
+  html += '<h2>' + q.title + '</h2>';
+  if (q.subtitle) { html += '<p>' + q.subtitle + '</p>'; }
+  html += '<div class="options">';
+  for (var i = 0; i < q.options.length; i++) {
+    var opt = q.options[i];
+    html += '<button class="option-btn" onclick="selectAnswer(\'' + q.id + '\',\'' + opt.id + '\')">' + opt.label + '</button>';
+  }
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+
+function selectAnswer(qId, optId) {
+  answers[qId] = optId;
+  currentStep++;
+  if (currentStep < questions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById("questionArea").classList.add("hidden");
+  document.getElementById("progressFill").style.width = "100%";
+
+  var urgency = calcUrgency();
+  var resultArea = document.getElementById("resultArea");
+  resultArea.classList.remove("hidden");
+  resultArea.innerHTML = buildResultHTML(urgency);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function calcUrgency() {
+  // 最高緊急度: 突然 + 顔面麻痺 or 片側脱力 or 頭痛 or 意識障害
+  if (answers.onset === "sudden" || answers.onset === "today_gradual") {
+    if (answers.face === "droop" || answers.limbs === "weak_one") {
+      return "call119";
+    }
+    if (answers.other_symptoms === "headache" || answers.other_symptoms === "consciousness") {
+      return "call119";
+    }
+  }
+
+  // TIA: 突然だが今は回復
+  if (answers.onset === "sudden" && answers.resolved === "resolved") {
+    return "tia";
+  }
+
+  // 突然で顔面や手足の異常なし
+  if (answers.onset === "sudden") {
+    return "urgent";
+  }
+
+  // 徐々に進行 + 飲み込み困難 or まぶた下垂 or 声の変化
+  if (answers.onset === "days" || answers.onset === "months") {
+    if (answers.other_symptoms === "swallow" || answers.other_symptoms === "eyelid" || answers.other_symptoms === "voice") {
+      return "soon";
+    }
+    if (answers.limbs === "weak_both") {
+      return "soon";
+    }
+    return "checkup";
+  }
+
+  // 疲れた時だけ
+  if (answers.onset === "occasional") {
+    if (answers.other_symptoms === "swallow" || answers.other_symptoms === "voice") {
+      return "checkup";
+    }
+    return "watch";
+  }
+
+  return "watch";
+}
+
+function buildResultHTML(urgency) {
+  var data = {
+    call119: {
+      badge: "badge-red",
+      badgeText: "すぐ119番に電話してください",
+      title: "脳卒中の可能性があります",
+      desc: "突然のろれつ障害に加え、顔の麻痺や手足の脱力・しびれ、激しい頭痛、意識障害を伴う場合は、脳卒中の可能性が高いです。治療は時間との勝負です。",
+      action: "<strong>今すぐ119番に電話してください。</strong>発症時刻（症状が始まった時刻）をメモして救急隊に伝えてください。脳梗塞は発症4.5時間以内の治療で大きく予後が変わります。",
+      dept: "救急外来（脳神経内科・脳神経外科）"
+    },
+    tia: {
+      badge: "badge-red",
+      badgeText: "今日中に受診してください",
+      title: "一過性脳虚血発作（TIA）の可能性があります",
+      desc: "症状が消えたとしても安心できません。TIAは脳梗塞の前触れであり、48時間以内に約5%が脳梗塞を発症するとされています。",
+      action: "<strong>症状が消えていても、今日中に医療機関を受診してください。</strong>TIAの段階で治療を始めれば、脳梗塞のリスクを約80%減らせます。",
+      dept: "脳神経内科（救急外来でも可）"
+    },
+    urgent: {
+      badge: "badge-red",
+      badgeText: "早急に受診してください",
+      title: "急いで医療機関の受診が必要です",
+      desc: "突然のろれつ障害は脳血管障害の可能性を除外する必要があります。顔や手足に明らかな異常がなくても、脳の検査を受けることをおすすめします。",
+      action: "<strong>できるだけ早く脳神経内科または救急外来を受診してください。</strong>",
+      dept: "脳神経内科 または 救急外来"
+    },
+    soon: {
+      badge: "badge-yellow",
+      badgeText: "早めに受診をおすすめします",
+      title: "神経疾患の精査が必要な可能性があります",
+      desc: "徐々に進行するろれつの異常に飲み込みにくさ、声の変化、まぶたの下垂などを伴う場合、ALS、パーキンソン病、重症筋無力症などの可能性があります。",
+      action: "<strong>1〜2週間以内に脳神経内科を受診しましょう。</strong>近くにない場合はかかりつけ医に紹介状をもらってください。",
+      dept: "脳神経内科"
+    },
+    checkup: {
+      badge: "badge-yellow",
+      badgeText: "受診を検討してください",
+      title: "経過を観察しつつ、受診も検討しましょう",
+      desc: "徐々にろれつが悪くなっている場合、原因を調べておくと安心です。加齢や疲労の場合もありますが、早期発見が大切な病気が隠れていることもあります。",
+      action: "<strong>数週間以内に脳神経内科またはかかりつけの内科を受診しましょう。</strong>",
+      dept: "脳神経内科 または 内科"
+    },
+    watch: {
+      badge: "badge-green",
+      badgeText: "様子を見ても大丈夫です",
+      title: "今のところ緊急性は低そうです",
+      desc: "疲れた時だけろれつが乱れ、すぐに回復する場合は、疲労や睡眠不足が原因のことが多いです。飲酒後の一時的な症状も心配いりません。",
+      action: "<strong>十分な睡眠と休息を心がけてください。</strong>症状が悪化したり、頻繁に起こるようになった場合は受診をおすすめします。",
+      dept: "悪化した場合：脳神経内科"
+    }
+  };
+
+  var d = data[urgency];
+  var html = '<div class="result-card">';
+  html += '<span class="result-badge ' + d.badge + '">' + d.badgeText + '</span>';
+  html += '<h2 class="result-title">' + d.title + '</h2>';
+  html += '<p class="result-desc">' + d.desc + '</p>';
+  html += '<div class="result-action">' + d.action + '</div>';
+  html += '<div class="result-action"><strong>推奨診療科：</strong>' + d.dept + '</div>';
+
+  html += '<div class="result-note">';
+  html += '<strong>あなたの回答：</strong><br>';
+  html += '発症時期：' + getLabelFor("onset", answers.onset) + '<br>';
+  html += '顔の異常：' + getLabelFor("face", answers.face) + '<br>';
+  html += '手足の異常：' + getLabelFor("limbs", answers.limbs) + '<br>';
+  html += '他の症状：' + getLabelFor("other_symptoms", answers.other_symptoms) + '<br>';
+  html += '現在の状態：' + getLabelFor("resolved", answers.resolved);
+  html += '<br><br>※ このチェック結果を印刷して受診時にお持ちいただくと、医師への説明がスムーズです。';
+  html += '</div>';
+  html += '</div>';
+
+  html += '<button class="restart-btn" onclick="restart()">もう一度チェックする</button>';
+  return html;
+}
+
+function getLabelFor(qId, optId) {
+  for (var i = 0; i < questions.length; i++) {
+    if (questions[i].id === qId) {
+      for (var j = 0; j < questions[i].options.length; j++) {
+        if (questions[i].options[j].id === optId) {
+          return questions[i].options[j].label;
+        }
+      }
+    }
+  }
+  return "";
+}
+
+function restart() {
+  currentStep = 0;
+  answers = {};
+  document.getElementById("resultArea").classList.add("hidden");
+  document.getElementById("resultArea").innerHTML = "";
+  document.getElementById("questionArea").classList.remove("hidden");
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+renderQuestion();
+</script>
+
+</body>
+</html>

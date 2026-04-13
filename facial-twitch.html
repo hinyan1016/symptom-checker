@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>顔のピクつきセルフチェック ― その症状、大丈夫？</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif;
+  background: #f0f4f8;
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.app-header {
+  background: linear-gradient(135deg, #1B3A5C, #2C5AA0);
+  color: #fff;
+  padding: 16px 20px;
+  text-align: center;
+}
+.app-header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+.app-header .series { font-size: 0.8rem; opacity: 0.8; }
+.disclaimer {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 12px 16px;
+  margin: 12px 16px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #856404;
+}
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+.step-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.step-number {
+  display: inline-block;
+  background: #2C5AA0;
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+.step-card h2 {
+  font-size: 1.1rem;
+  color: #1B3A5C;
+  margin-bottom: 12px;
+}
+.step-card p {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 12px;
+}
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #333;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.option-btn:hover { border-color: #2C5AA0; background: #f0f6ff; }
+.option-btn.selected { border-color: #2C5AA0; background: #e8f4fd; color: #1B3A5C; font-weight: bold; }
+.hidden { display: none; }
+.result-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+.result-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.badge-red { background: #f8d7da; color: #c0392b; }
+.badge-yellow { background: #fff3cd; color: #856404; }
+.badge-green { background: #d4edda; color: #155724; }
+.result-title { font-size: 1.2rem; color: #1B3A5C; margin-bottom: 8px; }
+.result-desc { font-size: 0.95rem; color: #555; margin-bottom: 16px; }
+.result-action {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.result-action strong { color: #2C5AA0; }
+.result-note {
+  font-size: 0.85rem;
+  color: #888;
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+  margin-top: 12px;
+}
+.restart-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: #2C5AA0;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 12px;
+}
+.restart-btn:hover { background: #1B3A5C; }
+.progress-bar {
+  height: 4px;
+  background: #dee2e6;
+  margin: 0 16px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: #2C5AA0;
+  transition: width 0.3s;
+  border-radius: 2px;
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="series">その症状、大丈夫？ #04</div>
+  <h1>顔のピクつきセルフチェック</h1>
+</div>
+
+<div class="disclaimer">
+  このツールは医療行為ではありません。結果は参考情報であり、診断に代わるものではありません。心配な場合は必ず医師にご相談ください。
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+<div class="container">
+  <div id="questionArea"></div>
+  <div id="resultArea" class="hidden"></div>
+</div>
+
+<script>
+var questions = [
+  {
+    id: "where",
+    title: "ピクつくのはどこですか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "eyelid_part", label: "片方のまぶたの一部だけがピクピクする" },
+      { id: "eye_to_mouth", label: "片側の目の周り〜頬〜口角がけいれんする" },
+      { id: "both_eyelids", label: "両方のまぶたが閉じてしまう・目が開けにくい" },
+      { id: "other", label: "それ以外（額、首など）" }
+    ]
+  },
+  {
+    id: "duration",
+    title: "ピクつきはいつ頃から気になっていますか？",
+    subtitle: "",
+    options: [
+      { id: "days", label: "数日前から" },
+      { id: "weeks", label: "数週間前から" },
+      { id: "month_plus", label: "1ヶ月以上前から" },
+      { id: "years", label: "数ヶ月〜数年前から" }
+    ]
+  },
+  {
+    id: "progression",
+    title: "ピクつきは変化していますか？",
+    subtitle: "",
+    options: [
+      { id: "same", label: "最初からずっと同じ場所・同じ程度" },
+      { id: "spreading", label: "最初は目だけだったが、頬や口にも広がってきた" },
+      { id: "worse", label: "頻度や強さが徐々に増している" },
+      { id: "on_off", label: "出たり消えたりしている" }
+    ]
+  },
+  {
+    id: "triggers",
+    title: "どんな時に起きやすいですか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "fatigue", label: "疲れた時や睡眠不足の時だけ" },
+      { id: "stress", label: "緊張やストレスを感じた時に悪化する" },
+      { id: "always", label: "常にある（リラックスしても止まらない）" },
+      { id: "sleep", label: "寝ている間も起きている" }
+    ]
+  },
+  {
+    id: "other_symptoms",
+    title: "他に気になる症状はありますか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "paralysis", label: "顔の片側が動かない（口角が下がるなど）" },
+      { id: "headache_vision", label: "頭痛がある、または視力に異常がある" },
+      { id: "eye_hard_open", label: "目が開けにくくて日常生活に支障がある" },
+      { id: "none", label: "ピクつき以外に気になることはない" }
+    ]
+  },
+  {
+    id: "daily_life",
+    title: "日常生活への影響はありますか？",
+    subtitle: "",
+    options: [
+      { id: "no_impact", label: "自分では気になるが、生活には支障なし" },
+      { id: "mild", label: "時々気になるが、大きな支障はない" },
+      { id: "moderate", label: "見た目が気になる、人と話す時に困る" },
+      { id: "severe", label: "目が開けにくく運転や読書が困難" }
+    ]
+  }
+];
+
+var currentStep = 0;
+var answers = {};
+
+function renderQuestion() {
+  var area = document.getElementById("questionArea");
+  var q = questions[currentStep];
+  var pct = Math.round((currentStep / questions.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+
+  var html = '<div class="step-card">';
+  html += '<span class="step-number">' + (currentStep + 1) + ' / ' + questions.length + '</span>';
+  html += '<h2>' + q.title + '</h2>';
+  if (q.subtitle) { html += '<p>' + q.subtitle + '</p>'; }
+  html += '<div class="options">';
+  for (var i = 0; i < q.options.length; i++) {
+    var opt = q.options[i];
+    html += '<button class="option-btn" onclick="selectAnswer(\'' + q.id + '\',\'' + opt.id + '\')">' + opt.label + '</button>';
+  }
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+
+function selectAnswer(qId, optId) {
+  answers[qId] = optId;
+  currentStep++;
+  if (currentStep < questions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById("questionArea").classList.add("hidden");
+  document.getElementById("progressFill").style.width = "100%";
+
+  var urgency = calcUrgency();
+  var resultArea = document.getElementById("resultArea");
+  resultArea.classList.remove("hidden");
+  resultArea.innerHTML = buildResultHTML(urgency);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function calcUrgency() {
+  // 緊急: 顔面麻痺 or 頭痛+視力障害
+  if (answers.other_symptoms === "paralysis") {
+    return "emergency";
+  }
+  if (answers.other_symptoms === "headache_vision") {
+    return "emergency";
+  }
+
+  // 片側顔面けいれん疑い
+  if (answers.where === "eye_to_mouth") {
+    return "hfs";
+  }
+  if (answers.where === "eyelid_part" && answers.progression === "spreading") {
+    return "hfs";
+  }
+
+  // 眼瞼けいれん疑い
+  if (answers.where === "both_eyelids") {
+    return "blepharospasm";
+  }
+  if (answers.other_symptoms === "eye_hard_open") {
+    return "blepharospasm";
+  }
+  if (answers.daily_life === "severe") {
+    return "blepharospasm";
+  }
+
+  // 長期 + 悪化
+  if (answers.duration === "month_plus" || answers.duration === "years") {
+    if (answers.progression === "worse" || answers.triggers === "always" || answers.triggers === "sleep") {
+      return "checkup";
+    }
+  }
+
+  // 生活支障あり
+  if (answers.daily_life === "moderate") {
+    return "checkup";
+  }
+
+  // 眼瞼ミオキミア（心配不要）
+  return "myokymia";
+}
+
+function buildResultHTML(urgency) {
+  var data = {
+    emergency: {
+      badge: "badge-red",
+      badgeText: "すぐ受診してください",
+      title: "緊急性が高い可能性があります",
+      desc: "顔面の麻痺（口角が下がる、目が閉じにくい）を伴う場合は、顔面神経麻痺や脳卒中の可能性があります。頭痛や視力の異常がある場合は、脳の病変を除外する必要があります。",
+      action: "<strong>顔面麻痺は早期のステロイド治療が重要です。今日中に脳神経内科または耳鼻咽喉科を受診してください。</strong>片側の手足の脱力を伴う場合は119番に電話してください。",
+      dept: "脳神経内科 または 耳鼻咽喉科（救急外来でも可）"
+    },
+    hfs: {
+      badge: "badge-yellow",
+      badgeText: "受診をおすすめします",
+      title: "片側顔面けいれんの可能性があります",
+      desc: "片側の目の周りから頬・口角に広がるけいれんは、顔面神経が血管に圧迫されて起きる「片側顔面けいれん」の可能性があります。自然に治ることは少なく、徐々に悪化する傾向があります。",
+      action: "<strong>脳神経内科を受診しましょう。</strong>ボツリヌス毒素注射（ボトックス）で症状を改善できます。保険適用されています。MRI検査で原因を確認できます。",
+      dept: "脳神経内科"
+    },
+    blepharospasm: {
+      badge: "badge-yellow",
+      badgeText: "受診をおすすめします",
+      title: "眼瞼けいれんの可能性があります",
+      desc: "両方のまぶたが閉じてしまい目が開けにくい場合は、「眼瞼けいれん」の可能性があります。ドライアイや眼精疲労と間違われやすい病気ですが、ボトックスで治療できます。",
+      action: "<strong>脳神経内科を受診しましょう。</strong>眼科で目薬をもらっても改善しない「目が開けにくさ」がある場合は、脳神経内科に相談してください。ボトックスは保険適用されています。",
+      dept: "脳神経内科"
+    },
+    checkup: {
+      badge: "badge-yellow",
+      badgeText: "受診を検討してください",
+      title: "一度、専門医に相談すると安心です",
+      desc: "1ヶ月以上続くピクつきや、頻度が増している場合は、片側顔面けいれんや眼瞼けいれんの初期段階の可能性があります。早期に診断を受けておくと安心です。",
+      action: "<strong>時間のある時に脳神経内科を受診しましょう。</strong>今すぐ緊急というわけではありませんが、放置すると悪化する場合があります。",
+      dept: "脳神経内科"
+    },
+    myokymia: {
+      badge: "badge-green",
+      badgeText: "様子を見ても大丈夫です",
+      title: "眼瞼ミオキミア ― 心配いりません",
+      desc: "まぶたの一部だけがピクピクする症状は「眼瞼ミオキミア」と呼ばれ、最も多い顔のピクつきです。疲労、睡眠不足、カフェインの摂りすぎ、ストレスが主な原因で、通常は数日〜数週間で自然に治ります。",
+      action: "<strong>まずは以下のセルフケアを試してみてください。</strong><br>・十分な睡眠（7〜8時間）<br>・カフェインの減量（コーヒーは1日2杯まで）<br>・目の休息（20分ごとに20秒遠くを見る）<br>・ストレス管理<br><br>1ヶ月以上続く場合や、まぶた以外に広がってきた場合は受診しましょう。",
+      dept: "悪化した場合：脳神経内科"
+    }
+  };
+
+  var d = data[urgency];
+  var html = '<div class="result-card">';
+  html += '<span class="result-badge ' + d.badge + '">' + d.badgeText + '</span>';
+  html += '<h2 class="result-title">' + d.title + '</h2>';
+  html += '<p class="result-desc">' + d.desc + '</p>';
+  html += '<div class="result-action">' + d.action + '</div>';
+  html += '<div class="result-action"><strong>推奨診療科：</strong>' + d.dept + '</div>';
+
+  html += '<div class="result-note">';
+  html += '<strong>あなたの回答：</strong><br>';
+  html += 'ピクつきの場所：' + getLabelFor("where", answers.where) + '<br>';
+  html += 'いつ頃から：' + getLabelFor("duration", answers.duration) + '<br>';
+  html += '変化：' + getLabelFor("progression", answers.progression) + '<br>';
+  html += '起きやすい時：' + getLabelFor("triggers", answers.triggers) + '<br>';
+  html += '他の症状：' + getLabelFor("other_symptoms", answers.other_symptoms) + '<br>';
+  html += '生活への影響：' + getLabelFor("daily_life", answers.daily_life);
+  html += '<br><br>※ このチェック結果を印刷して受診時にお持ちいただくと、医師への説明がスムーズです。';
+  html += '</div>';
+  html += '</div>';
+
+  html += '<button class="restart-btn" onclick="restart()">もう一度チェックする</button>';
+  return html;
+}
+
+function getLabelFor(qId, optId) {
+  for (var i = 0; i < questions.length; i++) {
+    if (questions[i].id === qId) {
+      for (var j = 0; j < questions[i].options.length; j++) {
+        if (questions[i].options[j].id === optId) {
+          return questions[i].options[j].label;
+        }
+      }
+    }
+  }
+  return "";
+}
+
+function restart() {
+  currentStep = 0;
+  answers = {};
+  document.getElementById("resultArea").classList.add("hidden");
+  document.getElementById("resultArea").innerHTML = "";
+  document.getElementById("questionArea").classList.remove("hidden");
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+renderQuestion();
+</script>
+
+</body>
+</html>

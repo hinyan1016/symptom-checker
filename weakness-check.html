@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>脱力セルフチェック ― その症状、大丈夫？</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif;
+  background: #f0f4f8;
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.app-header {
+  background: linear-gradient(135deg, #1B3A5C, #2C5AA0);
+  color: #fff;
+  padding: 16px 20px;
+  text-align: center;
+}
+.app-header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+.app-header .series { font-size: 0.8rem; opacity: 0.8; }
+.disclaimer {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 12px 16px;
+  margin: 12px 16px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #856404;
+}
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+.step-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.step-number {
+  display: inline-block;
+  background: #2C5AA0;
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+.step-card h2 {
+  font-size: 1.1rem;
+  color: #1B3A5C;
+  margin-bottom: 12px;
+}
+.step-card p {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 12px;
+}
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #333;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.option-btn:hover { border-color: #2C5AA0; background: #f0f6ff; }
+.option-btn.selected { border-color: #2C5AA0; background: #e8f4fd; color: #1B3A5C; font-weight: bold; }
+.hidden { display: none; }
+.result-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+.result-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.badge-red { background: #f8d7da; color: #c0392b; }
+.badge-yellow { background: #fff3cd; color: #856404; }
+.badge-green { background: #d4edda; color: #155724; }
+.result-title { font-size: 1.2rem; color: #1B3A5C; margin-bottom: 8px; }
+.result-desc { font-size: 0.95rem; color: #555; margin-bottom: 16px; }
+.result-action {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.result-action strong { color: #2C5AA0; }
+.result-note {
+  font-size: 0.85rem;
+  color: #888;
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+  margin-top: 12px;
+}
+.restart-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: #2C5AA0;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 12px;
+}
+.restart-btn:hover { background: #1B3A5C; }
+.progress-bar {
+  height: 4px;
+  background: #dee2e6;
+  margin: 0 16px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: #2C5AA0;
+  transition: width 0.3s;
+  border-radius: 2px;
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="series">その症状、大丈夫？ #03</div>
+  <h1>脱力セルフチェック</h1>
+</div>
+
+<div class="disclaimer">
+  このツールは医療行為ではありません。結果は参考情報であり、診断に代わるものではありません。心配な場合は必ず医師にご相談ください。
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+<div class="container">
+  <div id="questionArea"></div>
+  <div id="resultArea" class="hidden"></div>
+</div>
+
+<script>
+var questions = [
+  {
+    id: "onset",
+    title: "力が入らなくなったのはいつからですか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "sudden", label: "今日〜数時間前から突然始まった" },
+      { id: "days", label: "数日前から急速に悪くなっている" },
+      { id: "weeks", label: "数週間〜数ヶ月かけて徐々に弱くなった" },
+      { id: "fatigue_only", label: "疲れた時だけで、休めば戻る" }
+    ]
+  },
+  {
+    id: "location",
+    title: "力が入りにくいのはどこですか？",
+    subtitle: "",
+    options: [
+      { id: "one_side", label: "片側の手足（右手と右足、など）" },
+      { id: "both_distal", label: "両方の手先や足先" },
+      { id: "both_proximal", label: "両方の太ももや上腕（体幹に近い部分）" },
+      { id: "legs_up", label: "両足から始まり、上に広がっている" },
+      { id: "general", label: "全体的にだるい感じ" }
+    ]
+  },
+  {
+    id: "numbness",
+    title: "しびれはありますか？",
+    subtitle: "",
+    options: [
+      { id: "one_side", label: "片側の手足がしびれる" },
+      { id: "both_tips", label: "手足の先がしびれる（手袋・靴下のような範囲）" },
+      { id: "none", label: "しびれはない" }
+    ]
+  },
+  {
+    id: "other_symptoms",
+    title: "他に気になる症状はありますか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "face_speech", label: "顔の麻痺やろれつの障害がある" },
+      { id: "swallow_breathe", label: "飲み込みにくい、または息苦しい" },
+      { id: "bladder", label: "排尿・排便のコントロールが難しい" },
+      { id: "eyelid_evening", label: "まぶたが下がる、夕方に悪化する" },
+      { id: "muscle_pain", label: "筋肉痛がある" },
+      { id: "cold_infection", label: "1〜3週間前に風邪や下痢をした" },
+      { id: "none", label: "特にない" }
+    ]
+  },
+  {
+    id: "daily_life",
+    title: "日常生活への影響はありますか？",
+    subtitle: "",
+    options: [
+      { id: "no_impact", label: "特に困っていない" },
+      { id: "mild", label: "少し不便だが、生活はできる" },
+      { id: "moderate", label: "箸やペンが使いにくい、階段が辛い" },
+      { id: "severe", label: "着替えや食事が一人では難しい" }
+    ]
+  },
+  {
+    id: "medication",
+    title: "飲んでいる薬はありますか？",
+    subtitle: "",
+    options: [
+      { id: "statin", label: "コレステロールの薬（スタチン）を飲んでいる" },
+      { id: "steroid", label: "ステロイドを長期間飲んでいる" },
+      { id: "diuretic", label: "利尿薬を飲んでいる" },
+      { id: "other", label: "他の薬を飲んでいる" },
+      { id: "none", label: "薬は飲んでいない" }
+    ]
+  }
+];
+
+var currentStep = 0;
+var answers = {};
+
+function renderQuestion() {
+  var area = document.getElementById("questionArea");
+  var q = questions[currentStep];
+  var pct = Math.round((currentStep / questions.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+
+  var html = '<div class="step-card">';
+  html += '<span class="step-number">' + (currentStep + 1) + ' / ' + questions.length + '</span>';
+  html += '<h2>' + q.title + '</h2>';
+  if (q.subtitle) { html += '<p>' + q.subtitle + '</p>'; }
+  html += '<div class="options">';
+  for (var i = 0; i < q.options.length; i++) {
+    var opt = q.options[i];
+    html += '<button class="option-btn" onclick="selectAnswer(\'' + q.id + '\',\'' + opt.id + '\')">' + opt.label + '</button>';
+  }
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+
+function selectAnswer(qId, optId) {
+  answers[qId] = optId;
+  currentStep++;
+  if (currentStep < questions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById("questionArea").classList.add("hidden");
+  document.getElementById("progressFill").style.width = "100%";
+
+  var urgency = calcUrgency();
+  var resultArea = document.getElementById("resultArea");
+  resultArea.classList.remove("hidden");
+  resultArea.innerHTML = buildResultHTML(urgency);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function calcUrgency() {
+  // 最高緊急度: 突然 + 片側 + 顔面/ろれつ
+  if (answers.onset === "sudden" && answers.location === "one_side") {
+    return "call119";
+  }
+  if (answers.onset === "sudden" && answers.other_symptoms === "face_speech") {
+    return "call119";
+  }
+
+  // 緊急: 両足から広がる（ギラン・バレー）
+  if (answers.location === "legs_up") {
+    if (answers.other_symptoms === "swallow_breathe") {
+      return "call119";
+    }
+    return "urgent_gbs";
+  }
+
+  // 飲み込み/呼吸困難 or 排尿排便障害
+  if (answers.other_symptoms === "swallow_breathe" || answers.other_symptoms === "bladder") {
+    return "urgent";
+  }
+
+  // 突然だが片側でない
+  if (answers.onset === "sudden") {
+    return "urgent";
+  }
+
+  // 数日で急速に進行
+  if (answers.onset === "days") {
+    if (answers.other_symptoms === "cold_infection") {
+      return "urgent_gbs";
+    }
+    return "soon";
+  }
+
+  // 徐々に進行
+  if (answers.onset === "weeks") {
+    if (answers.other_symptoms === "eyelid_evening") {
+      return "soon_mg";
+    }
+    if (answers.other_symptoms === "muscle_pain" && answers.location === "both_proximal") {
+      return "soon_myositis";
+    }
+    if (answers.daily_life === "severe" || answers.daily_life === "moderate") {
+      return "soon";
+    }
+    return "checkup";
+  }
+
+  // 薬剤性疑い
+  if (answers.medication === "statin" || answers.medication === "steroid") {
+    return "medication";
+  }
+
+  // 疲労のみ
+  return "watch";
+}
+
+function buildResultHTML(urgency) {
+  var data = {
+    call119: {
+      badge: "badge-red",
+      badgeText: "すぐ119番に電話してください",
+      title: "脳卒中の可能性があります",
+      desc: "片側の手足に突然力が入らなくなり、顔の麻痺やろれつの障害を伴う場合は、脳卒中の可能性が高いです。",
+      action: "<strong>今すぐ119番に電話してください。</strong>発症時刻をメモし、FASTチェック（顔・腕・言葉・時間）で症状を確認しましょう。",
+      dept: "救急外来（脳神経内科・脳神経外科）"
+    },
+    urgent_gbs: {
+      badge: "badge-red",
+      badgeText: "早急に受診してください",
+      title: "ギラン・バレー症候群の可能性があります",
+      desc: "両足からの脱力が上に広がっている場合、ギラン・バレー症候群の可能性があります。特に先行する風邪や下痢の後に発症した場合はその可能性が高まります。重症化すると呼吸筋に影響するため、早急な対応が必要です。",
+      action: "<strong>今日中に脳神経内科または救急外来を受診してください。</strong>呼吸が苦しい場合は119番に電話してください。",
+      dept: "脳神経内科（救急外来でも可）"
+    },
+    urgent: {
+      badge: "badge-red",
+      badgeText: "早急に受診してください",
+      title: "緊急の検査が必要な可能性があります",
+      desc: "急速に進行する脱力、飲み込みや呼吸の困難、排尿排便の障害は、重篤な神経疾患や脊髄の圧迫を示している可能性があります。",
+      action: "<strong>できるだけ早く脳神経内科または救急外来を受診してください。</strong>",
+      dept: "脳神経内科 または 救急外来"
+    },
+    soon: {
+      badge: "badge-yellow",
+      badgeText: "早めに受診をおすすめします",
+      title: "専門的な検査が必要な可能性があります",
+      desc: "数日〜数週間で進行する脱力は、神経や筋肉の病気が原因の可能性があります。原因を特定するために専門的な検査が必要です。",
+      action: "<strong>1〜2週間以内に脳神経内科を受診しましょう。</strong>",
+      dept: "脳神経内科"
+    },
+    soon_mg: {
+      badge: "badge-yellow",
+      badgeText: "早めに受診をおすすめします",
+      title: "重症筋無力症の可能性があります",
+      desc: "まぶたが下がり、夕方に症状が悪化する場合は、重症筋無力症の可能性があります。治療で改善できる病気です。",
+      action: "<strong>1〜2週間以内に脳神経内科を受診しましょう。</strong>血液検査と電気生理検査で診断できます。",
+      dept: "脳神経内科"
+    },
+    soon_myositis: {
+      badge: "badge-yellow",
+      badgeText: "早めに受診をおすすめします",
+      title: "筋炎の可能性があります",
+      desc: "太ももや上腕の力が入りにくく、筋肉痛を伴う場合は、多発性筋炎や皮膚筋炎の可能性があります。血液検査で診断の手がかりが得られます。",
+      action: "<strong>1〜2週間以内に脳神経内科または内科を受診しましょう。</strong>",
+      dept: "脳神経内科 または 内科"
+    },
+    checkup: {
+      badge: "badge-yellow",
+      badgeText: "受診を検討してください",
+      title: "原因を調べておくと安心です",
+      desc: "徐々に筋力が落ちてきている場合、加齢や運動不足のこともありますが、早期に発見すべき病気が隠れていることもあります。",
+      action: "<strong>数週間以内に脳神経内科またはかかりつけの内科を受診しましょう。</strong>",
+      dept: "脳神経内科 または 内科"
+    },
+    medication: {
+      badge: "badge-yellow",
+      badgeText: "主治医に相談してください",
+      title: "薬の影響の可能性があります",
+      desc: "スタチン（コレステロールの薬）やステロイドの長期使用は筋力低下の原因になることがあります。",
+      action: "<strong>自己判断で薬を中止せず、処方した主治医に相談してください。</strong>薬の種類や量を調整することで改善する場合があります。特に筋肉痛が強い場合は早めに受診を。",
+      dept: "処方元の主治医"
+    },
+    watch: {
+      badge: "badge-green",
+      badgeText: "様子を見ても大丈夫です",
+      title: "今のところ緊急性は低そうです",
+      desc: "疲れた時だけ力が入りにくく、休めば回復する場合は、疲労や運動不足が原因のことが多いです。",
+      action: "<strong>適度な運動（ウォーキングなど）とたんぱく質の摂取を心がけましょう。</strong>症状が悪化したり、休んでも戻らなくなった場合は受診をおすすめします。",
+      dept: "悪化した場合：脳神経内科"
+    }
+  };
+
+  var d = data[urgency];
+  var html = '<div class="result-card">';
+  html += '<span class="result-badge ' + d.badge + '">' + d.badgeText + '</span>';
+  html += '<h2 class="result-title">' + d.title + '</h2>';
+  html += '<p class="result-desc">' + d.desc + '</p>';
+  html += '<div class="result-action">' + d.action + '</div>';
+  html += '<div class="result-action"><strong>推奨診療科：</strong>' + d.dept + '</div>';
+
+  html += '<div class="result-note">';
+  html += '<strong>あなたの回答：</strong><br>';
+  html += '発症時期：' + getLabelFor("onset", answers.onset) + '<br>';
+  html += '脱力の部位：' + getLabelFor("location", answers.location) + '<br>';
+  html += 'しびれ：' + getLabelFor("numbness", answers.numbness) + '<br>';
+  html += '他の症状：' + getLabelFor("other_symptoms", answers.other_symptoms) + '<br>';
+  html += '生活への影響：' + getLabelFor("daily_life", answers.daily_life) + '<br>';
+  html += '内服薬：' + getLabelFor("medication", answers.medication);
+  html += '<br><br>※ このチェック結果を印刷して受診時にお持ちいただくと、医師への説明がスムーズです。';
+  html += '</div>';
+  html += '</div>';
+
+  html += '<button class="restart-btn" onclick="restart()">もう一度チェックする</button>';
+  return html;
+}
+
+function getLabelFor(qId, optId) {
+  for (var i = 0; i < questions.length; i++) {
+    if (questions[i].id === qId) {
+      for (var j = 0; j < questions[i].options.length; j++) {
+        if (questions[i].options[j].id === optId) {
+          return questions[i].options[j].label;
+        }
+      }
+    }
+  }
+  return "";
+}
+
+function restart() {
+  currentStep = 0;
+  answers = {};
+  document.getElementById("resultArea").classList.add("hidden");
+  document.getElementById("resultArea").innerHTML = "";
+  document.getElementById("questionArea").classList.remove("hidden");
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+renderQuestion();
+</script>
+
+</body>
+</html>
