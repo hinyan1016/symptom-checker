@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>複視セルフチェック ― その症状、大丈夫？</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif;
+  background: #f0f4f8;
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.app-header {
+  background: linear-gradient(135deg, #1B3A5C, #2C5AA0);
+  color: #fff;
+  padding: 16px 20px;
+  text-align: center;
+}
+.app-header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+.app-header .series { font-size: 0.8rem; opacity: 0.8; }
+.disclaimer {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 12px 16px;
+  margin: 12px 16px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #856404;
+}
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+.step-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.step-number {
+  display: inline-block;
+  background: #2C5AA0;
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+.step-card h2 {
+  font-size: 1.1rem;
+  color: #1B3A5C;
+  margin-bottom: 12px;
+}
+.step-card p {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 12px;
+}
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #333;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.option-btn:hover { border-color: #2C5AA0; background: #f0f6ff; }
+.option-btn.selected { border-color: #2C5AA0; background: #e8f4fd; color: #1B3A5C; font-weight: bold; }
+.hidden { display: none; }
+.result-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 20px;
+  margin: 16px 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+.result-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.badge-red { background: #f8d7da; color: #c0392b; }
+.badge-yellow { background: #fff3cd; color: #856404; }
+.badge-green { background: #d4edda; color: #155724; }
+.result-title { font-size: 1.2rem; color: #1B3A5C; margin-bottom: 8px; }
+.result-desc { font-size: 0.95rem; color: #555; margin-bottom: 16px; }
+.result-action {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.result-action strong { color: #2C5AA0; }
+.result-note {
+  font-size: 0.85rem;
+  color: #888;
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+  margin-top: 12px;
+}
+.restart-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: #2C5AA0;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 12px;
+}
+.restart-btn:hover { background: #1B3A5C; }
+.progress-bar {
+  height: 4px;
+  background: #dee2e6;
+  margin: 0 16px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: #2C5AA0;
+  transition: width 0.3s;
+  border-radius: 2px;
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="series">その症状、大丈夫？ #07</div>
+  <h1>複視セルフチェック</h1>
+</div>
+
+<div class="disclaimer">
+  このツールは医療行為ではありません。結果は参考情報であり、診断に代わるものではありません。心配な場合は必ず医師にご相談ください。
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+<div class="container">
+  <div id="questionArea"></div>
+  <div id="resultArea" class="hidden"></div>
+</div>
+
+<script>
+var questions = [
+  {
+    id: "cover_test",
+    title: "片目テスト：片目を閉じるとどうなりますか？",
+    subtitle: "右目・左目をそれぞれ閉じて確認してください",
+    options: [
+      { id: "binocular", label: "片目だと1つに見えるが、両目だと二重になる" },
+      { id: "monocular", label: "片目でも二重に見える" },
+      { id: "unsure", label: "よくわからない・確認が難しい" }
+    ]
+  },
+  {
+    id: "onset",
+    title: "複視はいつ頃から始まりましたか？",
+    subtitle: "",
+    options: [
+      { id: "sudden", label: "突然始まった（今日〜数日前）" },
+      { id: "gradual", label: "徐々に悪化してきた（数週間〜数ヶ月）" },
+      { id: "fluctuating", label: "良くなったり悪くなったりする" },
+      { id: "evening", label: "夕方〜夜にかけて悪化する" }
+    ]
+  },
+  {
+    id: "red_flags",
+    title: "以下のいずれかに当てはまりますか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "headache", label: "激しい頭痛を伴う" },
+      { id: "pupil", label: "瞳孔の大きさが左右で違う" },
+      { id: "slurred", label: "ろれつが回りにくい・片側の手足が動きにくい" },
+      { id: "ptosis_pupil", label: "まぶたが下がる＋瞳孔が広がっている" },
+      { id: "none", label: "いずれも当てはまらない" }
+    ]
+  },
+  {
+    id: "associated",
+    title: "複視に加えて、他の症状はありますか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "ptosis", label: "まぶたが下がってくる（眼瞼下垂）" },
+      { id: "eye_bulge", label: "眼球が出てきた気がする（眼球突出）" },
+      { id: "fatigue", label: "体がだるい・飲み込みにくさがある" },
+      { id: "pain", label: "目の奥が痛い" },
+      { id: "none_assoc", label: "複視だけで他に症状はない" }
+    ]
+  },
+  {
+    id: "direction",
+    title: "どの方向を見たときに二重が強くなりますか？",
+    subtitle: "わかる範囲で選んでください",
+    options: [
+      { id: "lateral", label: "横を見たとき（左右どちらか）" },
+      { id: "updown", label: "上や下を見たとき" },
+      { id: "all", label: "どの方向でも二重に見える" },
+      { id: "unknown", label: "方向はよくわからない" }
+    ]
+  },
+  {
+    id: "history",
+    title: "以下に当てはまるものはありますか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "diabetes", label: "糖尿病がある・血糖値が高いと言われた" },
+      { id: "thyroid", label: "甲状腺の病気がある（バセドウ病など）" },
+      { id: "hypertension", label: "高血圧がある" },
+      { id: "autoimmune", label: "自己免疫疾患がある" },
+      { id: "none_hist", label: "特にない" }
+    ]
+  }
+];
+
+var currentStep = 0;
+var answers = {};
+
+function renderQuestion() {
+  var area = document.getElementById("questionArea");
+  var q = questions[currentStep];
+  var pct = Math.round((currentStep / questions.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+
+  var html = '<div class="step-card">';
+  html += '<span class="step-number">' + "\u8CEA\u554F " + (currentStep + 1) + " / " + questions.length + '</span>';
+  html += '<h2>' + q.title + '</h2>';
+  if (q.subtitle) { html += '<p>' + q.subtitle + '</p>'; }
+  html += '<div class="options">';
+  for (var i = 0; i < q.options.length; i++) {
+    var opt = q.options[i];
+    html += '<button class="option-btn" onclick="selectAnswer(\'' + q.id + '\',\'' + opt.id + '\')">' + opt.label + '</button>';
+  }
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+
+function selectAnswer(qId, optId) {
+  answers[qId] = optId;
+  currentStep++;
+  if (currentStep < questions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById("questionArea").classList.add("hidden");
+  document.getElementById("progressFill").style.width = "100%";
+
+  var urgency = calcUrgency();
+  var resultArea = document.getElementById("resultArea");
+  resultArea.classList.remove("hidden");
+  resultArea.innerHTML = buildResultHTML(urgency);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function calcUrgency() {
+  // 単眼性複視 → 眼科
+  if (answers.cover_test === "monocular") {
+    return "monocular";
+  }
+
+  // 緊急: 頭痛＋突然の複視 → 脳動脈瘤破裂
+  if (answers.red_flags === "headache") {
+    return "emergency_aneurysm";
+  }
+  // 緊急: まぶた下垂＋瞳孔散大 → 脳動脈瘤
+  if (answers.red_flags === "ptosis_pupil") {
+    return "emergency_cn3";
+  }
+  // 緊急: 脳卒中徴候
+  if (answers.red_flags === "slurred") {
+    return "emergency_stroke";
+  }
+  // 緊急: 瞳孔異常
+  if (answers.red_flags === "pupil") {
+    return "urgent_pupil";
+  }
+
+  // 夕方悪化＋まぶた下垂 → 重症筋無力症の疑い
+  if (answers.onset === "evening" && answers.associated === "ptosis") {
+    return "urgent_mg_strong";
+  }
+  // 夕方悪化 or まぶた下垂 → 重症筋無力症の可能性
+  if (answers.onset === "evening" || answers.associated === "ptosis") {
+    return "urgent_mg";
+  }
+  // 日内変動＋易疲労性
+  if (answers.onset === "fluctuating" && answers.associated === "fatigue") {
+    return "urgent_mg";
+  }
+
+  // 眼球突出 → 甲状腺眼症
+  if (answers.associated === "eye_bulge" || answers.history === "thyroid") {
+    return "urgent_thyroid";
+  }
+
+  // 突然発症
+  if (answers.onset === "sudden") {
+    return "urgent_sudden";
+  }
+
+  // 糖尿病あり
+  if (answers.history === "diabetes") {
+    return "soon_diabetes";
+  }
+
+  // 高血圧あり + 徐々に進行
+  if (answers.history === "hypertension" && answers.onset === "gradual") {
+    return "soon_vascular";
+  }
+
+  // 徐々に悪化
+  if (answers.onset === "gradual") {
+    return "soon_gradual";
+  }
+
+  // よくわからない
+  if (answers.cover_test === "unsure") {
+    return "check_eye";
+  }
+
+  // その他
+  return "watch";
+}
+
+function buildResultHTML(urgency) {
+  var data = {
+    monocular: {
+      badge: "badge-green",
+      badgeText: "\u307E\u305A\u773C\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u5358\u773C\u6027\u8907\u8996\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u7247\u76EE\u3067\u3082\u4E8C\u91CD\u306B\u898B\u3048\u308B\u5834\u5408\u3001\u76EE\u305D\u306E\u3082\u306E\u306E\u554F\u984C\uFF08\u4E71\u8996\u30FB\u767D\u5185\u969C\u30FB\u30C9\u30E9\u30A4\u30A2\u30A4\u306A\u3069\uFF09\u304C\u539F\u56E0\u3067\u3042\u308B\u53EF\u80FD\u6027\u304C\u9AD8\u3044\u3067\u3059\u3002\u8133\u3084\u795E\u7D4C\u306E\u554F\u984C\u3067\u306F\u306A\u3044\u3053\u3068\u304C\u591A\u3044\u3067\u3059\u3002",
+      action: "<strong>\u773C\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u8996\u529B\u30FB\u5C48\u6298\u691C\u67FB\u3092\u53D7\u3051\u307E\u3057\u3087\u3046\u3002</strong>\u4E71\u8996\u306E\u77EF\u6B63\u3084\u767D\u5185\u969C\u306E\u6CBB\u7642\u3067\u6539\u5584\u3059\u308B\u3053\u3068\u304C\u591A\u3044\u3067\u3059\u3002",
+      dept: "\u773C\u79D1"
+    },
+    emergency_aneurysm: {
+      badge: "badge-red",
+      badgeText: "\u3059\u3050\u306B119\u756A\u3078\u96FB\u8A71\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u8133\u52D5\u8108\u7624\u7834\u88C2\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u7A81\u7136\u306E\u8907\u8996\u306B\u6FC0\u3057\u3044\u982D\u75DB\u3092\u4F34\u3046\u5834\u5408\u3001\u8133\u52D5\u8108\u7624\u7834\u88C2\uFF08\u304F\u3082\u819C\u4E0B\u51FA\u8840\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u3053\u308C\u306F\u4E00\u523B\u3092\u4E89\u3046\u7DCA\u6025\u4E8B\u614B\u3067\u3059\u3002",
+      action: "<strong>\u4ECA\u3059\u3050119\u756A\u306B\u96FB\u8A71\u3057\u3066\u6551\u6025\u642C\u9001\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u982D\u90E8CT\u30FBMRA\u3067\u7DCA\u6025\u306B\u8A55\u4FA1\u3059\u308B\u5FC5\u8981\u304C\u3042\u308A\u307E\u3059\u3002",
+      dept: "\u6551\u6025\u79D1\uFF08119\u756A\uFF09"
+    },
+    emergency_cn3: {
+      badge: "badge-red",
+      badgeText: "\u3059\u3050\u306B\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u52D5\u773C\u795E\u7D4C\u9EBB\u75FA\u306E\u7DCA\u6025\u6240\u898B\u3067\u3059",
+      desc: "\u307E\u3076\u305F\u4E0B\u5782\uFF0B\u77B3\u5B54\u6563\u5927\uFF0B\u8907\u8996\u306F\u3001\u52D5\u773C\u795E\u7D4C\u304C\u8133\u52D5\u8108\u7624\u306B\u3088\u3063\u3066\u5727\u8FEB\u3055\u308C\u3066\u3044\u308B\u53EF\u80FD\u6027\u3092\u5F37\u304F\u793A\u5506\u3057\u307E\u3059\u3002",
+      action: "<strong>\u4ECA\u3059\u3050\u6551\u6025\u75C5\u9662\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u982D\u90E8MRI\u30FBMRA\u3067\u8133\u52D5\u8108\u7624\u306E\u8A55\u4FA1\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      dept: "\u6551\u6025\u79D1 \u30FB \u8133\u795E\u7D4C\u5916\u79D1"
+    },
+    emergency_stroke: {
+      badge: "badge-red",
+      badgeText: "\u3059\u3050\u306B119\u756A\u3078\u96FB\u8A71\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u8133\u5352\u4E2D\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u8907\u8996\u306B\u52A0\u3048\u3066\u308D\u308C\u3064\u969C\u5BB3\u3084\u7247\u5074\u306E\u9EBB\u75FA\u304C\u3042\u308B\u5834\u5408\u3001\u8133\u5352\u4E2D\uFF08\u8133\u68B3\u585E\u30FB\u8133\u51FA\u8840\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u6642\u9593\u3068\u306E\u52DD\u8CA0\u3067\u3059\u3002",
+      action: "<strong>\u4ECA\u3059\u3050119\u756A\u306B\u96FB\u8A71\u3057\u3066\u6551\u6025\u642C\u9001\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u8133\u5352\u4E2D\u306F\u767A\u75C7\u304B\u3089\u306E\u6642\u9593\u304C\u6CBB\u7642\u6210\u7E3E\u3092\u5DE6\u53F3\u3057\u307E\u3059\u3002",
+      dept: "\u6551\u6025\u79D1\uFF08119\u756A\uFF09"
+    },
+    urgent_pupil: {
+      badge: "badge-red",
+      badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u77B3\u5B54\u7570\u5E38\u306E\u539F\u56E0\u7CBE\u67FB\u304C\u5FC5\u8981\u3067\u3059",
+      desc: "\u77B3\u5B54\u306E\u5927\u304D\u3055\u304C\u5DE6\u53F3\u3067\u7570\u306A\u308B\u5834\u5408\u3001\u52D5\u773C\u795E\u7D4C\u304C\u5727\u8FEB\u3055\u308C\u3066\u3044\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u8133\u52D5\u8108\u7624\u3084\u8133\u816B\u760D\u3092\u9664\u5916\u3059\u308B\u5FC5\u8981\u304C\u3042\u308A\u307E\u3059\u3002",
+      action: "<strong>\u3067\u304D\u308B\u3060\u3051\u65E9\u304F\u8133\u795E\u7D4C\u5185\u79D1\u307E\u305F\u306F\u6551\u6025\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u982D\u90E8MRI\u30FBMRA\u3067\u306E\u8A55\u4FA1\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1 \u30FB \u6551\u6025\u79D1"
+    },
+    urgent_mg_strong: {
+      badge: "badge-red",
+      badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059",
+      title: "\u91CD\u75C7\u7B4B\u7121\u529B\u75C7\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u5915\u65B9\u306B\u60AA\u5316\u3059\u308B\u8907\u8996\u3068\u307E\u3076\u305F\u306E\u4E0B\u5782\u306F\u3001\u91CD\u75C7\u7B4B\u7121\u529B\u75C7\u306E\u5178\u578B\u7684\u306A\u75C7\u72B6\u3067\u3059\u3002\u795E\u7D4C\u3068\u7B4B\u8089\u306E\u63A5\u5408\u90E8\u306B\u81EA\u5DF1\u6297\u4F53\u304C\u3067\u304D\u308B\u81EA\u5DF1\u514D\u75AB\u75BE\u60A3\u3067\u3001\u6CBB\u7642\u3067\u6539\u5584\u3067\u304D\u307E\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u6297\u30A2\u30BB\u30C1\u30EB\u30B3\u30EA\u30F3\u53D7\u5BB9\u4F53\u6297\u4F53\u691C\u67FB\u3084\u53CD\u5FA9\u523A\u6FC0\u8A66\u9A13\u3067\u8A3A\u65AD\u3067\u304D\u307E\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    urgent_mg: {
+      badge: "badge-yellow",
+      badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u91CD\u75C7\u7B4B\u7121\u529B\u75C7\u306E\u53EF\u80FD\u6027\u3092\u691C\u8A0E\u3057\u307E\u3057\u3087\u3046",
+      desc: "\u5915\u65B9\u306B\u60AA\u5316\u3059\u308B\u8907\u8996\u3084\u307E\u3076\u305F\u306E\u4E0B\u5782\u306F\u3001\u91CD\u75C7\u7B4B\u7121\u529B\u75C7\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u300C\u75B2\u308C\u76EE\u300D\u3067\u7247\u3065\u3051\u305A\u3001\u5C02\u9580\u7684\u306A\u691C\u67FB\u3092\u53D7\u3051\u308B\u3053\u3068\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u8840\u6DB2\u691C\u67FB\uFF08\u6297\u4F53\u691C\u67FB\uFF09\u3068\u53CD\u5FA9\u523A\u6FC0\u8A66\u9A13\u3067\u8A3A\u65AD\u3067\u304D\u307E\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    urgent_thyroid: {
+      badge: "badge-yellow",
+      badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u7532\u72B6\u816A\u773C\u75C7\uFF08\u30D0\u30BB\u30C9\u30A6\u75C5\u773C\u75C7\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u7532\u72B6\u816A\u306E\u7570\u5E38\u3067\u773C\u7403\u5468\u56F2\u306E\u7B4B\u8089\u304C\u816B\u308C\u3001\u8907\u8996\u3084\u773C\u7403\u7A81\u51FA\u304C\u8D77\u304D\u308B\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u3002\u7532\u72B6\u816A\u6A5F\u80FD\u691C\u67FB\u3067\u8A3A\u65AD\u3067\u304D\u307E\u3059\u3002",
+      action: "<strong>\u5185\u5206\u6CCC\u5185\u79D1\u307E\u305F\u306F\u773C\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u8840\u6DB2\u691C\u67FB\u3067\u7532\u72B6\u816A\u6A5F\u80FD\u3092\u78BA\u8A8D\u3057\u307E\u3057\u3087\u3046\u3002",
+      dept: "\u5185\u5206\u6CCC\u5185\u79D1 \u30FB \u773C\u79D1"
+    },
+    urgent_sudden: {
+      badge: "badge-red",
+      badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u7A81\u7136\u767A\u75C7\u306E\u8907\u8996\u306F\u539F\u56E0\u7CBE\u67FB\u304C\u5FC5\u8981\u3067\u3059",
+      desc: "\u7A81\u7136\u59CB\u307E\u3063\u305F\u4E21\u773C\u6027\u8907\u8996\u306F\u3001\u8133\u52D5\u8108\u7624\u30FB\u8133\u5352\u4E2D\u30FB\u773C\u7403\u904B\u52D5\u795E\u7D4C\u9EBB\u75FA\u306A\u3069\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u539F\u56E0\u306E\u7279\u5B9A\u304C\u6025\u304C\u308C\u307E\u3059\u3002",
+      action: "<strong>\u3067\u304D\u308B\u3060\u3051\u65E9\u304F\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u982D\u90E8MRI\u30FBMRA\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    soon_diabetes: {
+      badge: "badge-yellow",
+      badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u7CD6\u5C3F\u75C5\u6027\u795E\u7D4C\u969C\u5BB3\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u7CD6\u5C3F\u75C5\u304C\u3042\u308B\u65B9\u306E\u8907\u8996\u306F\u3001\u9AD8\u8840\u7CD6\u306B\u3088\u308B\u773C\u7403\u904B\u52D5\u795E\u7D4C\u306E\u969C\u5BB3\uFF08\u7279\u306B\u5916\u8EE2\u795E\u7D4C\u9EBB\u75FA\uFF09\u304C\u539F\u56E0\u306E\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u30023\u301C6\u30F6\u6708\u3067\u81EA\u7136\u56DE\u5FA9\u3059\u308B\u3053\u3068\u304C\u591A\u3044\u3067\u3059\u304C\u3001\u8840\u7CD6\u30B3\u30F3\u30C8\u30ED\u30FC\u30EB\u304C\u91CD\u8981\u3067\u3059\u3002",
+      action: "<strong>\u304B\u304B\u308A\u3064\u3051\u306E\u5185\u79D1\u307E\u305F\u306F\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u8840\u7CD6\u7BA1\u7406\u306E\u898B\u76F4\u3057\u3068\u3001\u4ED6\u306E\u539F\u56E0\u306E\u9664\u5916\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      dept: "\u5185\u79D1 \u30FB \u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    soon_vascular: {
+      badge: "badge-yellow",
+      badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u8840\u7BA1\u6027\u306E\u795E\u7D4C\u969C\u5BB3\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u9AD8\u8840\u5727\u304C\u3042\u308B\u65B9\u3067\u5F90\u3005\u306B\u8907\u8996\u304C\u9032\u884C\u3057\u3066\u3044\u308B\u5834\u5408\u3001\u5FAE\u5C0F\u8840\u7BA1\u969C\u5BB3\u306B\u3088\u308B\u773C\u7403\u904B\u52D5\u795E\u7D4C\u9EBB\u75FA\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u982D\u90E8MRI\u3067\u306E\u8A55\u4FA1\u3068\u3001\u8840\u5727\u7BA1\u7406\u306E\u898B\u76F4\u3057\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    soon_gradual: {
+      badge: "badge-yellow",
+      badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u539F\u56E0\u306E\u7CBE\u67FB\u3092\u53D7\u3051\u307E\u3057\u3087\u3046",
+      desc: "\u5F90\u3005\u306B\u60AA\u5316\u3059\u308B\u4E21\u773C\u6027\u8907\u8996\u306F\u3001\u773C\u7403\u904B\u52D5\u795E\u7D4C\u306E\u969C\u5BB3\u3084\u7532\u72B6\u816A\u773C\u75C7\u30FB\u91CD\u75C7\u7B4B\u7121\u529B\u75C7\u306A\u3069\u3001\u3055\u307E\u3056\u307E\u306A\u539F\u56E0\u304C\u8003\u3048\u3089\u308C\u307E\u3059\u3002\u539F\u56E0\u306E\u7279\u5B9A\u304C\u6CBB\u7642\u306E\u7B2C\u4E00\u6B69\u3067\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u982D\u90E8MRI\u30FB\u8840\u6DB2\u691C\u67FB\u3067\u539F\u56E0\u3092\u7D5E\u308A\u8FBC\u307F\u307E\u3057\u3087\u3046\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    check_eye: {
+      badge: "badge-green",
+      badgeText: "\u307E\u305A\u773C\u79D1\u3067\u78BA\u8A8D\u3057\u307E\u3057\u3087\u3046",
+      title: "\u307E\u305A\u306F\u773C\u79D1\u3067\u8996\u529B\u30FB\u773C\u4F4D\u3092\u78BA\u8A8D\u3057\u307E\u3057\u3087\u3046",
+      desc: "\u7247\u76EE\u30C6\u30B9\u30C8\u306E\u7D50\u679C\u304C\u306F\u3063\u304D\u308A\u3057\u306A\u3044\u5834\u5408\u3001\u307E\u305A\u773C\u79D1\u3067\u8996\u529B\u30FB\u773C\u4F4D\u30FB\u773C\u7403\u904B\u52D5\u3092\u8A55\u4FA1\u3057\u3066\u3082\u3089\u3044\u307E\u3057\u3087\u3046\u3002\u5FC5\u8981\u306B\u5FDC\u3058\u3066\u8133\u795E\u7D4C\u5185\u79D1\u3078\u306E\u7D39\u4ECB\u3092\u53D7\u3051\u3089\u308C\u307E\u3059\u3002",
+      action: "<strong>\u773C\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u3001\u5358\u773C\u6027\u304B\u4E21\u773C\u6027\u304B\u3092\u78BA\u8A8D\u3057\u3066\u3082\u3089\u3044\u307E\u3057\u3087\u3046\u3002</strong>\u4E21\u773C\u6027\u306E\u5834\u5408\u306F\u8133\u795E\u7D4C\u5185\u79D1\u3078\u306E\u7D39\u4ECB\u3092\u6C42\u3081\u3066\u304F\u3060\u3055\u3044\u3002",
+      dept: "\u773C\u79D1 \u2192 \u5FC5\u8981\u306B\u5FDC\u3058\u3066\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    watch: {
+      badge: "badge-green",
+      badgeText: "\u69D8\u5B50\u3092\u898B\u3066\u3082\u5927\u4E08\u592B\u3067\u3059",
+      title: "\u4ECA\u306E\u3068\u3053\u308D\u7DCA\u6025\u6027\u306F\u4F4E\u305D\u3046\u3067\u3059",
+      desc: "\u7DCA\u6025\u306E\u5371\u967A\u30B5\u30A4\u30F3\u306F\u898B\u3089\u308C\u307E\u305B\u3093\u3002\u75B2\u52B4\u3084\u30C9\u30E9\u30A4\u30A2\u30A4\u306B\u3088\u308B\u4E00\u6642\u7684\u306A\u75C7\u72B6\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u305F\u3060\u3057\u3001\u75C7\u72B6\u304C\u7D9A\u304F\u5834\u5408\u3084\u60AA\u5316\u3059\u308B\u5834\u5408\u306F\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002",
+      action: "<strong>\u5341\u5206\u306A\u4F11\u606F\u3092\u53D6\u308A\u307E\u3057\u3087\u3046\u3002</strong>\u75C7\u72B6\u304C\u7E70\u308A\u8FD4\u3059\u3001\u60AA\u5316\u3059\u308B\u3001\u65B0\u305F\u306A\u75C7\u72B6\u304C\u52A0\u308F\u3063\u305F\u5834\u5408\u306F\u773C\u79D1\u307E\u305F\u306F\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002",
+      dept: "\u60AA\u5316\u3057\u305F\u5834\u5408\uFF1A\u773C\u79D1 \u30FB \u8133\u795E\u7D4C\u5185\u79D1"
+    }
+  };
+
+  var d = data[urgency];
+  var html = '<div class="result-card">';
+  html += '<span class="result-badge ' + d.badge + '">' + d.badgeText + '</span>';
+  html += '<h2 class="result-title">' + d.title + '</h2>';
+  html += '<p class="result-desc">' + d.desc + '</p>';
+  html += '<div class="result-action">' + d.action + '</div>';
+  html += '<div class="result-action"><strong>' + "\u63A8\u5968\u8A3A\u7642\u79D1\uFF1A" + '</strong>' + d.dept + '</div>';
+
+  html += '<div class="result-note">';
+  html += '<strong>' + "\u3042\u306A\u305F\u306E\u56DE\u7B54\uFF1A" + '</strong><br>';
+  html += "\u7247\u76EE\u30C6\u30B9\u30C8\uFF1A" + getLabelFor("cover_test", answers.cover_test) + '<br>';
+  html += "\u767A\u75C7\u6642\u671F\uFF1A" + getLabelFor("onset", answers.onset) + '<br>';
+  html += "\u5371\u967A\u306A\u30B5\u30A4\u30F3\uFF1A" + getLabelFor("red_flags", answers.red_flags) + '<br>';
+  html += "\u4ED8\u968F\u75C7\u72B6\uFF1A" + getLabelFor("associated", answers.associated) + '<br>';
+  html += "\u4E8C\u91CD\u304C\u5F37\u3044\u65B9\u5411\uFF1A" + getLabelFor("direction", answers.direction) + '<br>';
+  html += "\u65E2\u5F80\u6B74\uFF1A" + getLabelFor("history", answers.history);
+  html += '<br><br>' + "\u203B \u3053\u306E\u30C1\u30A7\u30C3\u30AF\u7D50\u679C\u3092\u5370\u5237\u3057\u3066\u53D7\u8A3A\u6642\u306B\u304A\u6301\u3061\u3044\u305F\u3060\u304F\u3068\u3001\u533B\u5E2B\u3078\u306E\u8AAC\u660E\u304C\u30B9\u30E0\u30FC\u30BA\u3067\u3059\u3002";
+  html += '</div>';
+  html += '</div>';
+
+  html += '<button class="restart-btn" onclick="restart()">' + "\u3082\u3046\u4E00\u5EA6\u30C1\u30A7\u30C3\u30AF\u3059\u308B" + '</button>';
+
+  return html;
+}
+
+function getLabelFor(qId, optId) {
+  for (var i = 0; i < questions.length; i++) {
+    if (questions[i].id === qId) {
+      for (var j = 0; j < questions[i].options.length; j++) {
+        if (questions[i].options[j].id === optId) {
+          return questions[i].options[j].label;
+        }
+      }
+    }
+  }
+  return "";
+}
+
+function restart() {
+  currentStep = 0;
+  answers = {};
+  document.getElementById("resultArea").classList.add("hidden");
+  document.getElementById("resultArea").innerHTML = "";
+  document.getElementById("questionArea").classList.remove("hidden");
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+renderQuestion();
+</script>
+
+</body>
+</html>
