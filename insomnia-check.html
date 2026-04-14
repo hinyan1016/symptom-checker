@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>不眠セルフチェック ― その症状、大丈夫？</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif; background: #f0f4f8; color: #333; line-height: 1.6; min-height: 100vh; }
+.app-header { background: linear-gradient(135deg, #1B3A5C, #2C5AA0); color: #fff; padding: 16px 20px; text-align: center; }
+.app-header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+.app-header .series { font-size: 0.8rem; opacity: 0.8; }
+.disclaimer { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin: 12px 16px; border-radius: 4px; font-size: 0.85rem; color: #856404; }
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+.step-card { background: #fff; border-radius: 12px; padding: 20px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.step-number { display: inline-block; background: #2C5AA0; color: #fff; font-size: 0.8rem; padding: 2px 10px; border-radius: 12px; margin-bottom: 8px; }
+.step-card h2 { font-size: 1.1rem; color: #1B3A5C; margin-bottom: 12px; }
+.step-card p { font-size: 0.95rem; color: #555; margin-bottom: 12px; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn { display: block; width: 100%; padding: 14px 16px; border: 2px solid #dee2e6; border-radius: 8px; background: #fff; font-size: 1rem; font-family: inherit; color: #333; text-align: left; cursor: pointer; transition: all 0.2s; }
+.option-btn:hover { border-color: #2C5AA0; background: #f0f6ff; }
+.option-btn.selected { border-color: #2C5AA0; background: #e8f4fd; color: #1B3A5C; font-weight: bold; }
+.hidden { display: none; }
+.result-card { background: #fff; border-radius: 12px; padding: 24px 20px; margin: 16px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+.result-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; }
+.badge-red { background: #f8d7da; color: #c0392b; }
+.badge-yellow { background: #fff3cd; color: #856404; }
+.badge-green { background: #d4edda; color: #155724; }
+.result-title { font-size: 1.2rem; color: #1B3A5C; margin-bottom: 8px; }
+.result-desc { font-size: 0.95rem; color: #555; margin-bottom: 16px; }
+.result-action { background: #f8f9fa; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; }
+.result-action strong { color: #2C5AA0; }
+.result-note { font-size: 0.85rem; color: #888; border-top: 1px solid #eee; padding-top: 12px; margin-top: 12px; }
+.restart-btn { display: block; width: 100%; padding: 14px; background: #2C5AA0; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-family: inherit; cursor: pointer; margin-top: 12px; }
+.restart-btn:hover { background: #1B3A5C; }
+.progress-bar { height: 4px; background: #dee2e6; margin: 0 16px; border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: #2C5AA0; transition: width 0.3s; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div class="series">\u305D\u306E\u75C7\u72B6\u3001\u5927\u4E08\u592B\uFF1F #15</div>
+  <h1>\u4E0D\u7720\u30BB\u30EB\u30D5\u30C1\u30A7\u30C3\u30AF</h1>
+</div>
+<div class="disclaimer">\u3053\u306E\u30C4\u30FC\u30EB\u306F\u533B\u7642\u884C\u70BA\u3067\u306F\u3042\u308A\u307E\u305B\u3093\u3002\u7D50\u679C\u306F\u53C2\u8003\u60C5\u5831\u3067\u3042\u308A\u3001\u8A3A\u65AD\u306B\u4EE3\u308F\u308B\u3082\u306E\u3067\u306F\u3042\u308A\u307E\u305B\u3093\u3002\u5FC3\u914D\u306A\u5834\u5408\u306F\u5FC5\u305A\u533B\u5E2B\u306B\u3054\u76F8\u8AC7\u304F\u3060\u3055\u3044\u3002</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="container">
+  <div id="questionArea"></div>
+  <div id="resultArea" class="hidden"></div>
+</div>
+<script>
+var questions = [
+  {
+    id: "type",
+    title: "\u4E0D\u7720\u306E\u30BF\u30A4\u30D7\u306F\u3069\u308C\u306B\u8A72\u5F53\u3057\u307E\u3059\u304B\uFF1F",
+    subtitle: "\u6700\u3082\u5F53\u3066\u306F\u307E\u308B\u3082\u306E\u3092\u9078\u3093\u3067\u304F\u3060\u3055\u3044",
+    options: [
+      { id: "sleep_onset", label: "\u5BC5\u306B\u5165\u308C\u306A\u3044\uFF08\u5165\u7720\u969C\u5BB3\uFF09" },
+      { id: "maintenance", label: "\u591C\u4E2D\u306B\u4F55\u5EA6\u3082\u76EE\u304C\u899A\u3081\u308B\uFF08\u4E2D\u9014\u899A\u9192\uFF09" },
+      { id: "early_waking", label: "\u65E9\u671D\u65E9\u304F\u76EE\u304C\u899A\u3081\u3066\u3057\u307E\u3046\uFF08\u65E9\u671D\u899A\u9192\uFF09" },
+      { id: "unrefreshing", label: "\u5BC5\u3066\u3044\u308B\u306E\u306B\u7720\u308C\u305F\u6C17\u304C\u3057\u306A\u3044\uFF08\u719F\u7720\u969C\u5BB3\uFF09" }
+    ]
+  },
+  {
+    id: "duration",
+    title: "\u4E0D\u7720\u306F\u3069\u306E\u304F\u3089\u3044\u7D9A\u3044\u3066\u3044\u307E\u3059\u304B\uFF1F",
+    subtitle: "",
+    options: [
+      { id: "under2w", label: "2\u9031\u9593\u672A\u6E80\uFF08\u6700\u8FD1\u59CB\u307E\u3063\u305F\uFF09" },
+      { id: "2w_1m", label: "2\u9031\u9593\u301C1\u304B\u6708\u7A0B\u5EA6" },
+      { id: "over1m", label: "1\u304B\u6708\u4EE5\u4E0A\u7D9A\u3044\u3066\u3044\u308B" },
+      { id: "over3m", label: "3\u304B\u6708\u4EE5\u4E0A\u9577\u671F\u9593\u7D9A\u3044\u3066\u3044\u308B" }
+    ]
+  },
+  {
+    id: "daytime",
+    title: "\u65FC\u9593\u306E\u72B6\u614B\u306F\u3069\u3046\u3067\u3059\u304B\uFF1F",
+    subtitle: "",
+    options: [
+      { id: "accident_risk", label: "\u904B\u8EE2\u4E2D\u3084\u4F5C\u696D\u4E2D\u306B\u5C45\u7720\u308A\u3057\u305D\u3046\u306B\u306A\u308B\uFF08\u4E8B\u6545\u3092\u8D77\u3053\u3057\u305D\u3046\uFF09" },
+      { id: "daily_impaired", label: "\u4ED5\u4E8B\u30FB\u5B66\u696D\u30FB\u65E5\u5E38\u751F\u6D3B\u306B\u652F\u969C\u304C\u3042\u308B" },
+      { id: "tired", label: "\u75B2\u308C\u3084\u6BC5\u8FFD\u3044\u304C\u3042\u308B\u304C\u306A\u3093\u3068\u304B\u3084\u308C\u3066\u3044\u308B" },
+      { id: "ok", label: "\u65FC\u9593\u306F\u7279\u306B\u554F\u984C\u306A\u3044" }
+    ]
+  },
+  {
+    id: "accompanying",
+    title: "\u4E0D\u7720\u306B\u4F34\u3063\u3066\u6C17\u306B\u306A\u308B\u3053\u3068\u306F\u3042\u308A\u307E\u3059\u304B\uFF1F",
+    subtitle: "\u6700\u3082\u5F53\u3066\u306F\u307E\u308B\u3082\u306E\u3092\u9078\u3093\u3067\u304F\u3060\u3055\u3044",
+    options: [
+      { id: "depression_suicidal", label: "\u6B7B\u306B\u305F\u3044\u3001\u6D88\u3048\u305F\u3044\u3068\u3044\u3046\u6C17\u6301\u3061\u304C\u3042\u308B" },
+      { id: "depression_only", label: "\u6C17\u5206\u304C\u6C88\u307F\u3001\u4F55\u3082\u697D\u3057\u3081\u306A\u3044\u72B6\u614B\u304C\u7D9A\u304F" },
+      { id: "rem_behavior", label: "\u7720\u308A\u4E2D\u306B\u305F\u305F\u304D\u6253\u3063\u305F\u308A\u3001\u5922\u306E\u5185\u5BB9\u3092\u6F14\u3058\u3066\u3057\u307E\u3046" },
+      { id: "snoring_apnea", label: "\u3044\u3073\u304D\u3084\u7720\u4E2D\u306E\u547C\u5438\u505C\u6B62\u3092\u6307\u6458\u3055\u308C\u305F\u3053\u3068\u304C\u3042\u308B" },
+      { id: "none", label: "\u7279\u306B\u4F34\u3046\u75C7\u72B6\u306F\u306A\u3044" }
+    ]
+  },
+  {
+    id: "habits",
+    title: "\u7761\u7720\u306B\u95A2\u3059\u308B\u7FD2\u6163\u3067\u5F53\u3066\u306F\u307E\u308B\u3082\u306E\u306F\uFF1F",
+    subtitle: "\u6700\u3082\u5F53\u3066\u306F\u307E\u308B\u3082\u306E\u3092\u9078\u3093\u3067\u304F\u3060\u3055\u3044",
+    options: [
+      { id: "caffeine_alcohol", label: "\u5C31\u5C3D\u524D\u306B\u30AB\u30D5\u30A7\u30A4\u30F3\u3084\u30A2\u30EB\u30B3\u30FC\u30EB\u3092\u6442\u53D6\u3059\u308B\u3053\u3068\u304C\u591A\u3044" },
+      { id: "screen", label: "\u5C31\u5C3D\u524D1\u6642\u9593\u4EE5\u5185\u307E\u3067\u30B9\u30DE\u30DB\u3084\u30D1\u30BD\u30B3\u30F3\u3092\u4F7F\u3063\u3066\u3044\u308B" },
+      { id: "irregular", label: "\u8D77\u5E8F\u6642\u523B\u304C\u65E5\u3054\u3068\u5927\u304D\u304F\u305A\u308C\u308B" },
+      { id: "none", label: "\u7279\u306B\u601D\u3044\u5F53\u305F\u3089\u306A\u3044" }
+    ]
+  },
+  {
+    id: "medication",
+    title: "\u85AC\u5264\u30FB\u7269\u8CEA\u306E\u4F7F\u7528\u306F\u3042\u308A\u307E\u3059\u304B\uFF1F",
+    subtitle: "",
+    options: [
+      { id: "sleeping_pill", label: "\u7761\u7720\u85AC\u3084\u6297\u4E0D\u5B89\u85AC\u3092\u73FE\u5728\u5C31\u7528\u4E2D\u3060\u304C\u6548\u304B\u306A\u304F\u306A\u3063\u3066\u304D\u305F" },
+      { id: "self_medication", label: "\u5E02\u8CA9\u306E\u7761\u7720\u6539\u5584\u8584\u3084\u30B5\u30D7\u30EA\u3092\u81EA\u5206\u3067\u8D77\u3063\u3066\u304D\u305F" },
+      { id: "steroid_other", label: "\u30B9\u30C6\u30ED\u30A4\u30C9\u30FB\u6297\u3052\u3093\u8584\u30FB\u6295\u3073\u8584\u306A\u3069\u3092\u5C55\u5F00\u4E2D" },
+      { id: "none", label: "\u7279\u306B\u306A\u3044" }
+    ]
+  }
+];
+
+var currentStep = 0;
+var answers = {};
+
+function renderQuestion() {
+  var area = document.getElementById("questionArea");
+  var q = questions[currentStep];
+  var pct = Math.round((currentStep / questions.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+  var html = '<div class="step-card">';
+  html += '<span class="step-number">' + "\u8CEA\u554F " + (currentStep + 1) + " / " + questions.length + '</span>';
+  html += '<h2>' + q.title + '</h2>';
+  if (q.subtitle) { html += '<p>' + q.subtitle + '</p>'; }
+  html += '<div class="options">';
+  for (var i = 0; i < q.options.length; i++) {
+    var opt = q.options[i];
+    html += '<button class="option-btn" onclick="selectAnswer(\'' + q.id + '\',\'' + opt.id + '\')">' + opt.label + '</button>';
+  }
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+
+function selectAnswer(qId, optId) {
+  answers[qId] = optId;
+  currentStep++;
+  if (currentStep < questions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById("questionArea").classList.add("hidden");
+  document.getElementById("progressFill").style.width = "100%";
+  var urgency = calcUrgency();
+  var resultArea = document.getElementById("resultArea");
+  resultArea.classList.remove("hidden");
+  resultArea.innerHTML = buildResultHTML(urgency);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function calcUrgency() {
+  // RED: suicidal ideation
+  if (answers.accompanying === "depression_suicidal") { return "emergency_suicidal"; }
+  // RED: near-accident due to daytime sleepiness
+  if (answers.daytime === "accident_risk") { return "emergency_accident"; }
+  // YELLOW: REM sleep behavior disorder signs
+  if (answers.accompanying === "rem_behavior") { return "urgent_rem"; }
+  // YELLOW: sleep apnea signs
+  if (answers.accompanying === "snoring_apnea") { return "urgent_apnea"; }
+  // YELLOW: chronic insomnia (over 1 month) with daily impairment
+  if ((answers.duration === "over1m" || answers.duration === "over3m") && answers.daytime === "daily_impaired") { return "urgent_chronic"; }
+  // YELLOW: sleeping pill no longer effective
+  if (answers.medication === "sleeping_pill") { return "urgent_medication"; }
+  // YELLOW: depression without suicidal ideation, lasting insomnia
+  if (answers.accompanying === "depression_only" && (answers.duration === "over1m" || answers.duration === "over3m")) { return "urgent_depression"; }
+  // GREEN: lifestyle-related
+  if (answers.habits === "caffeine_alcohol" || answers.habits === "screen" || answers.habits === "irregular") { return "watch_lifestyle"; }
+  // GREEN: short duration / manageable
+  return "watch_ok";
+}
+
+function buildResultHTML(urgency) {
+  var data = {
+    emergency_suicidal: {
+      badge: "badge-red", badgeText: "\u4ECA\u3059\u3050\u76F8\u8AC7\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u3053\u307E\u308C\u305F\u6C17\u6301\u3061\u304C\u3042\u308B\u3068\u304D\u306F\u4E00\u4EBA\u3067\u6291\u3048\u8FBC\u307E\u306A\u3044\u3067\u304F\u3060\u3055\u3044",
+      desc: "\u6B7B\u3084\u6D88\u3048\u3066\u3057\u307E\u3044\u305F\u3044\u3068\u3044\u3046\u6C17\u6301\u3061\u306F\u3001\u3053\u308C\u4EE5\u4E0A\u306A\u3044\u82E6\u3057\u307F\u306E\u30B5\u30A4\u30F3\u3067\u3059\u3002\u4E0D\u7720\u3068\u3046\u3064\u306F\u92B7\u306B\u5408\u5CA1\u3057\u3084\u3059\u304F\u3001\u4E00\u5EA6\u8AA4\u308C\u305F\u9054\u6210\u3092\u8457\u3051\u308B\u3053\u3068\u306F\u3042\u308A\u307E\u305B\u3093\u3002\u304A\u5B08\u3057\u306E\u65B9\u3084\u30D7\u30ED\u306B\u5FC5\u305A\u8A71\u3057\u3066\u304F\u3060\u3055\u3044\u3002",
+      action: "<strong>\u3044\u306E\u3061\u306E\u96FB\u8A71\u76F8\u8AC7\u7A93\u53E3\uFF1A0120-783-556\uFF08\u7121\u6599\u30FB24\u6642\u9593\uFF09</strong><br>\u307E\u305F\u306F\u5FC3\u8108\u5167\u79D1\u30FB\u7CBE\u795E\u79D1\u3092\u65E9\u3081\u306B\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002",
+      dept: "\u7CBE\u795E\u79D1\u30FB\u5FC3\u7642\u5185\u79D1"
+    },
+    emergency_accident: {
+      badge: "badge-red", badgeText: "\u8CAB\u4EFB\u304C\u3042\u308A\u307E\u3059",
+      title: "\u904B\u8EE2\u4E2D\u30FB\u4F5C\u696D\u4E2D\u306E\u5C45\u7720\u308A\u306F\u91CD\u5927\u306A\u30EA\u30B9\u30AF\u3067\u3059",
+      desc: "\u5C45\u7720\u308A\u306B\u3088\u308B\u4E8B\u6545\u30EA\u30B9\u30AF\u304C\u3042\u308B\u72B6\u614B\u3067\u306F\u3001\u904B\u8EE2\u3084\u5371\u967A\u4F5C\u696D\u3092\u4E00\u6642\u4E2D\u6B62\u3059\u308B\u3053\u3068\u304C\u5FC5\u8981\u3067\u3059\u3002\u7761\u7720\u6642\u7121\u547C\u5438\u75C7\u5019\u7FA4\uFF08\u7761\u7720\u6642\u7121\u547C\u5438\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002",
+      action: "<strong>\u9054\u304D\u6B21\u7B2C\u65E9\u3081\u306B\u7761\u7720\u5916\u6765\u307E\u305F\u306F\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u7761\u7720\u6642\u7121\u547C\u5438\u306E\u7CBE\u67FB\uFF08\u7761\u7720\u691C\u67FB\uFF09\u304C\u53EF\u80FD\u3067\u3059\u3002",
+      dept: "\u7761\u7720\u5916\u6765\u30FB\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    urgent_rem: {
+      badge: "badge-yellow", badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "REM\u7761\u7720\u884C\u52D5\u969C\u5BB3\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u7720\u308A\u4E2D\u306B\u5922\u306E\u5185\u5BB9\u3092\u6F14\u3058\u3066\u3057\u307E\u3046\uFF08\u305F\u305F\u304D\u6253\u3064\u30FB\u5C55\u8133\u308C\u308B\uFF09\u5834\u5408\u3001REM\u7761\u7720\u884C\u52D5\u969C\u5BB3\u3068\u3044\u3046\u75C5\u614B\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u30D1\u30FC\u30AD\u30F3\u30BD\u30F3\u75C5\u306A\u3069\u795E\u7D4C\u5909\u6027\u75BE\u6C07\u306E\u524D\u99C6\u75C7\u3068\u306A\u308B\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\u307E\u305F\u306F\u7761\u7720\u5916\u6765\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u7761\u7720\u691C\u67FB\uFF08PSG\uFF09\u306B\u3088\u308B\u8A3A\u65AD\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1\u30FB\u7761\u7720\u5916\u6765"
+    },
+    urgent_apnea: {
+      badge: "badge-yellow", badgeText: "\u53D7\u8A3A\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059",
+      title: "\u7761\u7720\u6642\u7121\u547C\u5438\u75C7\u5019\u7FA4\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u3044\u3073\u304D\u3084\u5C31\u5C3D\u4E2D\u306E\u547C\u5438\u505C\u6B62\u306F\u7761\u7720\u6642\u7121\u547C\u5438\u75C7\u5019\u7FA4\uFF08SAS\uFF09\u306E\u5178\u578B\u7684\u306A\u30B5\u30A4\u30F3\u3067\u3059\u3002\u65E5\u4E2D\u306E\u5C45\u7720\u308A\u3084\u5BCC\u8840\u7BA1\u75BE\u6C07\uFF08\u9AD8\u8840\u5727\u30FB\u5FC3\u623F\u7D30\u52D5\uFF09\u306E\u30EA\u30B9\u30AF\u3092\u9AD8\u3081\u307E\u3059\u3002",
+      action: "<strong>\u7761\u7720\u5916\u6765\u307E\u305F\u306F\u8033\u9F3B\u54BD\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u7C3D\u5546\u578B\u30A2\u30A2\u30EC\u30D3\u30E5\u30FC\u7B49\u306E\u7B80\u6613\u691C\u67FB\u3067\u8A3A\u65AD\u3067\u304D\u307E\u3059\u3002",
+      dept: "\u7761\u7720\u5916\u6765\u30FB\u8033\u9F3B\u54BD\u79D1\u30FB\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    urgent_chronic: {
+      badge: "badge-yellow", badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "1\u304B\u6708\u4EE5\u4E0A\u7D9A\u304F\u4E0D\u7720\u306F\u6CBB\u7642\u304C\u5FC5\u8981\u3067\u3059",
+      desc: "1\u304B\u6708\u4EE5\u4E0A\u306E\u6162\u6027\u4E0D\u7720\u306F\u3001\u4E0D\u7720\u75C7\u306E\u8A3A\u65AD\u57FA\u6E96\u3092\u6E80\u305F\u3057\u3066\u3044\u307E\u3059\u3002\u8EFD\u7720\u8584\u3088\u308A\u8A8D\u77E5\u884C\u52D5\u7642\u6CD5\uFF08CBT-I\uFF09\u3084\u9069\u5207\u306A\u85AC\u7269\u7642\u6CD5\u304C\u52B9\u679C\u7684\u3067\u3059\u3002",
+      action: "<strong>\u7761\u7720\u5916\u6765\u307E\u305F\u306F\u5FC3\u7642\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u6211\u6162\u3057\u305A\u306B\u76F8\u8AC7\u3057\u307E\u3057\u3087\u3046\u3002",
+      dept: "\u7761\u7720\u5916\u6765\u30FB\u5FC3\u7642\u5185\u79D1\u30FB\u7CBE\u795E\u79D1"
+    },
+    urgent_medication: {
+      badge: "badge-yellow", badgeText: "\u53D7\u8A3A\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059",
+      title: "\u7761\u7720\u85AC\u306E\u898B\u76F4\u3057\u304C\u5FC5\u8981\u304B\u3082\u3057\u308C\u307E\u305B\u3093",
+      desc: "\u73FE\u5728\u306E\u7761\u7720\u85AC\u304C\u52B9\u304B\u306A\u304F\u306A\u3063\u3066\u304D\u305F\u5834\u5408\u3001\u8A72\u5F53\u85AC\u306E\u5909\u66F4\u3084CBT-I\u3078\u306E\u5909\u66F4\u304C\u52B9\u679C\u7684\u306A\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u3002\u81EA\u5206\u3067\u589E\u91CF\u306F\u305B\u305A\u3001\u51E6\u65B9\u306E\u5148\u751F\u306B\u5FC5\u305A\u76F8\u8AC7\u3057\u3066\u304F\u3060\u3055\u3044\u3002",
+      action: "<strong>\u51E6\u65B9\u3057\u3066\u3044\u308B\u533B\u5E2B\u307E\u305F\u306F\u7761\u7720\u5916\u6765\u306B\u76F8\u8AC7\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>",
+      dept: "\u7761\u7720\u5916\u6765\u30FB\u5FC3\u7642\u5185\u79D1\u30FB\u7CBE\u795E\u79D1"
+    },
+    urgent_depression: {
+      badge: "badge-yellow", badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u3046\u3064\u304C\u4E0D\u7720\u306E\u80CC\u666F\u306B\u3042\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u4E0D\u7720\u3068\u6C17\u5206\u306E\u6C88\u307F\u304C\u91CD\u306A\u308B\u5834\u5408\u3001\u3046\u3064\u75C5\u3084\u4E0D\u5B89\u969C\u5BB3\u306A\u3069\u304C\u4E0D\u7720\u306E\u539F\u56E0\u3068\u306A\u3063\u3066\u3044\u308B\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u3002\u8996\u70B9\u3092\u5909\u3048\u305F\u9069\u5207\u306A\u6CBB\u7642\u304C\u6709\u52B9\u3067\u3059\u3002",
+      action: "<strong>\u5FC3\u7642\u5185\u79D1\u307E\u305F\u306F\u7CBE\u795E\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u6C17\u5206\u3068\u7761\u7720\u3092\u4E00\u5EA6\u306B\u8A3A\u3066\u3082\u3089\u3048\u307E\u3059\u3002",
+      dept: "\u7CBE\u795E\u79D1\u30FB\u5FC3\u7642\u5185\u79D1"
+    },
+    watch_lifestyle: {
+      badge: "badge-green", badgeText: "\u69D8\u5B50\u3092\u898B\u3066\u3082\u5927\u4E08\u592B\u3067\u3059",
+      title: "\u751F\u6D3B\u7FD2\u6163\u306E\u898B\u76F4\u3057\u3067\u6539\u5584\u304C\u671F\u5F85\u3067\u304D\u307E\u3059",
+      desc: "\u30AB\u30D5\u30A7\u30A4\u30F3\u30FB\u30A2\u30EB\u30B3\u30FC\u30EB\u30FB\u30B9\u30AF\u30EA\u30FC\u30F3\u30FB\u4E0D\u898F\u5247\u306A\u751F\u6D3B\u30EA\u30BA\u30E0\u306F\u4E0D\u7720\u306E\u4E3B\u306A\u539F\u56E0\u3067\u3059\u3002\u30B9\u30EA\u30FC\u30D7\u30CF\u30A4\u30B8\u30FC\u30F3\u3092\u8A0E\u308B\u3053\u3068\u3067\u539F\u5B9A\u3067\u5927\u5E45\u306B\u6539\u5584\u3059\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002",
+      action: "<strong>\u5C31\u5C3D2\u6642\u9593\u524D\u307E\u3067\u30AB\u30D5\u30A7\u30A4\u30F3\u30FB\u30A2\u30EB\u30B3\u30FC\u30EB\u3092\u907F\u3051\u3001\u30B9\u30DE\u30DB\u306F\u5C31\u5C3D\u524D\u306B\u30D6\u30EB\u30FC\u30E9\u30A4\u30C8\u30AB\u30C3\u30C8\u3002\u6BCE\u65E5\u540C\u3058\u6642\u523B\u306B\u8D77\u5E8F\u5E8A\u3059\u308B\u3053\u3068\u304C\u57FA\u672C\u3067\u3059\u3002</strong>",
+      dept: "\u6539\u5584\u306A\u3051\u308C\u3070\uFF1A\u7761\u7720\u5916\u6765\u30FB\u5FC3\u7642\u5185\u79D1"
+    },
+    watch_ok: {
+      badge: "badge-green", badgeText: "\u69D8\u5B50\u3092\u898B\u3066\u3082\u5927\u4E08\u592B\u3067\u3059",
+      title: "\u4E00\u6642\u7684\u306A\u4E0D\u7720\u306E\u53EF\u80FD\u6027\u304C\u9AD8\u3044\u3067\u3059",
+      desc: "\u30B9\u30C8\u30EC\u30B9\u3084\u74B0\u5883\u5909\u5316\u306B\u3088\u308B\u4E00\u6642\u7684\u306A\u4E0D\u7720\u3067\u3001\u76EE\u7ACB\u3063\u305F\u5371\u967A\u306A\u30B5\u30A4\u30F3\u306F\u898B\u3089\u308C\u307E\u305B\u3093\u3002\u7121\u7406\u306B\u5BC5\u3088\u3046\u3068\u3057\u306A\u3044\u3053\u3068\u3001\u304A\u3075\u3068\u3093\u306E\u5165\u5C3D\u307E\u3067\u306E\u5C45\u5834\u3067\u30EA\u30E9\u30C3\u30AF\u30B9\u3059\u308B\u3053\u3068\u304C\u6700\u5145\u5206\u306A\u5BFE\u51E6\u3067\u3059\u3002",
+      action: "<strong>2\u9031\u9593\u4EE5\u4E0A\u6539\u5584\u3057\u306A\u3044\u5834\u5408\u306F\u7761\u7720\u5916\u6765\u307E\u305F\u306F\u5FC3\u7642\u5185\u79D1\u3078\u3002</strong>",
+      dept: "\u60AA\u5316\u6642\uFF1A\u7761\u7720\u5916\u6765\u30FB\u5FC3\u7642\u5185\u79D1"
+    }
+  };
+
+  var d = data[urgency];
+  var html = '<div class="result-card">';
+  html += '<span class="result-badge ' + d.badge + '">' + d.badgeText + '</span>';
+  html += '<h2 class="result-title">' + d.title + '</h2>';
+  html += '<p class="result-desc">' + d.desc + '</p>';
+  html += '<div class="result-action">' + d.action + '</div>';
+  html += '<div class="result-action"><strong>\u63A8\u5968\u8A3A\u7642\u79D1\uFF1A</strong>' + d.dept + '</div>';
+  html += '<div class="result-note">';
+  html += '<strong>\u3042\u306A\u305F\u306E\u56DE\u7B54\uFF1A</strong><br>';
+  html += "\u4E0D\u7720\u306E\u30BF\u30A4\u30D7\uFF1A" + getLabelFor("type", answers.type) + '<br>';
+  html += "\u6301\u7D9A\u671F\u9593\uFF1A" + getLabelFor("duration", answers.duration) + '<br>';
+  html += "\u65FC\u9593\u306E\u72B6\u614B\uFF1A" + getLabelFor("daytime", answers.daytime) + '<br>';
+  html += "\u4F34\u3046\u75C7\u72B6\uFF1A" + getLabelFor("accompanying", answers.accompanying) + '<br>';
+  html += "\u751F\u6D3B\u7FD2\u6163\uFF1A" + getLabelFor("habits", answers.habits) + '<br>';
+  html += "\u85AC\u5264\u30FB\u7269\u8CEA\uFF1A" + getLabelFor("medication", answers.medication);
+  html += '</div></div>';
+  html += '<button class="restart-btn" onclick="restart()">\u3082\u3046\u4E00\u5EA6\u30C1\u30A7\u30C3\u30AF\u3059\u308B</button>';
+  return html;
+}
+
+function getLabelFor(qId, optId) {
+  for (var i = 0; i < questions.length; i++) {
+    if (questions[i].id === qId) {
+      for (var j = 0; j < questions[i].options.length; j++) {
+        if (questions[i].options[j].id === optId) { return questions[i].options[j].label; }
+      }
+    }
+  }
+  return "";
+}
+
+function restart() {
+  currentStep = 0; answers = {};
+  document.getElementById("resultArea").classList.add("hidden");
+  document.getElementById("resultArea").innerHTML = "";
+  document.getElementById("questionArea").classList.remove("hidden");
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+renderQuestion();
+</script>
+</body>
+</html>

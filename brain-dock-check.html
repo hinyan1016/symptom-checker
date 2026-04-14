@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>脳ドック受診チェック ― その症状、大丈夫？</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif; background: #f0f4f8; color: #333; line-height: 1.6; min-height: 100vh; }
+.app-header { background: linear-gradient(135deg, #1B3A5C, #2C5AA0); color: #fff; padding: 16px 20px; text-align: center; }
+.app-header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+.app-header .series { font-size: 0.8rem; opacity: 0.8; }
+.disclaimer { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin: 12px 16px; border-radius: 4px; font-size: 0.85rem; color: #856404; }
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+.step-card { background: #fff; border-radius: 12px; padding: 20px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.step-number { display: inline-block; background: #2C5AA0; color: #fff; font-size: 0.8rem; padding: 2px 10px; border-radius: 12px; margin-bottom: 8px; }
+.step-card h2 { font-size: 1.1rem; color: #1B3A5C; margin-bottom: 12px; }
+.step-card p { font-size: 0.95rem; color: #555; margin-bottom: 12px; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn { display: block; width: 100%; padding: 14px 16px; border: 2px solid #dee2e6; border-radius: 8px; background: #fff; font-size: 1rem; font-family: inherit; color: #333; text-align: left; cursor: pointer; transition: all 0.2s; }
+.option-btn:hover { border-color: #2C5AA0; background: #f0f6ff; }
+.option-btn.selected { border-color: #2C5AA0; background: #e8f4fd; color: #1B3A5C; font-weight: bold; }
+.hidden { display: none; }
+.result-card { background: #fff; border-radius: 12px; padding: 24px 20px; margin: 16px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+.result-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; }
+.badge-red { background: #f8d7da; color: #c0392b; }
+.badge-yellow { background: #fff3cd; color: #856404; }
+.badge-green { background: #d4edda; color: #155724; }
+.result-title { font-size: 1.2rem; color: #1B3A5C; margin-bottom: 8px; }
+.result-desc { font-size: 0.95rem; color: #555; margin-bottom: 16px; }
+.result-action { background: #f8f9fa; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; }
+.result-action strong { color: #2C5AA0; }
+.result-note { font-size: 0.85rem; color: #888; border-top: 1px solid #eee; padding-top: 12px; margin-top: 12px; }
+.restart-btn { display: block; width: 100%; padding: 14px; background: #2C5AA0; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-family: inherit; cursor: pointer; margin-top: 12px; }
+.restart-btn:hover { background: #1B3A5C; }
+.progress-bar { height: 4px; background: #dee2e6; margin: 0 16px; border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: #2C5AA0; transition: width 0.3s; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div class="series">その症状、大丈夫？ #20</div>
+  <h1>脳ドック受診チェック</h1>
+</div>
+<div class="disclaimer">このツールは脳ドックの受診を考えるための参考ツールです。医療行為ではありません。現在症状がある場合は、脳ドックではなく通常の受診をお勧めします。</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="container">
+  <div id="questionArea"></div>
+  <div id="resultArea" class="hidden"></div>
+</div>
+<script>
+var questions = [
+  {
+    id: "age",
+    title: "現在の年齢はおよそ何歳ですか？",
+    subtitle: "",
+    options: [
+      { id: "under40", label: "40歳未満" },
+      { id: "40to49", label: "40〜49歳" },
+      { id: "50to59", label: "50〜59歳" },
+      { id: "over60", label: "60歳以上" }
+    ]
+  },
+  {
+    id: "family_history",
+    title: "ご家族（親・兄弟姉妹）に脳卒中・脳動脈瘤の方はいますか？",
+    subtitle: "脳梗塞・脳出血・くも膜下出血・脳動脈瘤を含む",
+    options: [
+      { id: "no_history", label: "いない・わからない" },
+      { id: "distant_history", label: "祖父母・いとこなどに脳卒中の方がいる" },
+      { id: "close_history", label: "親または兄弟姉妹が脳卒中になったことがある" },
+      { id: "aneurysm_history", label: "親または兄弟姉妹に脳動脈瘤がある・あった" }
+    ]
+  },
+  {
+    id: "risk_factors",
+    title: "次のリスク因子はありますか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "none_risk", label: "高血圧・糖尿病・脂質異常・喫煙はいずれもない" },
+      { id: "one_risk", label: "上記のうち1つに当てはまる" },
+      { id: "two_risk", label: "上記のうち2つに当てはまる" },
+      { id: "three_risk", label: "上記のうち3つ以上に当てはまる" }
+    ]
+  },
+  {
+    id: "current_symptoms",
+    title: "現在、次のような症状はありますか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "no_symptoms", label: "特に症状はない" },
+      { id: "occasional_headache", label: "時々頭痛がある（いつもと同じ程度）" },
+      { id: "numbness_headache", label: "頭痛や手足のしびれが気になっている" },
+      { id: "sudden_severe", label: "突然の激しい頭痛・片側の麻痺・言語障害がある" }
+    ]
+  },
+  {
+    id: "previous_dock",
+    title: "これまでに脳ドックや頭部MRI検査を受けたことがありますか？",
+    subtitle: "",
+    options: [
+      { id: "never", label: "一度も受けたことがない" },
+      { id: "over5years", label: "5年以上前に受けたことがある" },
+      { id: "within5years", label: "5年以内に受けたことがある" },
+      { id: "within1year", label: "1年以内に受けたことがある" }
+    ]
+  },
+  {
+    id: "anxiety_level",
+    title: "脳の病気（脳卒中・動脈瘤など）への不安はどの程度ありますか？",
+    subtitle: "",
+    options: [
+      { id: "no_anxiety", label: "あまり気にしていない" },
+      { id: "mild_anxiety", label: "少し気になっている" },
+      { id: "moderate_anxiety", label: "かなり心配している" },
+      { id: "high_anxiety", label: "非常に不安で、早く調べたい" }
+    ]
+  }
+];
+
+var currentStep = 0;
+var answers = {};
+
+function renderQuestion() {
+  var area = document.getElementById("questionArea");
+  var q = questions[currentStep];
+  var pct = Math.round((currentStep / questions.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+  var html = '<div class="step-card">';
+  html += '<span class="step-number">質問 ' + (currentStep + 1) + " / " + questions.length + '</span>';
+  html += '<h2>' + q.title + '</h2>';
+  if (q.subtitle) { html += '<p>' + q.subtitle + '</p>'; }
+  html += '<div class="options">';
+  for (var i = 0; i < q.options.length; i++) {
+    var opt = q.options[i];
+    html += '<button class="option-btn" onclick="selectAnswer(\'' + q.id + '\',\'' + opt.id + '\')">' + opt.label + '</button>';
+  }
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+
+function selectAnswer(qId, optId) {
+  answers[qId] = optId;
+  currentStep++;
+  if (currentStep < questions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById("questionArea").classList.add("hidden");
+  document.getElementById("progressFill").style.width = "100%";
+  var urgency = calcUrgency();
+  var resultArea = document.getElementById("resultArea");
+  resultArea.classList.remove("hidden");
+  resultArea.innerHTML = buildResultHTML(urgency);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function calcUrgency() {
+  if (answers.current_symptoms === "sudden_severe") { return "see_doctor_now"; }
+  var score = 0;
+  if (answers.age === "over60") { score += 3; }
+  else if (answers.age === "50to59") { score += 2; }
+  else if (answers.age === "40to49") { score += 1; }
+  if (answers.family_history === "aneurysm_history") { score += 4; }
+  else if (answers.family_history === "close_history") { score += 3; }
+  else if (answers.family_history === "distant_history") { score += 1; }
+  if (answers.risk_factors === "three_risk") { score += 3; }
+  else if (answers.risk_factors === "two_risk") { score += 2; }
+  else if (answers.risk_factors === "one_risk") { score += 1; }
+  if (answers.current_symptoms === "numbness_headache") { score += 2; }
+  else if (answers.current_symptoms === "occasional_headache") { score += 1; }
+  if (answers.previous_dock === "never") { score += 2; }
+  else if (answers.previous_dock === "over5years") { score += 1; }
+  if (answers.anxiety_level === "high_anxiety") { score += 1; }
+  else if (answers.anxiety_level === "moderate_anxiety") { score += 1; }
+  if (score >= 7) { return "strongly_recommended"; }
+  if (score >= 3) { return "recommended"; }
+  return "optional";
+}
+
+function buildResultHTML(urgency) {
+  var data = {
+    see_doctor_now: {
+      badge: "badge-red", badgeText: "脳ドックより先に受診を",
+      title: "今すぐ通常の医療機関を受診してください",
+      desc: "突然の激しい頭痛・片側の麻痺・言語障害などの症状がある場合、脳ドックではなく救急受診が必要です。これらは脳卒中のサインの可能性があります。",
+      action: "<strong>症状が強い場合は119番、そうでない場合もすぐに救急外来または脳神経内科を受診してください。</strong>脳ドックは症状が落ち着いてから検討しましょう。",
+      dept: "救急科・脳神経内科"
+    },
+    strongly_recommended: {
+      badge: "badge-red", badgeText: "脳ドックを強くおすすめ",
+      title: "リスク因子が重なっています。脳ドック受診を強くお勧めします",
+      desc: "年齢・家族歴・生活習慣病などの複数のリスク因子が重なっています。脳動脈瘤や未破裂の脳血管病変が見つかる可能性があり、早期発見・早期対応が重要です。",
+      action: "<strong>脳ドック実施施設に予約してください。</strong>未受診の場合は特にお勧めします。頭部MRI・MRAによる脳血管の評価が有用です。",
+      dept: "脳ドック実施施設・脳神経内科"
+    },
+    recommended: {
+      badge: "badge-yellow", badgeText: "脳ドックをおすすめ",
+      title: "いくつかのリスク因子があります。脳ドックの受診をお勧めします",
+      desc: "いくつかのリスク因子が見られます。50歳以降では脳ドックで無症候性脳梗塞や動脈瘤が見つかることがあります。定期的な確認が安心につながります。",
+      action: "<strong>近くの脳ドック実施施設に問い合わせてみましょう。</strong>5年以上前に受けた方は再検査もお勧めです。",
+      dept: "脳ドック実施施設・脳神経内科"
+    },
+    optional: {
+      badge: "badge-green", badgeText: "今すぐでなくてもOK",
+      title: "現時点では高いリスクはなさそうです",
+      desc: "大きなリスク因子は見られません。まずは生活習慣（食事・運動・禁煙・血圧管理）の見直しが効果的です。40歳以降になったら脳ドックを検討するのも良いでしょう。",
+      action: "<strong>まずは定期健康診断を活用し、血圧・血糖・コレステロールを確認しましょう。</strong>不安が続く場合は脳ドックの受診も選択肢の一つです。",
+      dept: "かかりつけ医・脳ドック実施施設（任意）"
+    }
+  };
+
+  var d = data[urgency];
+  var html = '<div class="result-card">';
+  html += '<span class="result-badge ' + d.badge + '">' + d.badgeText + '</span>';
+  html += '<h2 class="result-title">' + d.title + '</h2>';
+  html += '<p class="result-desc">' + d.desc + '</p>';
+  html += '<div class="result-action">' + d.action + '</div>';
+  html += '<div class="result-action"><strong>受診先：</strong>' + d.dept + '</div>';
+  html += '<div class="result-note">';
+  html += '<strong>あなたの回答：</strong><br>';
+  html += "年齢：" + getLabelFor("age", answers.age) + '<br>';
+  html += "家族歴：" + getLabelFor("family_history", answers.family_history) + '<br>';
+  html += "リスク因子：" + getLabelFor("risk_factors", answers.risk_factors) + '<br>';
+  html += "現在の症状：" + getLabelFor("current_symptoms", answers.current_symptoms) + '<br>';
+  html += "脳ドック受診歴：" + getLabelFor("previous_dock", answers.previous_dock) + '<br>';
+  html += "不安の程度：" + getLabelFor("anxiety_level", answers.anxiety_level);
+  html += '</div></div>';
+  html += '<button class="restart-btn" onclick="restart()">もう一度チェックする</button>';
+  return html;
+}
+
+function getLabelFor(qId, optId) {
+  for (var i = 0; i < questions.length; i++) {
+    if (questions[i].id === qId) {
+      for (var j = 0; j < questions[i].options.length; j++) {
+        if (questions[i].options[j].id === optId) { return questions[i].options[j].label; }
+      }
+    }
+  }
+  return "";
+}
+
+function restart() {
+  currentStep = 0; answers = {};
+  document.getElementById("resultArea").classList.add("hidden");
+  document.getElementById("resultArea").innerHTML = "";
+  document.getElementById("questionArea").classList.remove("hidden");
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+renderQuestion();
+</script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>認知症と運転セルフチェック ― その症状、大丈夫？</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif; background: #f0f4f8; color: #333; line-height: 1.6; min-height: 100vh; }
+.app-header { background: linear-gradient(135deg, #1B3A5C, #2C5AA0); color: #fff; padding: 16px 20px; text-align: center; }
+.app-header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+.app-header .series { font-size: 0.8rem; opacity: 0.8; }
+.disclaimer { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin: 12px 16px; border-radius: 4px; font-size: 0.85rem; color: #856404; }
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+.step-card { background: #fff; border-radius: 12px; padding: 20px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.step-number { display: inline-block; background: #2C5AA0; color: #fff; font-size: 0.8rem; padding: 2px 10px; border-radius: 12px; margin-bottom: 8px; }
+.step-card h2 { font-size: 1.1rem; color: #1B3A5C; margin-bottom: 12px; }
+.step-card p { font-size: 0.95rem; color: #555; margin-bottom: 12px; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn { display: block; width: 100%; padding: 14px 16px; border: 2px solid #dee2e6; border-radius: 8px; background: #fff; font-size: 1rem; font-family: inherit; color: #333; text-align: left; cursor: pointer; transition: all 0.2s; }
+.option-btn:hover { border-color: #2C5AA0; background: #f0f6ff; }
+.option-btn.selected { border-color: #2C5AA0; background: #e8f4fd; color: #1B3A5C; font-weight: bold; }
+.hidden { display: none; }
+.result-card { background: #fff; border-radius: 12px; padding: 24px 20px; margin: 16px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+.result-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; }
+.badge-red { background: #f8d7da; color: #c0392b; }
+.badge-yellow { background: #fff3cd; color: #856404; }
+.badge-green { background: #d4edda; color: #155724; }
+.result-title { font-size: 1.2rem; color: #1B3A5C; margin-bottom: 8px; }
+.result-desc { font-size: 0.95rem; color: #555; margin-bottom: 16px; }
+.result-action { background: #f8f9fa; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; }
+.result-action strong { color: #2C5AA0; }
+.result-note { font-size: 0.85rem; color: #888; border-top: 1px solid #eee; padding-top: 12px; margin-top: 12px; }
+.restart-btn { display: block; width: 100%; padding: 14px; background: #2C5AA0; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-family: inherit; cursor: pointer; margin-top: 12px; }
+.restart-btn:hover { background: #1B3A5C; }
+.progress-bar { height: 4px; background: #dee2e6; margin: 0 16px; border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: #2C5AA0; transition: width 0.3s; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div class="series">その症状、大丈夫？ #19</div>
+  <h1>認知症と運転セルフチェック</h1>
+</div>
+<div class="disclaimer">このツールは、ご家族が高齢の運転者の運転継続の可否を考えるための参考ツールです。医療行為ではありません。心配な場合は必ず専門医にご相談ください。</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="container">
+  <div id="questionArea"></div>
+  <div id="resultArea" class="hidden"></div>
+</div>
+<script>
+var questions = [
+  {
+    id: "driver_age",
+    title: "運転しているご家族の年齢は？",
+    subtitle: "ご本人（運転者）の年齢をお答えください",
+    options: [
+      { id: "under70", label: "70歳未満" },
+      { id: "70to74", label: "70〜74歳" },
+      { id: "75to79", label: "75〜79歳" },
+      { id: "over80", label: "80歳以上" }
+    ]
+  },
+  {
+    id: "getting_lost",
+    title: "よく知っている道で迷ったり、目的地に辿り着けないことがありますか？",
+    subtitle: "以前は問題なく行けた場所で迷うようになった",
+    options: [
+      { id: "no_lost", label: "迷うことはない" },
+      { id: "once_lost", label: "1〜2回あった" },
+      { id: "often_lost", label: "何度もある・最近増えた" },
+      { id: "recently_lost", label: "最近、自宅周辺でも迷った" }
+    ]
+  },
+  {
+    id: "accidents",
+    title: "最近、接触事故・ヒヤリハットが増えていますか？",
+    subtitle: "車庫入れ・電柱との接触・追突されそうになったなど",
+    options: [
+      { id: "no_accident", label: "事故もヒヤリハットもない" },
+      { id: "minor_scratch", label: "小さなこすり傷が増えた" },
+      { id: "near_miss", label: "ヒヤリハットが増えた" },
+      { id: "actual_accident", label: "実際に事故を起こした（物損・人身）" }
+    ]
+  },
+  {
+    id: "traffic_rules",
+    title: "交通ルールや標識を間違えることがありますか？",
+    subtitle: "一時停止を見落とす・逆走しかけた・信号の見落としなど",
+    options: [
+      { id: "no_rule_error", label: "問題ない" },
+      { id: "sometimes_error", label: "たまに見落としがある気がする" },
+      { id: "often_error", label: "交通ルールをよく間違える・忘れている" },
+      { id: "wrong_way", label: "逆走した・一方通行に入ったことがある" }
+    ]
+  },
+  {
+    id: "personality_change",
+    title: "性格の変化や日常の物忘れは目立ちますか？",
+    subtitle: "怒りっぽくなった・同じことを何度も言う・約束を忘れるなど",
+    options: [
+      { id: "no_change", label: "以前と変わらない" },
+      { id: "mild_change", label: "少し物忘れが増えた程度" },
+      { id: "notable_change", label: "明らかに物忘れが増えた・性格が変わった" },
+      { id: "severe_change", label: "日常生活に支障が出ている" }
+    ]
+  },
+  {
+    id: "family_concern",
+    title: "ご家族として、運転を続けることへの心配度は？",
+    subtitle: "今のあなたの気持ちに近いものを選んでください",
+    options: [
+      { id: "no_concern", label: "今のところ問題ないと思っている" },
+      { id: "slight_concern", label: "少し心配になってきた" },
+      { id: "concerned", label: "できれば免許を返納してほしいと思っている" },
+      { id: "very_concerned", label: "今すぐ運転をやめてほしいと思っている" }
+    ]
+  }
+];
+
+var currentStep = 0;
+var answers = {};
+
+function renderQuestion() {
+  var area = document.getElementById("questionArea");
+  var q = questions[currentStep];
+  var pct = Math.round((currentStep / questions.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+  var html = '<div class="step-card">';
+  html += '<span class="step-number">質問 ' + (currentStep + 1) + " / " + questions.length + '</span>';
+  html += '<h2>' + q.title + '</h2>';
+  if (q.subtitle) { html += '<p>' + q.subtitle + '</p>'; }
+  html += '<div class="options">';
+  for (var i = 0; i < q.options.length; i++) {
+    var opt = q.options[i];
+    html += '<button class="option-btn" onclick="selectAnswer(\'' + q.id + '\',\'' + opt.id + '\')">' + opt.label + '</button>';
+  }
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+
+function selectAnswer(qId, optId) {
+  answers[qId] = optId;
+  currentStep++;
+  if (currentStep < questions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById("questionArea").classList.add("hidden");
+  document.getElementById("progressFill").style.width = "100%";
+  var urgency = calcUrgency();
+  var resultArea = document.getElementById("resultArea");
+  resultArea.classList.remove("hidden");
+  resultArea.innerHTML = buildResultHTML(urgency);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function calcUrgency() {
+  if (answers.accidents === "actual_accident") { return "urgent_stop_now"; }
+  if (answers.getting_lost === "recently_lost") { return "urgent_stop_now"; }
+  if (answers.traffic_rules === "wrong_way") { return "urgent_stop_now"; }
+  if (answers.personality_change === "severe_change") { return "urgent_stop_now"; }
+  if (answers.family_concern === "very_concerned") { return "urgent_stop_now"; }
+  if (answers.getting_lost === "often_lost" || answers.accidents === "near_miss" || answers.traffic_rules === "often_error") { return "caution_see_doctor"; }
+  if (answers.personality_change === "notable_change" || answers.driver_age === "over80") { return "caution_see_doctor"; }
+  if (answers.getting_lost === "once_lost" || answers.accidents === "minor_scratch" || answers.family_concern === "concerned") { return "caution_see_doctor"; }
+  return "watch_monitor";
+}
+
+function buildResultHTML(urgency) {
+  var data = {
+    urgent_stop_now: {
+      badge: "badge-red", badgeText: "運転停止＋すぐ受診を",
+      title: "今すぐ運転をやめ、専門医を受診してください",
+      desc: "実際の事故・近所での道迷い・逆走・日常生活への支障など、認知症による安全運転能力の低下を強く示すサインが見られます。他者への危険を防ぐためにも、今すぐ運転をやめることが重要です。",
+      action: "<strong>本日から運転を中止してください。</strong>もの忘れ外来または脳神経内科を速やかに受診し、認知機能の評価を受けてください。免許センターへの相談も検討しましょう。",
+      dept: "もの忘れ外来・脳神経内科／免許センター相談窓口"
+    },
+    caution_see_doctor: {
+      badge: "badge-yellow", badgeText: "受診をお勧めします",
+      title: "もの忘れ外来への受診を検討してください",
+      desc: "道に迷う・ヒヤリハットが増えるなどのサインが見られます。認知機能の低下が運転に影響している可能性があります。専門家による評価を受けることで、今後の対応が明確になります。",
+      action: "<strong>もの忘れ外来または脳神経内科を受診してください。</strong>認知機能検査（長谷川式・MoCAなど）と専門家による運転評価が参考になります。家族も同席して相談しましょう。",
+      dept: "もの忘れ外来・脳神経内科"
+    },
+    watch_monitor: {
+      badge: "badge-green", badgeText: "様子を見ながら対話を",
+      title: "現時点では大きな心配はなさそうです",
+      desc: "今のところ深刻なサインは見られません。しかし加齢とともに認知機能は変化します。定期的な観察と家族間でのオープンな対話を続けましょう。",
+      action: "<strong>半年〜1年ごとに状態を確認しましょう。</strong>変化が見られたらすぐに受診を検討してください。運転についての家族間の話し合いは早めに始めることをお勧めします。",
+      dept: "変化があれば：もの忘れ外来・かかりつけ医"
+    }
+  };
+
+  var d = data[urgency];
+  var html = '<div class="result-card">';
+  html += '<span class="result-badge ' + d.badge + '">' + d.badgeText + '</span>';
+  html += '<h2 class="result-title">' + d.title + '</h2>';
+  html += '<p class="result-desc">' + d.desc + '</p>';
+  html += '<div class="result-action">' + d.action + '</div>';
+  html += '<div class="result-action"><strong>相談先：</strong>' + d.dept + '</div>';
+  html += '<div class="result-note">';
+  html += '<strong>あなたの回答：</strong><br>';
+  html += "運転者の年齢：" + getLabelFor("driver_age", answers.driver_age) + '<br>';
+  html += "道迷い：" + getLabelFor("getting_lost", answers.getting_lost) + '<br>';
+  html += "事故・ヒヤリハット：" + getLabelFor("accidents", answers.accidents) + '<br>';
+  html += "交通ルールの間違い：" + getLabelFor("traffic_rules", answers.traffic_rules) + '<br>';
+  html += "性格・物忘れの変化：" + getLabelFor("personality_change", answers.personality_change) + '<br>';
+  html += "家族の心配度：" + getLabelFor("family_concern", answers.family_concern);
+  html += '</div></div>';
+  html += '<button class="restart-btn" onclick="restart()">もう一度チェックする</button>';
+  return html;
+}
+
+function getLabelFor(qId, optId) {
+  for (var i = 0; i < questions.length; i++) {
+    if (questions[i].id === qId) {
+      for (var j = 0; j < questions[i].options.length; j++) {
+        if (questions[i].options[j].id === optId) { return questions[i].options[j].label; }
+      }
+    }
+  }
+  return "";
+}
+
+function restart() {
+  currentStep = 0; answers = {};
+  document.getElementById("resultArea").classList.add("hidden");
+  document.getElementById("resultArea").innerHTML = "";
+  document.getElementById("questionArea").classList.remove("hidden");
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+renderQuestion();
+</script>
+</body>
+</html>

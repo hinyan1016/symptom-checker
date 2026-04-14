@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>子どもの頭痛セルフチェック ― その症状、大丈夫？</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif; background: #f0f4f8; color: #333; line-height: 1.6; min-height: 100vh; }
+.app-header { background: linear-gradient(135deg, #1B3A5C, #2C5AA0); color: #fff; padding: 16px 20px; text-align: center; }
+.app-header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+.app-header .series { font-size: 0.8rem; opacity: 0.8; }
+.disclaimer { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin: 12px 16px; border-radius: 4px; font-size: 0.85rem; color: #856404; }
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+.step-card { background: #fff; border-radius: 12px; padding: 20px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.step-number { display: inline-block; background: #2C5AA0; color: #fff; font-size: 0.8rem; padding: 2px 10px; border-radius: 12px; margin-bottom: 8px; }
+.step-card h2 { font-size: 1.1rem; color: #1B3A5C; margin-bottom: 12px; }
+.step-card p { font-size: 0.95rem; color: #555; margin-bottom: 12px; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn { display: block; width: 100%; padding: 14px 16px; border: 2px solid #dee2e6; border-radius: 8px; background: #fff; font-size: 1rem; font-family: inherit; color: #333; text-align: left; cursor: pointer; transition: all 0.2s; }
+.option-btn:hover { border-color: #2C5AA0; background: #f0f6ff; }
+.option-btn.selected { border-color: #2C5AA0; background: #e8f4fd; color: #1B3A5C; font-weight: bold; }
+.hidden { display: none; }
+.result-card { background: #fff; border-radius: 12px; padding: 24px 20px; margin: 16px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+.result-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; }
+.badge-red { background: #f8d7da; color: #c0392b; }
+.badge-yellow { background: #fff3cd; color: #856404; }
+.badge-green { background: #d4edda; color: #155724; }
+.result-title { font-size: 1.2rem; color: #1B3A5C; margin-bottom: 8px; }
+.result-desc { font-size: 0.95rem; color: #555; margin-bottom: 16px; }
+.result-action { background: #f8f9fa; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; }
+.result-action strong { color: #2C5AA0; }
+.result-note { font-size: 0.85rem; color: #888; border-top: 1px solid #eee; padding-top: 12px; margin-top: 12px; }
+.restart-btn { display: block; width: 100%; padding: 14px; background: #2C5AA0; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-family: inherit; cursor: pointer; margin-top: 12px; }
+.restart-btn:hover { background: #1B3A5C; }
+.progress-bar { height: 4px; background: #dee2e6; margin: 0 16px; border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: #2C5AA0; transition: width 0.3s; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div class="series">その症状、大丈夫？ #18</div>
+  <h1>子どもの頭痛セルフチェック</h1>
+</div>
+<div class="disclaimer">このツールは医療行為ではありません。結果は参考情報であり、診断に代わるものではありません。お子さんの様子がいつもと違う場合は、必ず医師にご相談ください。</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="container">
+  <div id="questionArea"></div>
+  <div id="resultArea" class="hidden"></div>
+</div>
+<script>
+var questions = [
+  {
+    id: "child_age",
+    title: "お子さんの年齢はおよそ何歳ですか？",
+    subtitle: "",
+    options: [
+      { id: "under5", label: "5歳未満" },
+      { id: "5to10", label: "5〜10歳" },
+      { id: "11to15", label: "11〜15歳" },
+      { id: "over15", label: "15歳以上（高校生程度）" }
+    ]
+  },
+  {
+    id: "frequency",
+    title: "頭痛はどのくらいの頻度で起こりますか？",
+    subtitle: "",
+    options: [
+      { id: "first_time", label: "今回が初めて" },
+      { id: "occasional", label: "月に数回程度" },
+      { id: "frequent", label: "週に何度もある" },
+      { id: "daily", label: "ほぼ毎日ある" }
+    ]
+  },
+  {
+    id: "morning_headache",
+    title: "朝起きたときから頭痛がありますか？",
+    subtitle: "起床時に頭痛で目が覚める、または起きてすぐ頭が痛い",
+    options: [
+      { id: "no_morning", label: "朝はない・昼以降に起こる" },
+      { id: "sometimes_morning", label: "時々、朝から頭痛がある" },
+      { id: "always_morning", label: "いつも朝から頭が痛い" }
+    ]
+  },
+  {
+    id: "vomiting",
+    title: "頭痛と一緒に嘔吐（おうと）はありますか？",
+    subtitle: "吐き気だけでなく、実際に吐く場合",
+    options: [
+      { id: "no_vomit", label: "吐いていない" },
+      { id: "nausea_only", label: "吐き気はあるが吐いていない" },
+      { id: "vomited", label: "頭痛と一緒に吐いた" },
+      { id: "sudden_severe_vomit", label: "突然の激しい頭痛と嘔吐が同時に起きた" }
+    ]
+  },
+  {
+    id: "fever_neck",
+    title: "発熱と首の硬さ（うなじが固い・うつむけない）はありますか？",
+    subtitle: "",
+    options: [
+      { id: "no_fever_neck", label: "発熱も首の硬さもない" },
+      { id: "fever_only", label: "熱はあるが首は問題ない" },
+      { id: "both_fever_neck", label: "発熱と首の硬さ（首が動かしにくい）が両方ある" }
+    ]
+  },
+  {
+    id: "consciousness",
+    title: "意識の変化や行動の異常はありますか？",
+    subtitle: "ぼーっとしている・呼びかけに反応しない・けいれん・急な性格変化など",
+    options: [
+      { id: "normal_consciousness", label: "いつも通り反応している" },
+      { id: "slightly_dull", label: "少しぼーっとしている気がする" },
+      { id: "poor_response", label: "呼びかけへの反応が悪い・意識がもうろうとしている" },
+      { id: "seizure", label: "けいれんが起きた" }
+    ]
+  },
+  {
+    id: "different_from_usual",
+    title: "今回の頭痛は「いつもと違う」感じがしますか？",
+    subtitle: "強さ・起き方・場所・続き方など",
+    options: [
+      { id: "same_as_usual", label: "いつもと同じ感じ" },
+      { id: "somewhat_different", label: "少しいつもと違う気がする" },
+      { id: "very_different", label: "明らかにいつもと違う・初めての感じ" }
+    ]
+  }
+];
+
+var currentStep = 0;
+var answers = {};
+
+function renderQuestion() {
+  var area = document.getElementById("questionArea");
+  var q = questions[currentStep];
+  var pct = Math.round((currentStep / questions.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+  var html = '<div class="step-card">';
+  html += '<span class="step-number">質問 ' + (currentStep + 1) + " / " + questions.length + '</span>';
+  html += '<h2>' + q.title + '</h2>';
+  if (q.subtitle) { html += '<p>' + q.subtitle + '</p>'; }
+  html += '<div class="options">';
+  for (var i = 0; i < q.options.length; i++) {
+    var opt = q.options[i];
+    html += '<button class="option-btn" onclick="selectAnswer(\'' + q.id + '\',\'' + opt.id + '\')">' + opt.label + '</button>';
+  }
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+
+function selectAnswer(qId, optId) {
+  answers[qId] = optId;
+  currentStep++;
+  if (currentStep < questions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById("questionArea").classList.add("hidden");
+  document.getElementById("progressFill").style.width = "100%";
+  var urgency = calcUrgency();
+  var resultArea = document.getElementById("resultArea");
+  resultArea.classList.remove("hidden");
+  resultArea.innerHTML = buildResultHTML(urgency);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function calcUrgency() {
+  if (answers.fever_neck === "both_fever_neck") { return "emergency_meningitis"; }
+  if (answers.consciousness === "poor_response" || answers.consciousness === "seizure") { return "emergency_consciousness"; }
+  if (answers.vomiting === "sudden_severe_vomit") { return "emergency_hemorrhage"; }
+  if (answers.always_morning === "always_morning" || answers.morning_headache === "always_morning") { return "urgent_tumor"; }
+  if (answers.different_from_usual === "very_different" && answers.frequency === "first_time") { return "urgent_new"; }
+  if (answers.frequency === "daily" || answers.frequency === "frequent") { return "urgent_recurring"; }
+  if (answers.vomiting === "vomited" && answers.morning_headache === "always_morning") { return "urgent_tumor"; }
+  if (answers.morning_headache === "always_morning") { return "urgent_tumor"; }
+  if (answers.frequency === "occasional" || answers.vomiting === "nausea_only") { return "watch_migraine"; }
+  return "watch_tension";
+}
+
+function buildResultHTML(urgency) {
+  var data = {
+    emergency_meningitis: {
+      badge: "badge-red", badgeText: "今すぐ119番へ",
+      title: "髄膜炎の可能性があります",
+      desc: "発熱と首の硬さ（項部硬直）が同時にある場合、細菌性髄膜炎の可能性があります。治療が遅れると後遺症が残ることがあり、一刻も早く救急搬送が必要です。",
+      action: "<strong>今すぐ119番に電話してください。</strong>水分を与えながら安静にして救急車を待ってください。",
+      dept: "救急科（119番）"
+    },
+    emergency_consciousness: {
+      badge: "badge-red", badgeText: "今すぐ119番へ",
+      title: "意識の異常・けいれんは緊急です",
+      desc: "頭痛に伴う意識障害やけいれんは、脳炎・出血・腫瘍など重篤な疾患のサインのことがあります。すぐに救急搬送が必要です。",
+      action: "<strong>今すぐ119番に電話してください。</strong>けいれんの場合は横向きに寝かせ、口に物を入れないでください。",
+      dept: "救急科（119番）"
+    },
+    emergency_hemorrhage: {
+      badge: "badge-red", badgeText: "今すぐ救急受診を",
+      title: "脳出血・くも膜下出血の可能性があります",
+      desc: "突然の激しい頭痛と嘔吐が同時に起きた場合、くも膜下出血などの頭蓋内出血が疑われます。子どもでもまれに起こります。一刻も早い対応が必要です。",
+      action: "<strong>今すぐ救急外来を受診するか、119番を呼んでください。</strong>",
+      dept: "救急科（119番）"
+    },
+    urgent_tumor: {
+      badge: "badge-yellow", badgeText: "早めに受診してください",
+      title: "脳腫瘍などの精査が必要です",
+      desc: "朝から頭痛がある・嘔吐を伴う・毎日続くといった症状の組み合わせは、頭蓋内圧が上昇している可能性を示すことがあります。脳腫瘍は子どもにも起こる疾患です。専門医による画像検査が必要です。",
+      action: "<strong>小児科または脳神経内科（小児神経科）を受診してください。</strong>頭部MRI検査が必要な場合があります。",
+      dept: "小児科・脳神経内科"
+    },
+    urgent_new: {
+      badge: "badge-yellow", badgeText: "早めに受診してください",
+      title: "初めてのいつもと違う頭痛は精査が必要です",
+      desc: "今まで経験したことのない頭痛が初めて起きた場合、原因を明らかにするために受診が必要です。多くは心配不要ですが、重篤な原因を除外することが大切です。",
+      action: "<strong>小児科を受診してください。</strong>症状が強い場合や悪化する場合は当日受診してください。",
+      dept: "小児科・脳神経内科"
+    },
+    urgent_recurring: {
+      badge: "badge-yellow", badgeText: "受診をお勧めします",
+      title: "繰り返す頭痛は専門医に相談しましょう",
+      desc: "週に何度もあったり毎日のように頭痛がある場合、片頭痛・緊張型頭痛・その他の原因が考えられます。適切な治療で症状が改善することが多いので、受診して原因を調べましょう。",
+      action: "<strong>小児科または小児神経科を受診してください。</strong>頭痛日記をつけておくと診断に役立ちます。",
+      dept: "小児科・脳神経内科"
+    },
+    watch_migraine: {
+      badge: "badge-green", badgeText: "様子見でも大丈夫です",
+      title: "小児片頭痛の可能性があります",
+      desc: "吐き気や嘔吐を伴う頭痛が月に数回程度ある場合、小児片頭痛の可能性があります。静かな暗い場所で休むと改善することが多いです。頻度が増えたり症状が変わった場合は受診してください。",
+      action: "<strong>頭痛が続く場合や頻度が増えた場合は小児科を受診してください。</strong>光や音の刺激を避け、静かに休ませましょう。",
+      dept: "小児科"
+    },
+    watch_tension: {
+      badge: "badge-green", badgeText: "様子見でも大丈夫です",
+      title: "現時点では緊急性は低そうです",
+      desc: "危険なサインは見られません。ストレスや疲労による緊張型頭痛の可能性が高いです。十分な睡眠・水分補給・適度な運動が助けになります。",
+      action: "<strong>症状が変わったり、頻度が増えたり、悪化した場合は小児科を受診してください。</strong>",
+      dept: "悪化時：小児科"
+    }
+  };
+
+  var d = data[urgency];
+  var html = '<div class="result-card">';
+  html += '<span class="result-badge ' + d.badge + '">' + d.badgeText + '</span>';
+  html += '<h2 class="result-title">' + d.title + '</h2>';
+  html += '<p class="result-desc">' + d.desc + '</p>';
+  html += '<div class="result-action">' + d.action + '</div>';
+  html += '<div class="result-action"><strong>推奨診療科：</strong>' + d.dept + '</div>';
+  html += '<div class="result-note">';
+  html += '<strong>あなたの回答：</strong><br>';
+  html += "年齢：" + getLabelFor("child_age", answers.child_age) + '<br>';
+  html += "頭痛の頻度：" + getLabelFor("frequency", answers.frequency) + '<br>';
+  html += "朝の頭痛：" + getLabelFor("morning_headache", answers.morning_headache) + '<br>';
+  html += "嘔吐：" + getLabelFor("vomiting", answers.vomiting) + '<br>';
+  html += "発熱・首の硬さ：" + getLabelFor("fever_neck", answers.fever_neck) + '<br>';
+  html += "意識の変化：" + getLabelFor("consciousness", answers.consciousness) + '<br>';
+  html += "いつもと違う感じ：" + getLabelFor("different_from_usual", answers.different_from_usual);
+  html += '</div></div>';
+  html += '<button class="restart-btn" onclick="restart()">もう一度チェックする</button>';
+  return html;
+}
+
+function getLabelFor(qId, optId) {
+  for (var i = 0; i < questions.length; i++) {
+    if (questions[i].id === qId) {
+      for (var j = 0; j < questions[i].options.length; j++) {
+        if (questions[i].options[j].id === optId) { return questions[i].options[j].label; }
+      }
+    }
+  }
+  return "";
+}
+
+function restart() {
+  currentStep = 0; answers = {};
+  document.getElementById("resultArea").classList.add("hidden");
+  document.getElementById("resultArea").innerHTML = "";
+  document.getElementById("questionArea").classList.remove("hidden");
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+renderQuestion();
+</script>
+</body>
+</html>

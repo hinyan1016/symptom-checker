@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>首の痛みと神経セルフチェック ― その症状、大丈夫？</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif; background: #f0f4f8; color: #333; line-height: 1.6; min-height: 100vh; }
+.app-header { background: linear-gradient(135deg, #1B3A5C, #2C5AA0); color: #fff; padding: 16px 20px; text-align: center; }
+.app-header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+.app-header .series { font-size: 0.8rem; opacity: 0.8; }
+.disclaimer { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin: 12px 16px; border-radius: 4px; font-size: 0.85rem; color: #856404; }
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+.step-card { background: #fff; border-radius: 12px; padding: 20px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.step-number { display: inline-block; background: #2C5AA0; color: #fff; font-size: 0.8rem; padding: 2px 10px; border-radius: 12px; margin-bottom: 8px; }
+.step-card h2 { font-size: 1.1rem; color: #1B3A5C; margin-bottom: 12px; }
+.step-card p { font-size: 0.95rem; color: #555; margin-bottom: 12px; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn { display: block; width: 100%; padding: 14px 16px; border: 2px solid #dee2e6; border-radius: 8px; background: #fff; font-size: 1rem; font-family: inherit; color: #333; text-align: left; cursor: pointer; transition: all 0.2s; }
+.option-btn:hover { border-color: #2C5AA0; background: #f0f6ff; }
+.option-btn.selected { border-color: #2C5AA0; background: #e8f4fd; color: #1B3A5C; font-weight: bold; }
+.hidden { display: none; }
+.result-card { background: #fff; border-radius: 12px; padding: 24px 20px; margin: 16px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+.result-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; }
+.badge-red { background: #f8d7da; color: #c0392b; }
+.badge-yellow { background: #fff3cd; color: #856404; }
+.badge-green { background: #d4edda; color: #155724; }
+.result-title { font-size: 1.2rem; color: #1B3A5C; margin-bottom: 8px; }
+.result-desc { font-size: 0.95rem; color: #555; margin-bottom: 16px; }
+.result-action { background: #f8f9fa; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; }
+.result-action strong { color: #2C5AA0; }
+.result-note { font-size: 0.85rem; color: #888; border-top: 1px solid #eee; padding-top: 12px; margin-top: 12px; }
+.restart-btn { display: block; width: 100%; padding: 14px; background: #2C5AA0; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-family: inherit; cursor: pointer; margin-top: 12px; }
+.restart-btn:hover { background: #1B3A5C; }
+.progress-bar { height: 4px; background: #dee2e6; margin: 0 16px; border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: #2C5AA0; transition: width 0.3s; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div class="series">その症状、大丈夫？ #17</div>
+  <h1>首の痛みと神経セルフチェック</h1>
+</div>
+<div class="disclaimer">このツールは医療行為ではありません。結果は参考情報であり、診断に代わるものではありません。心配な場合は必ず医師にご相談ください。</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="container">
+  <div id="questionArea"></div>
+  <div id="resultArea" class="hidden"></div>
+</div>
+<script>
+var questions = [
+  {
+    id: "pain_location",
+    title: "首の痛みはどこに広がっていますか？",
+    subtitle: "最も当てはまるものを選んでください",
+    options: [
+      { id: "neck_only", label: "首だけが痛い・こっている" },
+      { id: "arm_radiate", label: "首から肩・腕・手にかけて痛みやしびれが広がる" },
+      { id: "both_arms", label: "両腕・両手にしびれや力の入りにくさがある" },
+      { id: "neck_fever", label: "首の激しい痛みと発熱・頭痛がある" }
+    ]
+  },
+  {
+    id: "numbness",
+    title: "手や腕のしびれはありますか？",
+    subtitle: "",
+    options: [
+      { id: "no_numbness", label: "しびれはない" },
+      { id: "one_side", label: "片側の腕や手にしびれがある" },
+      { id: "both_sides", label: "両側の腕や手にしびれがある" },
+      { id: "sudden_face", label: "突然、顔や手足の片側にしびれが出た" }
+    ]
+  },
+  {
+    id: "fine_motor",
+    title: "手の細かい動作に困難はありますか？",
+    subtitle: "ボタンの掛け外し、箸の使用、字を書くなど",
+    options: [
+      { id: "no_difficulty", label: "問題なくできる" },
+      { id: "some_difficulty", label: "少しやりにくくなった気がする" },
+      { id: "clear_difficulty", label: "明らかにやりにくくなった" }
+    ]
+  },
+  {
+    id: "walking",
+    title: "歩き方や体のバランスに変化はありますか？",
+    subtitle: "",
+    options: [
+      { id: "normal_walk", label: "普通に歩ける" },
+      { id: "slight_unsteady", label: "少しふらつく・歩きにくい気がする" },
+      { id: "clear_unsteady", label: "はっきりとふらつく・転びやすくなった" },
+      { id: "cannot_walk", label: "歩けない・立てない" }
+    ]
+  },
+  {
+    id: "onset",
+    title: "首の痛みはどのように始まりましたか？",
+    subtitle: "",
+    options: [
+      { id: "gradual", label: "徐々に始まった（慢性的なこりや痛み）" },
+      { id: "after_injury", label: "転倒・事故・スポーツなど外傷の後から" },
+      { id: "sudden_worst", label: "突然、今まで経験したことがないほどの激しい痛み" },
+      { id: "sudden_fever", label: "突然の激しい痛みと発熱が同時に来た" }
+    ]
+  },
+  {
+    id: "duration",
+    title: "症状はどのくらい続いていますか？",
+    subtitle: "",
+    options: [
+      { id: "over_month", label: "1ヶ月以上続いている" },
+      { id: "over_2weeks", label: "2週間以上続いている" },
+      { id: "under_2weeks", label: "2週間未満" },
+      { id: "today", label: "今日突然出た" }
+    ]
+  }
+];
+
+var currentStep = 0;
+var answers = {};
+
+function renderQuestion() {
+  var area = document.getElementById("questionArea");
+  var q = questions[currentStep];
+  var pct = Math.round((currentStep / questions.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+  var html = '<div class="step-card">';
+  html += '<span class="step-number">質問 ' + (currentStep + 1) + " / " + questions.length + '</span>';
+  html += '<h2>' + q.title + '</h2>';
+  if (q.subtitle) { html += '<p>' + q.subtitle + '</p>'; }
+  html += '<div class="options">';
+  for (var i = 0; i < q.options.length; i++) {
+    var opt = q.options[i];
+    html += '<button class="option-btn" onclick="selectAnswer(\'' + q.id + '\',\'' + opt.id + '\')">' + opt.label + '</button>';
+  }
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+
+function selectAnswer(qId, optId) {
+  answers[qId] = optId;
+  currentStep++;
+  if (currentStep < questions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById("questionArea").classList.add("hidden");
+  document.getElementById("progressFill").style.width = "100%";
+  var urgency = calcUrgency();
+  var resultArea = document.getElementById("resultArea");
+  resultArea.classList.remove("hidden");
+  resultArea.innerHTML = buildResultHTML(urgency);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function calcUrgency() {
+  if (answers.onset === "sudden_fever" || answers.pain_location === "neck_fever") { return "emergency_meningitis"; }
+  if (answers.numbness === "sudden_face") { return "emergency_stroke"; }
+  if (answers.walking === "cannot_walk") { return "emergency_paralysis"; }
+  if (answers.walking === "clear_unsteady" || answers.fine_motor === "clear_difficulty" || answers.pain_location === "both_arms") { return "urgent_myelopathy"; }
+  if (answers.onset === "sudden_worst") { return "urgent_sudden"; }
+  if (answers.onset === "after_injury") { return "urgent_injury"; }
+  if (answers.pain_location === "arm_radiate" || answers.numbness === "one_side") { return "urgent_radiculopathy"; }
+  if (answers.duration === "over_month" || answers.duration === "over_2weeks") { return "watch_prolonged"; }
+  return "watch_muscle";
+}
+
+function buildResultHTML(urgency) {
+  var data = {
+    emergency_meningitis: {
+      badge: "badge-red", badgeText: "今すぐ119番へ",
+      title: "髄膜炎・くも膜下出血の可能性があります",
+      desc: "首の激しい痛みと発熱・頭痛が同時に現れる場合、髄膜炎（脳や脊髄を覆う膜の感染症）の可能性があります。適切な治療が遅れると命に関わります。すぐに救急搬送が必要です。",
+      action: "<strong>今すぐ119番に電話してください。</strong>自力での受診は避け、救急車を呼んでください。",
+      dept: "救急科（119番）"
+    },
+    emergency_stroke: {
+      badge: "badge-red", badgeText: "今すぐ119番へ",
+      title: "脳卒中の可能性があります",
+      desc: "突然の顔・手足の片側のしびれは脳卒中の典型的なサインです。数分以内に治まっても、脳梗塞の前兆（TIA）の場合があります。一刻も早い対応が必要です。",
+      action: "<strong>今すぐ119番に電話してください。</strong>時間をおかずにブラウジングしないでください。",
+      dept: "救急科（119番）"
+    },
+    emergency_paralysis: {
+      badge: "badge-red", badgeText: "今すぐ受診してください",
+      title: "重篤な脊髄障害の可能性があります",
+      desc: "歩けない・立てないほどの症状は、脊髄への重大な圧迫や損傷を示すことがあります。早急な診断と治療が必要です。",
+      action: "<strong>今すぐ救急外来を受診してください。</strong>自力での移動が困難な場合は119番を呼んでください。",
+      dept: "救急科・脳神経内科・整形外科"
+    },
+    urgent_myelopathy: {
+      badge: "badge-yellow", badgeText: "早めに受診してください",
+      title: "頸髄症（脊髄の圧迫）の可能性があります",
+      desc: "両手のしびれ・細かい動作の困難・歩行のふらつきが重なる場合、椎間板や骨棘による脊髄圧迫（頸髄症）が疑われます。進行すると排尿障害や歩行障害に至ることがあるため、早めの精査が必要です。",
+      action: "<strong>整形外科または脳神経内科を受診してください。</strong>頸部・胸椎のMRI検査が必要です。",
+      dept: "脳神経内科・整形外科"
+    },
+    urgent_sudden: {
+      badge: "badge-yellow", badgeText: "早めに受診してください",
+      title: "突然の激しい首の痛みは精査が必要です",
+      desc: "経験したことのない激しい首の痛みが突然起きた場合、くも膜下出血・頸動脈解離などの可能性を除外する必要があります。症状が落ち着いても今日中に受診することをお勧めします。",
+      action: "<strong>本日中に救急外来または脳神経内科を受診してください。</strong>",
+      dept: "救急科・脳神経内科"
+    },
+    urgent_injury: {
+      badge: "badge-yellow", badgeText: "早めに受診してください",
+      title: "外傷後の首の痛みは画像検査が必要です",
+      desc: "転倒・事故・スポーツなどの後に生じた首の痛みは、骨折や靭帯損傷を除外するためにレントゲンやMRI検査が必要です。自己判断で放置しないようにしましょう。",
+      action: "<strong>整形外科または救急外来を受診してください。</strong>外傷の状況を医師に詳しく伝えてください。",
+      dept: "整形外科・救急科"
+    },
+    urgent_radiculopathy: {
+      badge: "badge-yellow", badgeText: "受診をお勧めします",
+      title: "頸椎症性神経根症の可能性があります",
+      desc: "首から腕・手にかけての痛みやしびれは、椎間板ヘルニアや頸椎症による神経根への圧迫が原因のことがあります。2週間以上続く場合や日常生活に支障が出る場合は受診が必要です。",
+      action: "<strong>整形外科または脳神経内科を受診してください。</strong>レントゲン・MRI検査で原因を調べましょう。",
+      dept: "脳神経内科・整形外科"
+    },
+    watch_prolonged: {
+      badge: "badge-yellow", badgeText: "受診を検討してください",
+      title: "2週間以上続く首の症状は受診が望ましいです",
+      desc: "首のこりや痛みが長期間続く場合、筋肉疲労以外の原因が隠れていることがあります。悪化・新たな症状（しびれ・力が入らない）が出た場合はすぐに受診してください。",
+      action: "<strong>かかりつけ医に相談するか、整形外科を受診してください。</strong>",
+      dept: "かかりつけ医・整形外科"
+    },
+    watch_muscle: {
+      badge: "badge-green", badgeText: "様子見でも大丈夫です",
+      title: "現時点では緊急性は低そうです",
+      desc: "危険なサインは見られません。首の筋肉疲労やこりが原因の可能性が高いです。姿勢の改善・ストレッチ・適度な休憩で改善が期待できます。",
+      action: "<strong>症状が悪化したり、しびれ・力の入りにくさが出た場合は受診してください。</strong>",
+      dept: "悪化時：かかりつけ医・整形外科・脳神経内科"
+    }
+  };
+
+  var d = data[urgency];
+  var html = '<div class="result-card">';
+  html += '<span class="result-badge ' + d.badge + '">' + d.badgeText + '</span>';
+  html += '<h2 class="result-title">' + d.title + '</h2>';
+  html += '<p class="result-desc">' + d.desc + '</p>';
+  html += '<div class="result-action">' + d.action + '</div>';
+  html += '<div class="result-action"><strong>推奨診療科：</strong>' + d.dept + '</div>';
+  html += '<div class="result-note">';
+  html += '<strong>あなたの回答：</strong><br>';
+  html += "痛みの広がり：" + getLabelFor("pain_location", answers.pain_location) + '<br>';
+  html += "しびれ：" + getLabelFor("numbness", answers.numbness) + '<br>';
+  html += "手の細かい動作：" + getLabelFor("fine_motor", answers.fine_motor) + '<br>';
+  html += "歩行：" + getLabelFor("walking", answers.walking) + '<br>';
+  html += "発症のきっかけ：" + getLabelFor("onset", answers.onset) + '<br>';
+  html += "期間：" + getLabelFor("duration", answers.duration);
+  html += '</div></div>';
+  html += '<button class="restart-btn" onclick="restart()">もう一度チェックする</button>';
+  return html;
+}
+
+function getLabelFor(qId, optId) {
+  for (var i = 0; i < questions.length; i++) {
+    if (questions[i].id === qId) {
+      for (var j = 0; j < questions[i].options.length; j++) {
+        if (questions[i].options[j].id === optId) { return questions[i].options[j].label; }
+      }
+    }
+  }
+  return "";
+}
+
+function restart() {
+  currentStep = 0; answers = {};
+  document.getElementById("resultArea").classList.add("hidden");
+  document.getElementById("resultArea").innerHTML = "";
+  document.getElementById("questionArea").classList.remove("hidden");
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
