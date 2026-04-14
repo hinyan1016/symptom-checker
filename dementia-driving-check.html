@@ -174,19 +174,45 @@ function calcUrgency() {
   return "watch_monitor";
 }
 
+function buildCautionDesc() {
+  var reasons = [];
+  if (answers.getting_lost === "once_lost") { reasons.push("道に迷ったことがある"); }
+  if (answers.getting_lost === "often_lost") { reasons.push("道に迷うことが増えている"); }
+  if (answers.accidents === "minor_scratch") { reasons.push("小さなこすり傷が増えている"); }
+  if (answers.accidents === "near_miss") { reasons.push("ヒヤリハットが増えている"); }
+  if (answers.traffic_rules === "sometimes_error") { reasons.push("交通ルールの見落としがある"); }
+  if (answers.traffic_rules === "often_error") { reasons.push("交通ルールをよく間違える"); }
+  if (answers.personality_change === "notable_change") { reasons.push("物忘れや性格の変化が目立つ"); }
+  if (answers.driver_age === "over80") { reasons.push("80歳以上である"); }
+  if (answers.family_concern === "concerned") { reasons.push("ご家族が免許返納を希望している"); }
+  if (reasons.length === 0) { reasons.push("いくつかの気になる点がある"); }
+  return reasons.join("・") + "ことから、認知機能の変化が運転に影響している可能性があります。専門家による評価を受けることで、今後の対応が明確になります。";
+}
+
+function buildUrgentDesc() {
+  var reasons = [];
+  if (answers.accidents === "actual_accident") { reasons.push("実際に事故を起こしている"); }
+  if (answers.getting_lost === "recently_lost") { reasons.push("自宅周辺でも道に迷うようになった"); }
+  if (answers.traffic_rules === "wrong_way") { reasons.push("逆走や一方通行への進入があった"); }
+  if (answers.personality_change === "severe_change") { reasons.push("日常生活に支障が出ている"); }
+  if (answers.family_concern === "very_concerned") { reasons.push("ご家族が今すぐ運転をやめてほしいと感じている"); }
+  if (reasons.length === 0) { reasons.push("認知症による安全運転能力の低下を強く示すサインがある"); }
+  return reasons.join("・") + "ことから、運転の継続は他者への危険を伴います。今すぐ運転をやめることが重要です。";
+}
+
 function buildResultHTML(urgency) {
   var data = {
     urgent_stop_now: {
       badge: "badge-red", badgeText: "運転停止＋すぐ受診を",
       title: "今すぐ運転をやめ、専門医を受診してください",
-      desc: "実際の事故・近所での道迷い・逆走・日常生活への支障など、認知症による安全運転能力の低下を強く示すサインが見られます。他者への危険を防ぐためにも、今すぐ運転をやめることが重要です。",
+      desc: buildUrgentDesc(),
       action: "<strong>本日から運転を中止してください。</strong>もの忘れ外来または脳神経内科を速やかに受診し、認知機能の評価を受けてください。免許センターへの相談も検討しましょう。",
       dept: "もの忘れ外来・脳神経内科／免許センター相談窓口"
     },
     caution_see_doctor: {
       badge: "badge-yellow", badgeText: "受診をお勧めします",
       title: "もの忘れ外来への受診を検討してください",
-      desc: "道に迷う・ヒヤリハットが増えるなどのサインが見られます。認知機能の低下が運転に影響している可能性があります。専門家による評価を受けることで、今後の対応が明確になります。",
+      desc: buildCautionDesc(),
       action: "<strong>もの忘れ外来または脳神経内科を受診してください。</strong>認知機能検査（長谷川式・MoCAなど）と専門家による運転評価が参考になります。家族も同席して相談しましょう。",
       dept: "もの忘れ外来・脳神経内科"
     },
