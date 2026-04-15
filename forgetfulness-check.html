@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>物忘れセルフチェック ― からだの不思議</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif; background: #f0f4f8; color: #333; line-height: 1.6; min-height: 100vh; }
+.app-header { background: linear-gradient(135deg, #1B3A5C, #2C5AA0); color: #fff; padding: 16px 20px; text-align: center; }
+.app-header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+.app-header .series { font-size: 0.8rem; opacity: 0.8; }
+.disclaimer { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin: 12px 16px; border-radius: 4px; font-size: 0.85rem; color: #856404; }
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+.step-card { background: #fff; border-radius: 12px; padding: 20px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.step-number { display: inline-block; background: #2C5AA0; color: #fff; font-size: 0.8rem; padding: 2px 10px; border-radius: 12px; margin-bottom: 8px; }
+.step-card h2 { font-size: 1.1rem; color: #1B3A5C; margin-bottom: 12px; }
+.step-card p { font-size: 0.95rem; color: #555; margin-bottom: 12px; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn { display: block; width: 100%; padding: 14px 16px; border: 2px solid #dee2e6; border-radius: 8px; background: #fff; font-size: 1rem; font-family: inherit; color: #333; text-align: left; cursor: pointer; transition: all 0.2s; }
+.option-btn:hover { border-color: #2C5AA0; background: #f0f6ff; }
+.option-btn.selected { border-color: #2C5AA0; background: #e8f4fd; color: #1B3A5C; font-weight: bold; }
+.hidden { display: none; }
+.result-card { background: #fff; border-radius: 12px; padding: 24px 20px; margin: 16px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+.result-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; }
+.badge-red { background: #f8d7da; color: #c0392b; }
+.badge-yellow { background: #fff3cd; color: #856404; }
+.badge-green { background: #d4edda; color: #155724; }
+.result-title { font-size: 1.2rem; color: #1B3A5C; margin-bottom: 8px; }
+.result-desc { font-size: 0.95rem; color: #555; margin-bottom: 16px; }
+.result-action { background: #f8f9fa; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; }
+.result-action strong { color: #2C5AA0; }
+.result-note { font-size: 0.85rem; color: #888; border-top: 1px solid #eee; padding-top: 12px; margin-top: 12px; }
+.restart-btn { display: block; width: 100%; padding: 14px; background: #2C5AA0; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-family: inherit; cursor: pointer; margin-top: 12px; }
+.restart-btn:hover { background: #1B3A5C; }
+.back-link { display: block; text-align: center; padding: 8px 16px; font-size: 0.85rem; color: #fff; text-decoration: none; background: rgba(255,255,255,0.15); }
+.back-link:hover { background: rgba(255,255,255,0.25); }
+.progress-bar { height: 4px; background: #dee2e6; margin: 0 16px; border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: #2C5AA0; transition: width 0.3s; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="app-header">
+  <a class="back-link" href="index.html">&larr; ツール一覧に戻る</a>
+  <div class="series">からだの不思議 #1</div>
+  <h1>物忘れセルフチェック</h1>
+</div>
+<div class="disclaimer">このツールは医療行為ではありません。結果は参考情報であり、診断に代わるものではありません。心配な場合は必ず医師にご相談ください。</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="container">
+  <div id="questionArea"></div>
+  <div id="resultArea" class="hidden"></div>
+</div>
+<script>
+var questions = [
+  {
+    id: "who",
+    title: "\u7269\u5FD8\u308C\u304C\u6C17\u306B\u306A\u3063\u3066\u3044\u308B\u306E\u306F\u8AB0\u3067\u3059\u304B\uFF1F",
+    subtitle: "",
+    options: [
+      { id: "self", label: "\u81EA\u5206\u81EA\u8EAB\u306E\u7269\u5FD8\u308C\u304C\u6C17\u306B\u306A\u308B" },
+      { id: "family", label: "\u5BB6\u65CF\u306E\u7269\u5FD8\u308C\u304C\u6C17\u306B\u306A\u308B" },
+      { id: "both", label: "\u672C\u4EBA\u3082\u5BB6\u65CF\u3082\u6C17\u306B\u306A\u3063\u3066\u3044\u308B" }
+    ]
+  },
+  {
+    id: "recall",
+    title: "\u5FD8\u308C\u305F\u3053\u3068\u3092\u30D2\u30F3\u30C8\u3067\u601D\u3044\u51FA\u305B\u307E\u3059\u304B\uFF1F",
+    subtitle: "\u4F8B\uFF1A\u300C\u6628\u65E5\u306E\u5915\u98DF\u4F55\u3060\u3063\u305F\uFF1F\u300D\u2192\u300C\u9B5A\u6599\u7406\u3060\u3063\u305F\u3088\u300D\u3068\u8A00\u308F\u308C\u3066\u601D\u3044\u51FA\u305B\u308B\u304B",
+    options: [
+      { id: "yes", label: "\u30D2\u30F3\u30C8\u304C\u3042\u308C\u3070\u601D\u3044\u51FA\u305B\u308B" },
+      { id: "sometimes", label: "\u601D\u3044\u51FA\u305B\u308B\u3053\u3068\u3082\u3042\u308B\u304C\u3001\u601D\u3044\u51FA\u305B\u306A\u3044\u3053\u3068\u3082\u5897\u3048\u305F" },
+      { id: "no", label: "\u30D2\u30F3\u30C8\u3092\u3082\u3089\u3063\u3066\u3082\u601D\u3044\u51FA\u305B\u306A\u3044\u3053\u3068\u304C\u591A\u3044" },
+      { id: "event", label: "\u51FA\u6765\u4E8B\u81EA\u4F53\u3092\u5FD8\u308C\u3066\u3044\u308B\uFF08\u98DF\u4E8B\u3057\u305F\u3053\u3068\u81EA\u4F53\u3092\u5FD8\u308C\u308B\u306A\u3069\uFF09" }
+    ]
+  },
+  {
+    id: "repeat",
+    title: "\u540C\u3058\u8A71\u3084\u8CEA\u554F\u3092\u7E70\u308A\u8FD4\u3059\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u304B\uFF1F",
+    subtitle: "",
+    options: [
+      { id: "none", label: "\u306A\u3044" },
+      { id: "rare", label: "\u305F\u307E\u306B\u3042\u308B\u304C\u6307\u6458\u3055\u308C\u308C\u3070\u6C17\u3065\u304F" },
+      { id: "frequent", label: "\u3088\u304F\u3042\u308B\u304C\u3001\u672C\u4EBA\u306F\u6C17\u3065\u3044\u3066\u3044\u306A\u3044" }
+    ]
+  },
+  {
+    id: "daily_life",
+    title: "\u65E5\u5E38\u751F\u6D3B\u3078\u306E\u5F71\u97FF\u306F\uFF1F",
+    subtitle: "\u6700\u3082\u5F53\u3066\u306F\u307E\u308B\u3082\u306E\u3092\u9078\u3093\u3067\u304F\u3060\u3055\u3044",
+    options: [
+      { id: "none", label: "\u65E5\u5E38\u751F\u6D3B\u306B\u652F\u969C\u306F\u306A\u3044" },
+      { id: "minor", label: "\u4E88\u5B9A\u3092\u5FD8\u308C\u308B\u3053\u3068\u304C\u3042\u308B\u304C\u30E1\u30E2\u3067\u5BFE\u5FDC\u3067\u304D\u308B" },
+      { id: "moderate", label: "\u85AC\u306E\u98F2\u307F\u5FD8\u308C\u30FB\u8CB7\u3044\u7269\u306E\u30DF\u30B9\u30FB\u6599\u7406\u306E\u5931\u6557\u304C\u5897\u3048\u305F" },
+      { id: "severe", label: "\u304A\u91D1\u306E\u7BA1\u7406\u30FB\u670D\u85AC\u30FB\u5916\u51FA\u304C\u4E00\u4EBA\u3067\u306F\u96E3\u3057\u3044" }
+    ]
+  },
+  {
+    id: "personality",
+    title: "\u6027\u683C\u3084\u884C\u52D5\u306E\u5909\u5316\u306F\u3042\u308A\u307E\u3059\u304B\uFF1F",
+    subtitle: "\u6700\u3082\u5F53\u3066\u306F\u307E\u308B\u3082\u306E\u3092\u9078\u3093\u3067\u304F\u3060\u3055\u3044",
+    options: [
+      { id: "none", label: "\u7279\u306B\u5909\u5316\u306A\u3057" },
+      { id: "apathy", label: "\u8DA3\u5473\u3084\u5916\u51FA\u3078\u306E\u8208\u5473\u304C\u6E1B\u3063\u305F" },
+      { id: "irritable", label: "\u6012\u308A\u3063\u307D\u304F\u306A\u3063\u305F\u30FB\u7591\u3044\u6DF1\u304F\u306A\u3063\u305F" },
+      { id: "disoriented", label: "\u65E5\u4ED8\u3084\u5834\u6240\u304C\u308F\u304B\u3089\u306A\u304F\u306A\u308B\u3053\u3068\u304C\u3042\u308B" }
+    ]
+  },
+  {
+    id: "progression",
+    title: "\u7269\u5FD8\u308C\u306E\u7D4C\u904E\u306F\uFF1F",
+    subtitle: "",
+    options: [
+      { id: "stable", label: "\u4F55\u5E74\u3082\u524D\u304B\u3089\u540C\u3058\u7A0B\u5EA6" },
+      { id: "slow", label: "\u3053\u306E1\uFF5E2\u5E74\u3067\u5F90\u3005\u306B\u60AA\u5316" },
+      { id: "rapid", label: "\u3053\u306E\u6570\u30F6\u6708\u3067\u6025\u306B\u60AA\u5316" }
+    ]
+  }
+];
+
+var currentStep = 0;
+var answers = {};
+
+function renderQuestion() {
+  var area = document.getElementById("questionArea");
+  var q = questions[currentStep];
+  var pct = Math.round((currentStep / questions.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+  var html = '<div class="step-card">';
+  html += '<span class="step-number">' + "\u8CEA\u554F " + (currentStep + 1) + " / " + questions.length + '</span>';
+  html += '<h2>' + q.title + '</h2>';
+  if (q.subtitle) { html += '<p>' + q.subtitle + '</p>'; }
+  html += '<div class="options">';
+  for (var i = 0; i < q.options.length; i++) {
+    var opt = q.options[i];
+    html += '<button class="option-btn" onclick="selectAnswer(\'' + q.id + '\',\'' + opt.id + '\')">' + opt.label + '</button>';
+  }
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+
+function selectAnswer(qId, optId) {
+  answers[qId] = optId;
+  currentStep++;
+  if (currentStep < questions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById("questionArea").classList.add("hidden");
+  document.getElementById("progressFill").style.width = "100%";
+  var urgency = calcUrgency();
+  var resultArea = document.getElementById("resultArea");
+  resultArea.classList.remove("hidden");
+  resultArea.innerHTML = buildResultHTML(urgency);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function calcUrgency() {
+  // 高リスク：出来事自体を忘れる＋日常生活困難
+  if (answers.recall === "event" && answers.daily_life === "severe") { return "urgent_dementia_likely"; }
+  if (answers.recall === "event") { return "urgent_event_forgetting"; }
+
+  // 高リスク：急速悪化
+  if (answers.progression === "rapid") { return "urgent_rapid"; }
+
+  // 高リスク：見当識障害
+  if (answers.personality === "disoriented") { return "urgent_disoriented"; }
+
+  // 中リスク：日常生活に支障＋本人気づかず
+  if (answers.daily_life === "severe") { return "soon_daily_impact"; }
+  if (answers.daily_life === "moderate" && answers.repeat === "frequent") { return "soon_daily_impact"; }
+
+  // 中リスク：家族だけが気になる＋繰り返し
+  if (answers.who === "family" && answers.repeat === "frequent") { return "soon_family_concern"; }
+
+  // 中リスク：性格変化
+  if (answers.personality === "irritable") { return "soon_personality"; }
+  if (answers.personality === "apathy" && answers.progression === "slow") { return "soon_apathy"; }
+
+  // 軽度認知障害の可能性
+  if (answers.recall === "sometimes" && answers.progression === "slow") { return "mci_possible"; }
+  if (answers.daily_life === "moderate") { return "mci_possible"; }
+
+  // 加齢性
+  if (answers.recall === "yes" && answers.daily_life === "none" && answers.who === "self") { return "normal_aging"; }
+  if (answers.recall === "yes" && answers.daily_life === "minor") { return "normal_aging"; }
+
+  // その他
+  return "general_checkup";
+}
+
+function buildResultHTML(urgency) {
+  var data = {
+    urgent_dementia_likely: {
+      badge: "badge-red", badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u8A8D\u77E5\u75C7\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u51FA\u6765\u4E8B\u81EA\u4F53\u3092\u5FD8\u308C\u308B\uFF08\u98DF\u4E8B\u3057\u305F\u3053\u3068\u81EA\u4F53\u3092\u5FD8\u308C\u308B\u306A\u3069\uFF09\u3053\u3068\u306B\u52A0\u3048\u3001\u65E5\u5E38\u751F\u6D3B\u306B\u652F\u969C\u304C\u51FA\u3066\u3044\u308B\u5834\u5408\u3001\u8A8D\u77E5\u75C7\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u65E9\u671F\u306E\u8A3A\u65AD\u3068\u6CBB\u7642\u304C\u91CD\u8981\u3067\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\uFF08\u7269\u5FD8\u308C\u5916\u6765\uFF09\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u982D\u90E8MRI\u3068\u795E\u7D4C\u5FC3\u7406\u691C\u67FB\u3067\u8A55\u4FA1\u3057\u307E\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1\uFF08\u7269\u5FD8\u308C\u5916\u6765\uFF09"
+    },
+    urgent_event_forgetting: {
+      badge: "badge-red", badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u51FA\u6765\u4E8B\u81EA\u4F53\u306E\u5FD8\u5374\u306F\u91CD\u8981\u306A\u30B5\u30A4\u30F3\u3067\u3059",
+      desc: "\u300C\u4F55\u3092\u98DF\u3079\u305F\u304B\u5FD8\u308C\u308B\u300D\u306E\u306F\u52A0\u9F62\u6027\u3067\u3059\u304C\u3001\u300C\u98DF\u4E8B\u3057\u305F\u3053\u3068\u81EA\u4F53\u3092\u5FD8\u308C\u308B\u300D\u306E\u306F\u8A8D\u77E5\u75C7\u306E\u7279\u5FB4\u7684\u306A\u30B5\u30A4\u30F3\u3067\u3059\u3002\u30D2\u30F3\u30C8\u3092\u3082\u3089\u3063\u3066\u3082\u601D\u3044\u51FA\u305B\u306A\u3044\u300C\u30A8\u30D4\u30BD\u30FC\u30C9\u8A18\u61B6\u306E\u969C\u5BB3\u300D\u304C\u7591\u308F\u308C\u307E\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\uFF08\u7269\u5FD8\u308C\u5916\u6765\uFF09\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u982D\u90E8MRI\u3068\u795E\u7D4C\u5FC3\u7406\u691C\u67FB\u3067\u8A55\u4FA1\u3057\u307E\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1\uFF08\u7269\u5FD8\u308C\u5916\u6765\uFF09"
+    },
+    urgent_rapid: {
+      badge: "badge-red", badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u6025\u901F\u306A\u60AA\u5316\u306F\u6CBB\u7642\u53EF\u80FD\u306A\u539F\u56E0\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u6570\u30F6\u6708\u3067\u6025\u306B\u60AA\u5316\u3059\u308B\u7269\u5FD8\u308C\u306F\u3001\u6B63\u5E38\u5727\u6C34\u982D\u75C7\u30FB\u6162\u6027\u786C\u819C\u4E0B\u8840\u816B\u30FB\u7532\u72B6\u817A\u6A5F\u80FD\u4F4E\u4E0B\u75C7\u30FB\u30D3\u30BF\u30DF\u30F3B12\u6B20\u4E4F\u306A\u3069\u3001\u6CBB\u7642\u53EF\u80FD\u306A\u539F\u56E0\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u65E9\u671F\u767A\u898B\u304C\u91CD\u8981\u3067\u3059\u3002",
+      action: "<strong>\u3059\u3050\u306B\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u982D\u90E8MRI\u30FB\u8840\u6DB2\u691C\u67FB\u3067\u539F\u56E0\u3092\u7279\u5B9A\u3057\u307E\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    urgent_disoriented: {
+      badge: "badge-red", badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u898B\u5F53\u8B58\u969C\u5BB3\u306F\u8A8D\u77E5\u75C7\u306E\u91CD\u8981\u306A\u30B5\u30A4\u30F3\u3067\u3059",
+      desc: "\u65E5\u4ED8\u3084\u5834\u6240\u304C\u308F\u304B\u3089\u306A\u304F\u306A\u308B\u300C\u898B\u5F53\u8B58\u969C\u5BB3\u300D\u306F\u3001\u8A8D\u77E5\u75C7\u306E\u7279\u5FB4\u7684\u306A\u75C7\u72B6\u3067\u3059\u3002\u6163\u308C\u305F\u9053\u3067\u8FF7\u3046\u30FB\u5B63\u7BC0\u304C\u308F\u304B\u3089\u306A\u3044\u306A\u3069\u304C\u8A72\u5F53\u3057\u307E\u3059\u3002\u65E9\u671F\u306E\u8A3A\u65AD\u3068\u4ECB\u5165\u304C\u5927\u5207\u3067\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\uFF08\u7269\u5FD8\u308C\u5916\u6765\uFF09\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1\uFF08\u7269\u5FD8\u308C\u5916\u6765\uFF09"
+    },
+    soon_daily_impact: {
+      badge: "badge-yellow", badgeText: "\u53D7\u8A3A\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059",
+      title: "\u65E5\u5E38\u751F\u6D3B\u3078\u306E\u5F71\u97FF\u304C\u3042\u308B\u5834\u5408\u306F\u8A55\u4FA1\u304C\u5FC5\u8981\u3067\u3059",
+      desc: "\u85AC\u306E\u98F2\u307F\u5FD8\u308C\u30FB\u8CB7\u3044\u7269\u306E\u30DF\u30B9\u30FB\u6599\u7406\u306E\u5931\u6557\u306A\u3069\u3001\u65E5\u5E38\u751F\u6D3B\u306B\u652F\u969C\u304C\u51FA\u3066\u3044\u308B\u5834\u5408\u3001\u8EFD\u5EA6\u8A8D\u77E5\u969C\u5BB3\uFF08MCI\uFF09\u307E\u305F\u306F\u521D\u671F\u306E\u8A8D\u77E5\u75C7\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002MCI\u306E\u6BB5\u968E\u306A\u3089\u300114\uFF5E40\u0025\u304C\u6B63\u5E38\u306B\u623B\u308B\u3068\u3044\u3046\u5831\u544A\u3082\u3042\u308A\u307E\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\uFF08\u7269\u5FD8\u308C\u5916\u6765\uFF09\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u65E9\u671F\u767A\u898B\u30FB\u65E9\u671F\u4ECB\u5165\u304C\u91CD\u8981\u3067\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1\uFF08\u7269\u5FD8\u308C\u5916\u6765\uFF09"
+    },
+    soon_family_concern: {
+      badge: "badge-yellow", badgeText: "\u53D7\u8A3A\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059",
+      title: "\u300C\u5BB6\u65CF\u3060\u3051\u304C\u6C17\u3065\u304F\u300D\u306F\u91CD\u8981\u306A\u30B5\u30A4\u30F3\u3067\u3059",
+      desc: "\u52A0\u9F62\u6027\u306E\u7269\u5FD8\u308C\u3067\u306F\u672C\u4EBA\u304C\u81EA\u899A\u3057\u307E\u3059\u304C\u3001\u8A8D\u77E5\u75C7\u3067\u306F\u672C\u4EBA\u304C\u6C17\u3065\u304B\u305A\u5BB6\u65CF\u3060\u3051\u304C\u5FC3\u914D\u3059\u308B\u3053\u3068\u304C\u591A\u3044\u3067\u3059\u3002\u540C\u3058\u8A71\u3092\u7E70\u308A\u8FD4\u3059\u306E\u306B\u672C\u4EBA\u304C\u6C17\u3065\u3044\u3066\u3044\u306A\u3044\u5834\u5408\u3001\u4E00\u5EA6\u5C02\u9580\u533B\u306E\u8A55\u4FA1\u3092\u53D7\u3051\u308B\u3053\u3068\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\uFF08\u7269\u5FD8\u308C\u5916\u6765\uFF09\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u30D9\u30FC\u30B9\u30E9\u30A4\u30F3\u306E\u691C\u67FB\u3092\u53D7\u3051\u3066\u304A\u304F\u3068\u4ECA\u5F8C\u306E\u6BD4\u8F03\u306B\u5F79\u7ACB\u3061\u307E\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1\uFF08\u7269\u5FD8\u308C\u5916\u6765\uFF09"
+    },
+    soon_personality: {
+      badge: "badge-yellow", badgeText: "\u53D7\u8A3A\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059",
+      title: "\u6027\u683C\u5909\u5316\u3092\u4F34\u3046\u7269\u5FD8\u308C\u306F\u8A55\u4FA1\u304C\u5FC5\u8981\u3067\u3059",
+      desc: "\u6012\u308A\u3063\u307D\u304F\u306A\u3063\u305F\u30FB\u7591\u3044\u6DF1\u304F\u306A\u3063\u305F\u306A\u3069\u306E\u6027\u683C\u5909\u5316\u306F\u3001\u8A8D\u77E5\u75C7\u306E\u521D\u671F\u75C7\u72B6\u3068\u3057\u3066\u898B\u3089\u308C\u308B\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u3002\u7279\u306B\u524D\u982D\u5074\u982D\u578B\u8A8D\u77E5\u75C7\u3067\u306F\u6027\u683C\u5909\u5316\u304C\u521D\u767A\u75C7\u72B6\u3067\u3042\u308B\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u982D\u90E8MRI\u3067\u8133\u306E\u8403\u7E2E\u30D1\u30BF\u30FC\u30F3\u3092\u78BA\u8A8D\u3057\u307E\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    soon_apathy: {
+      badge: "badge-yellow", badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u610F\u6B32\u4F4E\u4E0B\u3092\u4F34\u3046\u7269\u5FD8\u308C\u306F\u8981\u6CE8\u610F\u3067\u3059",
+      desc: "\u8DA3\u5473\u3084\u5916\u51FA\u3078\u306E\u8208\u5473\u304C\u6E1B\u308A\u3001\u5F90\u3005\u306B\u7269\u5FD8\u308C\u3082\u60AA\u5316\u3057\u3066\u3044\u308B\u5834\u5408\u3001\u8A8D\u77E5\u75C7\u306E\u521D\u671F\u75C7\u72B6\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u3046\u3064\u75C5\u3068\u306E\u9451\u5225\u3082\u91CD\u8981\u3067\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\u307E\u305F\u306F\u7CBE\u795E\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1\u30FB\u7CBE\u795E\u79D1"
+    },
+    mci_possible: {
+      badge: "badge-yellow", badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
+      title: "\u8EFD\u5EA6\u8A8D\u77E5\u969C\u5BB3\uFF08MCI\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u52A0\u9F62\u6027\u306E\u7269\u5FD8\u308C\u3068\u8A8D\u77E5\u75C7\u306E\u4E2D\u9593\u306B\u3042\u308B\u300C\u8EFD\u5EA6\u8A8D\u77E5\u969C\u5BB3\uFF08MCI\uFF09\u300D\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u300065\u6B73\u4EE5\u4E0A\u306E15.5\u0025\u304CMCI\u3068\u3055\u308C\u3066\u3044\u307E\u3059\u3002\u65E9\u671F\u306B\u767A\u898B\u3059\u308C\u3070\u3001\u904B\u52D5\u30FB\u98DF\u4E8B\u30FB\u793E\u4F1A\u6D3B\u52D5\u3067\u9032\u884C\u3092\u9045\u3089\u305B\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\uFF08\u7269\u5FD8\u308C\u5916\u6765\uFF09\u3067\u30D9\u30FC\u30B9\u30E9\u30A4\u30F3\u691C\u67FB\u3092\u53D7\u3051\u307E\u3057\u3087\u3046\u3002</strong>\u6B63\u5E38\u3067\u3082\u4ECA\u5F8C\u306E\u6BD4\u8F03\u306B\u5F79\u7ACB\u3061\u307E\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1\uFF08\u7269\u5FD8\u308C\u5916\u6765\uFF09"
+    },
+    normal_aging: {
+      badge: "badge-green", badgeText: "\u52A0\u9F62\u6027\u306E\u53EF\u80FD\u6027\u304C\u9AD8\u3044\u3067\u3059",
+      title: "\u5E74\u9F62\u76F8\u5FDC\u306E\u7269\u5FD8\u308C\u306E\u53EF\u80FD\u6027\u304C\u9AD8\u3044\u3067\u3059",
+      desc: "\u30D2\u30F3\u30C8\u304C\u3042\u308C\u3070\u601D\u3044\u51FA\u305B\u308B\u30FB\u81EA\u5206\u3067\u7269\u5FD8\u308C\u306B\u6C17\u3065\u3044\u3066\u3044\u308B\u30FB\u65E5\u5E38\u751F\u6D3B\u306B\u652F\u969C\u306A\u3057\u3002\u3053\u308C\u306F\u300C\u540D\u524D\u304C\u51FA\u3066\u3053\u306A\u3044\u300D\u300C\u3042\u308C\u4F55\u3060\u3063\u305F\u3063\u3051\u300D\u306A\u3069\u3001\u8AB0\u306B\u3067\u3082\u8D77\u3053\u308BTOT\uFF08Tip-of-the-Tongue\uFF09\u73FE\u8C61\u3067\u3059\u3002\u52A0\u9F62\u306B\u3088\u308B\u767D\u8CEA\u306E\u795E\u7D4C\u7E4A\u7DAD\u306E\u4F4E\u4E0B\u304C\u539F\u56E0\u3067\u3059\u3002",
+      action: "<strong>\u904B\u52D5\u30FB\u793E\u4F1A\u6D3B\u52D5\u30FB\u826F\u8CEA\u306A\u7761\u7720\u304C\u4E88\u9632\u306B\u6709\u52B9\u3067\u3059\u3002</strong>\u60B2\u5316\u3057\u305F\u5834\u5408\u306F\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002",
+      dept: "\u60B2\u5316\u6642\uFF1A\u8133\u795E\u7D4C\u5185\u79D1\uFF08\u7269\u5FD8\u308C\u5916\u6765\uFF09"
+    },
+    general_checkup: {
+      badge: "badge-green", badgeText: "\u69D8\u5B50\u3092\u898B\u3066\u3082\u5927\u4E08\u592B\u3067\u3059",
+      title: "\u7DCA\u6025\u6027\u306F\u4F4E\u305D\u3046\u3067\u3059",
+      desc: "\u73FE\u6642\u70B9\u3067\u306F\u7DCA\u6025\u6027\u306E\u9AD8\u3044\u30B5\u30A4\u30F3\u306F\u898B\u3089\u308C\u307E\u305B\u3093\u3002\u305F\u3060\u3057\u3001\u7269\u5FD8\u308C\u304C\u6C17\u306B\u306A\u308B\u5834\u5408\u306F\u3001\u30D9\u30FC\u30B9\u30E9\u30A4\u30F3\u691C\u67FB\u3092\u53D7\u3051\u3066\u304A\u304F\u3068\u5C06\u6765\u306E\u6BD4\u8F03\u306B\u5F79\u7ACB\u3061\u307E\u3059\u3002",
+      action: "<strong>\u75C7\u72B6\u304C\u60AA\u5316\u3057\u305F\u5834\u5408\u306F\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>",
+      dept: "\u6C17\u306B\u306A\u308B\u5834\u5408\uFF1A\u8133\u795E\u7D4C\u5185\u79D1\uFF08\u7269\u5FD8\u308C\u5916\u6765\uFF09"
+    }
+  };
+
+  var d = data[urgency];
+  var html = '<div class="result-card">';
+  html += '<span class="result-badge ' + d.badge + '">' + d.badgeText + '</span>';
+  html += '<h2 class="result-title">' + d.title + '</h2>';
+  html += '<p class="result-desc">' + d.desc + '</p>';
+  html += '<div class="result-action">' + d.action + '</div>';
+  html += '<div class="result-action"><strong>' + "\u63A8\u5968\u8A3A\u7642\u79D1\uFF1A" + '</strong>' + d.dept + '</div>';
+  html += '<div class="result-note">';
+  html += '<strong>' + "\u3042\u306A\u305F\u306E\u56DE\u7B54\uFF1A" + '</strong><br>';
+  html += "\u5BFE\u8C61\uFF1A" + getLabelFor("who", answers.who) + '<br>';
+  html += "\u60F3\u8D77\uFF1A" + getLabelFor("recall", answers.recall) + '<br>';
+  html += "\u7E70\u308A\u8FD4\u3057\uFF1A" + getLabelFor("repeat", answers.repeat) + '<br>';
+  html += "\u65E5\u5E38\u751F\u6D3B\uFF1A" + getLabelFor("daily_life", answers.daily_life) + '<br>';
+  html += "\u6027\u683C\u5909\u5316\uFF1A" + getLabelFor("personality", answers.personality) + '<br>';
+  html += "\u7D4C\u904E\uFF1A" + getLabelFor("progression", answers.progression);
+  html += '<br><br>' + "\u203B \u3053\u306E\u30C1\u30A7\u30C3\u30AF\u7D50\u679C\u3092\u5370\u5237\u3057\u3066\u53D7\u8A3A\u6642\u306B\u304A\u6301\u3061\u3044\u305F\u3060\u304F\u3068\u3001\u533B\u5E2B\u3078\u306E\u8AAC\u660E\u304C\u30B9\u30E0\u30FC\u30BA\u3067\u3059\u3002";
+  html += '</div></div>';
+  html += '<button class="restart-btn" onclick="restart()">' + "\u3082\u3046\u4E00\u5EA6\u30C1\u30A7\u30C3\u30AF\u3059\u308B" + '</button>';
+  return html;
+}
+
+function getLabelFor(qId, optId) {
+  for (var i = 0; i < questions.length; i++) {
+    if (questions[i].id === qId) {
+      for (var j = 0; j < questions[i].options.length; j++) {
+        if (questions[i].options[j].id === optId) { return questions[i].options[j].label; }
+      }
+    }
+  }
+  return "";
+}
+
+function restart() {
+  currentStep = 0; answers = {};
+  document.getElementById("resultArea").classList.add("hidden");
+  document.getElementById("resultArea").innerHTML = "";
+  document.getElementById("questionArea").classList.remove("hidden");
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
