@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>しびれ受診科セルフチェック ― からだの不思議</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif; background: #f0f4f8; color: #333; line-height: 1.6; min-height: 100vh; }
+.app-header { background: linear-gradient(135deg, #1B3A5C, #2C5AA0); color: #fff; padding: 16px 20px; text-align: center; }
+.app-header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+.app-header .series { font-size: 0.8rem; opacity: 0.8; }
+.disclaimer { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin: 12px 16px; border-radius: 4px; font-size: 0.85rem; color: #856404; }
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+.step-card { background: #fff; border-radius: 12px; padding: 20px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.step-number { display: inline-block; background: #2C5AA0; color: #fff; font-size: 0.8rem; padding: 2px 10px; border-radius: 12px; margin-bottom: 8px; }
+.step-card h2 { font-size: 1.1rem; color: #1B3A5C; margin-bottom: 12px; }
+.step-card p { font-size: 0.95rem; color: #555; margin-bottom: 12px; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn { display: block; width: 100%; padding: 14px 16px; border: 2px solid #dee2e6; border-radius: 8px; background: #fff; font-size: 1rem; font-family: inherit; color: #333; text-align: left; cursor: pointer; transition: all 0.2s; }
+.option-btn:hover { border-color: #2C5AA0; background: #f0f6ff; }
+.option-btn.selected { border-color: #2C5AA0; background: #e8f4fd; color: #1B3A5C; font-weight: bold; }
+.hidden { display: none; }
+.result-card { background: #fff; border-radius: 12px; padding: 24px 20px; margin: 16px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+.result-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; }
+.badge-red { background: #f8d7da; color: #c0392b; }
+.badge-yellow { background: #fff3cd; color: #856404; }
+.badge-green { background: #d4edda; color: #155724; }
+.result-title { font-size: 1.2rem; color: #1B3A5C; margin-bottom: 8px; }
+.result-desc { font-size: 0.95rem; color: #555; margin-bottom: 16px; }
+.result-action { background: #f8f9fa; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; }
+.result-action strong { color: #2C5AA0; }
+.result-note { font-size: 0.85rem; color: #888; border-top: 1px solid #eee; padding-top: 12px; margin-top: 12px; }
+.restart-btn { display: block; width: 100%; padding: 14px; background: #2C5AA0; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-family: inherit; cursor: pointer; margin-top: 12px; }
+.restart-btn:hover { background: #1B3A5C; }
+.back-link { display: block; text-align: center; padding: 8px 16px; font-size: 0.85rem; color: #fff; text-decoration: none; background: rgba(255,255,255,0.15); }
+.back-link:hover { background: rgba(255,255,255,0.25); }
+.progress-bar { height: 4px; background: #dee2e6; margin: 0 16px; border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: #2C5AA0; transition: width 0.3s; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="app-header">
+  <a class="back-link" href="index.html">&larr; ツール一覧に戻る</a>
+  <div class="series">からだの不思議 #14</div>
+  <h1>しびれ受診科セルフチェック</h1>
+</div>
+<div class="disclaimer">このツールは医療行為ではありません。結果は参考情報であり、診断に代わるものではありません。心配な場合は必ず医師にご相談ください。</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="container">
+  <div id="questionArea"></div>
+  <div id="resultArea" class="hidden"></div>
+</div>
+<script>
+var questions = [
+  {
+    id: "onset",
+    title: "\u3057\u3073\u308C\u306E\u59CB\u307E\u308A\u65B9\u306F\uFF1F",
+    subtitle: "",
+    options: [
+      { id: "sudden", label: "\u7A81\u7136\u59CB\u307E\u3063\u305F\uFF08\u6570\u5206\uFF5E\u6570\u6642\u9593\u4EE5\u5185\uFF09" },
+      { id: "weeks", label: "\u6570\u9031\u9593\u304B\u3051\u3066\u5F90\u3005\u306B" },
+      { id: "months", label: "\u6570\u30F6\u6708\u4EE5\u4E0A\u304B\u3051\u3066\u5F90\u3005\u306B" }
+    ]
+  },
+  {
+    id: "location",
+    title: "\u3057\u3073\u308C\u306E\u5834\u6240\u306F\uFF1F",
+    subtitle: "\u6700\u3082\u8FD1\u3044\u3082\u306E\u3092\u9078\u3093\u3067\u304F\u3060\u3055\u3044",
+    options: [
+      { id: "hemi_face_arm_leg", label: "\u7247\u5074\u306E\u9854\u30FB\u8155\u30FB\u811A\uFF08\u540C\u6642\u306B\uFF09" },
+      { id: "both_feet", label: "\u4E21\u8DB3\u5148\uFF08\u5DE6\u53F3\u5BFE\u79F0\uFF09" },
+      { id: "specific_fingers", label: "\u7279\u5B9A\u306E\u6307\uFF08\u89AA\u6307\uFF5E\u4E2D\u6307 \u307E\u305F\u306F \u85AC\u6307\uFF5E\u5C0F\u6307\uFF09" },
+      { id: "arm_hand", label: "\u7247\u65B9\u306E\u8155\u304B\u3089\u624B\u5168\u4F53" },
+      { id: "below_level", label: "\u80F8\u3084\u8170\u304B\u3089\u4E0B\u304C\u5168\u4F53\u7684\u306B" }
+    ]
+  },
+  {
+    id: "symmetry",
+    title: "\u3057\u3073\u308C\u306F\u5DE6\u53F3\u3069\u3061\u3089\uFF1F",
+    subtitle: "",
+    options: [
+      { id: "one_side", label: "\u7247\u5074\u3060\u3051" },
+      { id: "both_symmetric", label: "\u4E21\u5074\u5BFE\u79F0\uFF08\u5DE6\u53F3\u540C\u3058\uFF09" },
+      { id: "both_asymmetric", label: "\u4E21\u5074\u3060\u304C\u5DE6\u53F3\u5DEE\u304C\u3042\u308B" }
+    ]
+  },
+  {
+    id: "associated",
+    title: "\u4E00\u7DD2\u306B\u3042\u308B\u75C7\u72B6\u306F\uFF1F",
+    subtitle: "\u6700\u3082\u5F53\u3066\u306F\u307E\u308B\u3082\u306E\u3092\u9078\u3093\u3067\u304F\u3060\u3055\u3044",
+    options: [
+      { id: "weakness", label: "\u529B\u304C\u5165\u3089\u306A\u3044\u30FB\u9EBB\u75FA\u304C\u3042\u308B" },
+      { id: "pain_neck", label: "\u9996\u30FB\u80A9\u306E\u75DB\u307F\u304C\u3042\u308B" },
+      { id: "pain_back", label: "\u8170\u306E\u75DB\u307F\u304C\u3042\u308B" },
+      { id: "metabolic", label: "\u7CD6\u5C3F\u75C5\u30FB\u7532\u72B6\u817A\u30FB\u814E\u81D3\u306E\u6301\u75C5\u304C\u3042\u308B" },
+      { id: "bladder", label: "\u6392\u5C3F\u30FB\u6392\u4FBF\u306E\u7570\u5E38\u304C\u3042\u308B" },
+      { id: "none", label: "\u7279\u306B\u306A\u3044" }
+    ]
+  },
+  {
+    id: "position_effect",
+    title: "\u59FF\u52E2\u306E\u5F71\u97FF\u306F\uFF1F",
+    subtitle: "",
+    options: [
+      { id: "neck_move", label: "\u9996\u3092\u52D5\u304B\u3059\u3068\u60AA\u5316\u3059\u308B" },
+      { id: "pressure", label: "\u624B\u3092\u3064\u304F\u30FB\u6B63\u5EA7\u3067\u60AA\u5316\u3059\u308B" },
+      { id: "back_move", label: "\u8170\u3092\u52D5\u304B\u3059\u3068\u60AA\u5316\u3059\u308B" },
+      { id: "none", label: "\u59FF\u52E2\u3068\u7121\u95A2\u4FC2" }
+    ]
+  },
+  {
+    id: "progression",
+    title: "\u3057\u3073\u308C\u306E\u7D4C\u904E\u306F\uFF1F",
+    subtitle: "",
+    options: [
+      { id: "spreading", label: "\u5225\u306E\u90E8\u4F4D\u306B\u3082\u5E83\u304C\u3063\u3066\u3044\u308B" },
+      { id: "worsening", label: "\u540C\u3058\u5834\u6240\u3067\u60AA\u5316\u3057\u3066\u3044\u308B" },
+      { id: "stable", label: "\u5909\u308F\u3089\u306A\u3044" },
+      { id: "improving", label: "\u826F\u304F\u306A\u3063\u3066\u304D\u3066\u3044\u308B" }
+    ]
+  }
+];
+
+var currentStep = 0;
+var answers = {};
+
+function renderQuestion() {
+  var area = document.getElementById("questionArea");
+  var q = questions[currentStep];
+  var pct = Math.round((currentStep / questions.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+  var html = '<div class="step-card">';
+  html += '<span class="step-number">' + "\u8CEA\u554F " + (currentStep + 1) + " / " + questions.length + '</span>';
+  html += '<h2>' + q.title + '</h2>';
+  if (q.subtitle) { html += '<p>' + q.subtitle + '</p>'; }
+  html += '<div class="options">';
+  for (var i = 0; i < q.options.length; i++) {
+    var opt = q.options[i];
+    html += '<button class="option-btn" onclick="selectAnswer(\'' + q.id + '\',\'' + opt.id + '\')">' + opt.label + '</button>';
+  }
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+
+function selectAnswer(qId, optId) {
+  answers[qId] = optId;
+  currentStep++;
+  if (currentStep < questions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById("questionArea").classList.add("hidden");
+  document.getElementById("progressFill").style.width = "100%";
+  var urgency = calcUrgency();
+  var resultArea = document.getElementById("resultArea");
+  resultArea.classList.remove("hidden");
+  resultArea.innerHTML = buildResultHTML(urgency);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function calcUrgency() {
+  // 最緊急：脳卒中の疑い
+  if (answers.onset === "sudden" && answers.location === "hemi_face_arm_leg") { return "emergency_stroke"; }
+  if (answers.onset === "sudden" && answers.associated === "weakness") { return "emergency_stroke"; }
+
+  // 緊急：脊髄圧迫
+  if (answers.associated === "bladder") { return "emergency_spinal"; }
+  if (answers.location === "below_level" && answers.onset === "sudden") { return "emergency_spinal"; }
+
+  // 脳神経内科：進行性・拡大するしびれ
+  if (answers.location === "hemi_face_arm_leg") { return "neuro_central"; }
+  if (answers.location === "below_level") { return "neuro_spinal"; }
+  if (answers.progression === "spreading") { return "neuro_progressive"; }
+  if (answers.location === "both_feet" && answers.symmetry === "both_symmetric" && answers.associated === "none" && answers.position_effect === "none") { return "neuro_polyneuropathy"; }
+
+  // 整形外科：頚椎・腰椎
+  if (answers.position_effect === "neck_move" && answers.associated === "pain_neck") { return "ortho_cervical"; }
+  if (answers.position_effect === "neck_move") { return "ortho_cervical"; }
+  if (answers.position_effect === "back_move" && answers.associated === "pain_back") { return "ortho_lumbar"; }
+  if (answers.position_effect === "back_move") { return "ortho_lumbar"; }
+  if (answers.specific_fingers === "specific_fingers" && answers.position_effect === "pressure") { return "ortho_carpal"; }
+  if (answers.location === "specific_fingers" && answers.position_effect === "pressure") { return "ortho_carpal"; }
+  if (answers.location === "specific_fingers" && answers.associated === "pain_neck") { return "ortho_cervical"; }
+
+  // 内科：代謝性
+  if (answers.associated === "metabolic") { return "internal_metabolic"; }
+  if (answers.location === "both_feet" && answers.symmetry === "both_symmetric") { return "internal_or_neuro"; }
+
+  // その他
+  if (answers.location === "arm_hand" && answers.associated === "pain_neck") { return "ortho_cervical"; }
+  if (answers.location === "arm_hand") { return "neuro_or_ortho"; }
+
+  return "general";
+}
+
+function buildResultHTML(urgency) {
+  var data = {
+    emergency_stroke: {
+      badge: "badge-red", badgeText: "\u4ECA\u3059\u3050119\u756A\u3078",
+      title: "\u8133\u5352\u4E2D\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u7247\u5074\u306E\u9854\u30FB\u8155\u30FB\u811A\u306B\u7A81\u7136\u3057\u3073\u308C\u3084\u9EBB\u75FA\u304C\u51FA\u305F\u5834\u5408\u3001\u8133\u5352\u4E2D\uFF08\u8133\u68D7\u585E\u30FB\u8133\u51FA\u8840\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002FAST\uFF08\u9854\u306E\u3086\u304C\u307F\u30FB\u8155\u306E\u529B\u30FB\u8A00\u8449\u306E\u7570\u5E38\u30FB\u6642\u9593\uFF09\u3092\u78BA\u8A8D\u3057\u3066\u304F\u3060\u3055\u3044\u3002\u3057\u3073\u308C\u3060\u3051\u3067\u3082\u8133\u5352\u4E2D\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002",
+      action: "<strong>\u4ECA\u3059\u3050119\u756A\u306B\u96FB\u8A71\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u6CBB\u7642\u306E\u6642\u9593\u7A93\u304C\u9650\u3089\u308C\u3066\u3044\u307E\u3059\u3002",
+      dept: "\u6551\u6025\u79D1\uFF08119\u756A\uFF09"
+    },
+    emergency_spinal: {
+      badge: "badge-red", badgeText: "\u4ECA\u3059\u3050\u6551\u6025\u5916\u6765\u3078",
+      title: "\u810A\u9AC4\u5727\u8FEB\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u6392\u5C3F\u30FB\u6392\u4FBF\u306E\u7570\u5E38\u3092\u4F34\u3046\u3057\u3073\u308C\u306F\u3001\u810A\u9AC4\u304C\u5727\u8FEB\u3055\u308C\u3066\u3044\u308B\u7DCA\u6025\u4E8B\u614B\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u7DCA\u6025\u624B\u8853\u304C\u5FC5\u8981\u306B\u306A\u308B\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u3002",
+      action: "<strong>\u4ECA\u3059\u3050\u6551\u6025\u5916\u6765\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u7DCA\u6025MRI\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      dept: "\u6551\u6025\u79D1\u30FB\u8133\u795E\u7D4C\u5916\u79D1\u30FB\u6574\u5F62\u5916\u79D1"
+    },
+    neuro_central: {
+      badge: "badge-yellow", badgeText: "\u8133\u795E\u7D4C\u5185\u79D1\u3078",
+      title: "\u4E2D\u679A\u6027\uFF08\u8133\u30FB\u810A\u9AC4\uFF09\u306E\u539F\u56E0\u304C\u7591\u308F\u308C\u307E\u3059",
+      desc: "\u7247\u5074\u306E\u9854\u30FB\u8155\u30FB\u811A\u306B\u540C\u6642\u306B\u3057\u3073\u308C\u304C\u51FA\u308B\u30D1\u30BF\u30FC\u30F3\u306F\u3001\u8133\u307E\u305F\u306F\u810A\u9AC4\u306B\u539F\u56E0\u304C\u3042\u308B\u53EF\u80FD\u6027\u304C\u9AD8\u3044\u3067\u3059\u3002\u8133\u5352\u4E2D\u30FB\u591A\u767A\u6027\u786C\u5316\u75C7\u30FB\u810A\u9AC4\u708E\u306A\u3069\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u982D\u90E8\u30FB\u810A\u9AC4MRI\u3067\u8A55\u4FA1\u3057\u307E\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    neuro_spinal: {
+      badge: "badge-yellow", badgeText: "\u8133\u795E\u7D4C\u5185\u79D1\u3078",
+      title: "\u810A\u9AC4\u306E\u554F\u984C\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u80F8\u3084\u8170\u304B\u3089\u4E0B\u306E\u30EC\u30D9\u30EB\u3067\u3057\u3073\u308C\u304C\u3042\u308B\u5834\u5408\u3001\u810A\u9AC4\u306E\u75C5\u5909\uFF08\u810A\u9AC4\u708E\u30FB\u810A\u9AC4\u5727\u8FEB\u306A\u3069\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u810A\u9AC4MRI\u3067\u8A55\u4FA1\u3057\u307E\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    neuro_progressive: {
+      badge: "badge-yellow", badgeText: "\u8133\u795E\u7D4C\u5185\u79D1\u3078",
+      title: "\u9032\u884C\u6027\u306E\u3057\u3073\u308C\u306F\u795E\u7D4C\u5185\u79D1\u3067\u8A55\u4FA1\u304C\u5FC5\u8981\u3067\u3059",
+      desc: "\u3057\u3073\u308C\u304C\u5225\u306E\u90E8\u4F4D\u306B\u5E83\u304C\u3063\u3066\u3044\u308B\u5834\u5408\u3001\u30AE\u30E9\u30F3\u30FB\u30D0\u30EC\u30FC\u75C7\u5019\u7FA4\u30FB\u591A\u767A\u6027\u786C\u5316\u75C7\u30FBCIDP\u306A\u3069\u306E\u795E\u7D4C\u75BE\u60A3\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u795E\u7D4C\u4F1D\u5C0E\u691C\u67FB\u3084\u8840\u6DB2\u691C\u67FB\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      action: "<strong>\u65E9\u3081\u306B\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    neuro_polyneuropathy: {
+      badge: "badge-yellow", badgeText: "\u8133\u795E\u7D4C\u5185\u79D1\u3078",
+      title: "\u591A\u767A\u795E\u7D4C\u969C\u5BB3\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u4E21\u8DB3\u5148\u306B\u5BFE\u79F0\u6027\u306E\u3057\u3073\u308C\u304C\u3042\u308B\u5834\u5408\u3001\u591A\u767A\u795E\u7D4C\u969C\u5BB3\uFF08\u30DD\u30EA\u30CB\u30E5\u30FC\u30ED\u30D1\u30C1\u30FC\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u7CD6\u5C3F\u75C5\u30FB\u30D3\u30BF\u30DF\u30F3B12\u6B20\u4E4F\u30FB\u7532\u72B6\u817A\u6A5F\u80FD\u4F4E\u4E0B\u75C7\u306A\u3069\u306E\u539F\u56E0\u691C\u7D22\u304C\u5FC5\u8981\u3067\u3059\u3002",
+      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u795E\u7D4C\u4F1D\u5C0E\u691C\u67FB\u30FB\u8840\u6DB2\u691C\u67FB\u3067\u539F\u56E0\u3092\u7279\u5B9A\u3057\u307E\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    ortho_cervical: {
+      badge: "badge-yellow", badgeText: "\u6574\u5F62\u5916\u79D1\u3078",
+      title: "\u9838\u690E\u75C7\uFF08\u9996\u306E\u795E\u7D4C\u5727\u8FEB\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u9996\u3092\u52D5\u304B\u3059\u3068\u60AA\u5316\u3059\u308B\u8155\u3084\u624B\u306E\u3057\u3073\u308C\u306F\u3001\u9838\u690E\u75C7\uFF08\u9838\u690E\u691C\u756A\u30D8\u30EB\u30CB\u30A2\u30FB\u9838\u690E\u75C7\u6027\u810A\u9AC4\u75C7\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u7279\u5B9A\u306E\u6307\u306E\u3057\u3073\u308C\u30D1\u30BF\u30FC\u30F3\u304C\u795E\u7D4C\u6839\u306E\u30EC\u30D9\u30EB\u3092\u793A\u5506\u3057\u307E\u3059\u3002",
+      action: "<strong>\u6574\u5F62\u5916\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u9838\u690E MRI\u3067\u8A55\u4FA1\u3057\u307E\u3059\u3002\u624B\u5148\u306E\u5DE7\u7DFB\u6027\u4F4E\u4E0B\u3084\u6B69\u884C\u969C\u5BB3\u304C\u3042\u308C\u3070\u8133\u795E\u7D4C\u5185\u79D1\u3082\u691C\u8A0E\u3092\u3002",
+      dept: "\u6574\u5F62\u5916\u79D1\uFF08\u810A\u690E\uFF09"
+    },
+    ortho_lumbar: {
+      badge: "badge-yellow", badgeText: "\u6574\u5F62\u5916\u79D1\u3078",
+      title: "\u8170\u690E\u75C7\uFF08\u8170\u306E\u795E\u7D4C\u5727\u8FEB\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u8170\u3092\u52D5\u304B\u3059\u3068\u60AA\u5316\u3059\u308B\u811A\u306E\u3057\u3073\u308C\u306F\u3001\u8170\u690E\u690E\u9593\u677F\u30D8\u30EB\u30CB\u30A2\u3084\u8170\u90E8\u810A\u67F1\u7BA1\u72ED\u7A84\u75C7\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u9577\u6642\u9593\u6B69\u304F\u3068\u3057\u3073\u308C\u304C\u5F37\u304F\u306A\u308A\u3001\u4F11\u3080\u3068\u697D\u306B\u306A\u308B\u300C\u9593\u6B47\u6027\u8DE1\u884C\u300D\u304C\u7279\u5FB4\u7684\u3067\u3059\u3002",
+      action: "<strong>\u6574\u5F62\u5916\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u8170\u690E MRI\u3067\u8A55\u4FA1\u3057\u307E\u3059\u3002",
+      dept: "\u6574\u5F62\u5916\u79D1\uFF08\u810A\u690E\uFF09"
+    },
+    ortho_carpal: {
+      badge: "badge-green", badgeText: "\u6574\u5F62\u5916\u79D1\u3078",
+      title: "\u624B\u6839\u7BA1\u75C7\u5019\u7FA4\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u89AA\u6307\uFF5E\u4E2D\u6307\u306E\u3057\u3073\u308C\u3067\u3001\u624B\u3092\u3064\u304F\u3068\u60AA\u5316\u3059\u308B\u5834\u5408\u3001\u624B\u6839\u7BA1\u75C7\u5019\u7FA4\uFF08\u6B63\u4E2D\u795E\u7D4C\u306E\u5727\u8FEB\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u591C\u9593\u3084\u671D\u65B9\u306B\u75C7\u72B6\u304C\u5F37\u304F\u306A\u308B\u306E\u304C\u7279\u5FB4\u3067\u3059\u3002",
+      action: "<strong>\u6574\u5F62\u5916\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u795E\u7D4C\u4F1D\u5C0E\u691C\u67FB\u3067\u8A3A\u65AD\u3057\u307E\u3059\u3002",
+      dept: "\u6574\u5F62\u5916\u79D1\uFF08\u624B\u5916\u79D1\uFF09"
+    },
+    internal_metabolic: {
+      badge: "badge-yellow", badgeText: "\u5185\u79D1\u3078",
+      title: "\u4EE3\u8B1D\u6027\u306E\u539F\u56E0\u304C\u7591\u308F\u308C\u307E\u3059",
+      desc: "\u7CD6\u5C3F\u75C5\u30FB\u7532\u72B6\u817A\u30FB\u814E\u81D3\u306E\u6301\u75C5\u304C\u3042\u308B\u5834\u5408\u3001\u305D\u306E\u75C5\u6C17\u304C\u3057\u3073\u308C\u306E\u539F\u56E0\u3067\u3042\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u307E\u305A\u306F\u304B\u304B\u308A\u3064\u3051\u306E\u5185\u79D1\u306B\u76F8\u8AC7\u3057\u3001\u8840\u6DB2\u691C\u67FB\u3067\u539F\u56E0\u3092\u78BA\u8A8D\u3057\u307E\u3057\u3087\u3046\u3002",
+      action: "<strong>\u304B\u304B\u308A\u3064\u3051\u306E\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u5FC5\u8981\u306B\u5FDC\u3058\u3066\u8133\u795E\u7D4C\u5185\u79D1\u306B\u7D39\u4ECB\u3055\u308C\u307E\u3059\u3002",
+      dept: "\u5185\u79D1\uFF08\u304B\u304B\u308A\u3064\u3051\u533B\uFF09"
+    },
+    internal_or_neuro: {
+      badge: "badge-yellow", badgeText: "\u5185\u79D1\u307E\u305F\u306F\u8133\u795E\u7D4C\u5185\u79D1\u3078",
+      title: "\u4E21\u8DB3\u5148\u306E\u5BFE\u79F0\u6027\u3057\u3073\u308C \u2014 \u539F\u56E0\u691C\u7D22\u304C\u5FC5\u8981\u3067\u3059",
+      desc: "\u4E21\u8DB3\u5148\u306E\u5BFE\u79F0\u7684\u306A\u3057\u3073\u308C\u306F\u3001\u7CD6\u5C3F\u75C5\u6027\u795E\u7D4C\u969C\u5BB3\u30FB\u30D3\u30BF\u30DF\u30F3B12\u6B20\u4E4F\u30FB\u7532\u72B6\u817A\u6A5F\u80FD\u4F4E\u4E0B\u75C7\u306A\u3069\u304C\u539F\u56E0\u306E\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u3002\u307E\u305A\u8840\u6DB2\u691C\u67FB\u3067\u539F\u56E0\u3092\u63A2\u308A\u307E\u3057\u3087\u3046\u3002",
+      action: "<strong>\u5185\u79D1\u307E\u305F\u306F\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u8840\u6DB2\u691C\u67FB\uFF08\u8840\u7CD6\u30FB\u30D3\u30BF\u30DF\u30F3B12\u30FB\u7532\u72B6\u817A\u6A5F\u80FD\uFF09\u304C\u91CD\u8981\u3067\u3059\u3002",
+      dept: "\u5185\u79D1\u30FB\u8133\u795E\u7D4C\u5185\u79D1"
+    },
+    neuro_or_ortho: {
+      badge: "badge-yellow", badgeText: "\u8133\u795E\u7D4C\u5185\u79D1\u307E\u305F\u306F\u6574\u5F62\u5916\u79D1\u3078",
+      title: "\u795E\u7D4C\u307E\u305F\u306F\u9838\u690E\u306E\u554F\u984C\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
+      desc: "\u7247\u65B9\u306E\u8155\u304B\u3089\u624B\u306E\u3057\u3073\u308C\u306F\u3001\u9838\u690E\u75C7\uFF08\u6574\u5F62\u5916\u79D1\uFF09\u307E\u305F\u306F\u672B\u68A2\u795E\u7D4C\u969C\u5BB3\uFF08\u8133\u795E\u7D4C\u5185\u79D1\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u9996\u306E\u75DB\u307F\u304C\u3042\u308C\u3070\u6574\u5F62\u5916\u79D1\u3001\u306A\u3051\u308C\u3070\u8133\u795E\u7D4C\u5185\u79D1\u304C\u826F\u3044\u3067\u3057\u3087\u3046\u3002",
+      action: "<strong>\u8FF7\u3063\u305F\u3089\u307E\u305A\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u5FC5\u8981\u306B\u5FDC\u3058\u3066\u6574\u5F62\u5916\u79D1\u306B\u7D39\u4ECB\u3055\u308C\u307E\u3059\u3002",
+      dept: "\u8133\u795E\u7D4C\u5185\u79D1 or \u6574\u5F62\u5916\u79D1"
+    },
+    general: {
+      badge: "badge-green", badgeText: "\u307E\u305A\u306F\u304B\u304B\u308A\u3064\u3051\u533B\u3078",
+      title: "\u307E\u305A\u306F\u304B\u304B\u308A\u3064\u3051\u533B\u306B\u76F8\u8AC7\u3057\u307E\u3057\u3087\u3046",
+      desc: "\u3057\u3073\u308C\u306E\u539F\u56E0\u306F\u591A\u5C90\u306B\u308F\u305F\u308A\u307E\u3059\u3002\u8FF7\u3063\u305F\u5834\u5408\u306F\u3001\u307E\u305A\u304B\u304B\u308A\u3064\u3051\u533B\u306B\u76F8\u8AC7\u3059\u308B\u3068\u3001\u9069\u5207\u306A\u5C02\u9580\u79D1\u306B\u7D39\u4ECB\u3057\u3066\u3082\u3089\u3048\u307E\u3059\u3002",
+      action: "<strong>\u751F\u6D3B\u306B\u652F\u969C\u304C\u3042\u308B\u5834\u5408\u306F\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>",
+      dept: "\u304B\u304B\u308A\u3064\u3051\u533B\uFF08\u5185\u79D1\uFF09"
+    }
+  };
+
+  var d = data[urgency];
+  var html = '<div class="result-card">';
+  html += '<span class="result-badge ' + d.badge + '">' + d.badgeText + '</span>';
+  html += '<h2 class="result-title">' + d.title + '</h2>';
+  html += '<p class="result-desc">' + d.desc + '</p>';
+  html += '<div class="result-action">' + d.action + '</div>';
+  html += '<div class="result-action"><strong>' + "\u63A8\u5968\u8A3A\u7642\u79D1\uFF1A" + '</strong>' + d.dept + '</div>';
+  html += '<div class="result-note">';
+  html += '<strong>' + "\u3042\u306A\u305F\u306E\u56DE\u7B54\uFF1A" + '</strong><br>';
+  html += "\u59CB\u307E\u308A\u65B9\uFF1A" + getLabelFor("onset", answers.onset) + '<br>';
+  html += "\u5834\u6240\uFF1A" + getLabelFor("location", answers.location) + '<br>';
+  html += "\u5DE6\u53F3\uFF1A" + getLabelFor("symmetry", answers.symmetry) + '<br>';
+  html += "\u968F\u4F34\u75C7\u72B6\uFF1A" + getLabelFor("associated", answers.associated) + '<br>';
+  html += "\u59FF\u52E2\u306E\u5F71\u97FF\uFF1A" + getLabelFor("position_effect", answers.position_effect) + '<br>';
+  html += "\u7D4C\u904E\uFF1A" + getLabelFor("progression", answers.progression);
+  html += '<br><br>' + "\u203B \u3053\u306E\u30C1\u30A7\u30C3\u30AF\u7D50\u679C\u3092\u5370\u5237\u3057\u3066\u53D7\u8A3A\u6642\u306B\u304A\u6301\u3061\u3044\u305F\u3060\u304F\u3068\u3001\u533B\u5E2B\u3078\u306E\u8AAC\u660E\u304C\u30B9\u30E0\u30FC\u30BA\u3067\u3059\u3002";
+  html += '</div></div>';
+  html += '<button class="restart-btn" onclick="restart()">' + "\u3082\u3046\u4E00\u5EA6\u30C1\u30A7\u30C3\u30AF\u3059\u308B" + '</button>';
+  return html;
+}
+
+function getLabelFor(qId, optId) {
+  for (var i = 0; i < questions.length; i++) {
+    if (questions[i].id === qId) {
+      for (var j = 0; j < questions[i].options.length; j++) {
+        if (questions[i].options[j].id === optId) { return questions[i].options[j].label; }
+      }
+    }
+  }
+  return "";
+}
+
+function restart() {
+  currentStep = 0; answers = {};
+  document.getElementById("resultArea").classList.add("hidden");
+  document.getElementById("resultArea").innerHTML = "";
+  document.getElementById("questionArea").classList.remove("hidden");
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
