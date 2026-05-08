@@ -44,11 +44,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic Pro
 <body>
 <div class="app-header">
   <a class="back-link" href="index.html">← ツール一覧に戻る</a>
-  <div class="series">\u305D\u306E\u75C7\u72B6\u3001\u5927\u4E08\u592B\uFF1F #14</div>
-  <h1>\u5473\u899A\u969C\u5BB3\u30BB\u30EB\u30D5\u30C1\u30A7\u30C3\u30AF</h1>
+  <div class="series">その症状、大丈夫？ #14</div>
+  <h1>味覚障害セルフチェック</h1>
 </div>
-<div class="disclaimer">\u3053\u306E\u30C4\u30FC\u30EB\u306F\u533B\u7642\u884C\u70BA\u3067\u306F\u3042\u308A\u307E\u305B\u3093\u3002\u7D50\u679C\u306F\u53C2\u8003\u60C5\u5831\u3067\u3042\u308A\u3001\u8A3A\u65AD\u306B\u4EE3\u308F\u308B\u3082\u306E\u3067\u306F\u3042\u308A\u307E\u305B\u3093\u3002\u5FC3\u914D\u306A\u5834\u5408\u306F\u5FC5\u305A\u533B\u5E2B\u306B\u3054\u76F8\u8AC7\u304F\u3060\u3055\u3044\u3002</div>
-<div class="blog-link" style="background:#e8f4fd;border-left:4px solid #2C5AA0;padding:10px 16px;margin:12px 16px 0;border-radius:4px;font-size:0.85rem;">\uD83D\uDCD6 <a href="https://hinyan1016.hatenablog.com/entry/2026/05/09/070013" target="_blank" rel="noopener" style="color:#2C5AA0;text-decoration:underline;">\u30D6\u30ED\u30B0\u8A18\u4E8B\u300C\u5473\u304C\u3057\u306A\u3044\u30FB\u5473\u304C\u5909\u308F\u3063\u305F\u2015\u30B3\u30ED\u30CA\u3060\u3051\u3058\u3083\u306A\u3044\u5473\u899A\u969C\u5BB3\u306E\u539F\u56E0\u300D\u3067\u8A73\u3057\u304F\u89E3\u8AAC</a></div>
+<div class="disclaimer">このツールは医療行為ではありません。結果は参考情報であり、診断に代わるものではありません。心配な場合は必ず医師にご相談ください。</div>
+<div class="blog-link" style="background:#e8f4fd;border-left:4px solid #2C5AA0;padding:10px 16px;margin:12px 16px 0;border-radius:4px;font-size:0.85rem;">📖 <a href="https://hinyan1016.hatenablog.com/entry/2026/05/09/070013" target="_blank" rel="noopener" style="color:#2C5AA0;text-decoration:underline;">ブログ記事「味がしない・味が変わった―コロナだけじゃない味覚障害の原因」で詳しく解説</a></div>
 <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
 <div class="container">
   <div id="questionArea"></div>
@@ -58,67 +58,67 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic Pro
 var questions = [
   {
     id: "type",
-    title: "\u5473\u899A\u306E\u554F\u984C\u306F\u3069\u306E\u3088\u3046\u306A\u74B0\u5883\u3067\u3059\u304B\uFF1F",
+    title: "味覚の問題はどのような環境ですか？",
     subtitle: "",
     options: [
-      { id: "reduced", label: "\u5473\u304C\u8584\u308C\u305F\u3001\u611F\u3058\u306B\u304F\u304F\u306A\u3063\u305F\uFF08\u5473\u899A\u4F4E\u4E0B\uFF09" },
-      { id: "absent", label: "\u5473\u304C\u307E\u3063\u305F\u304F\u308F\u304B\u3089\u306A\u3044\uFF08\u5473\u899A\u6D88\u5931\uFF09" },
-      { id: "distorted", label: "\u5473\u304C\u5909\u308F\u3063\u305F\u3001\u3078\u3093\u306A\u5473\u304C\u3059\u308B\uFF08\u7570\u5473\u75C7\uFF09" },
-      { id: "spontaneous", label: "\u4F55\u3082\u98DF\u3079\u3066\u3044\u306A\u3044\u306E\u306B\u5473\u304C\u3059\u308B\uFF08\u81EA\u767A\u6027\u7570\u5E38\u5473\u899A\uFF09" }
+      { id: "reduced", label: "味が薄れた、感じにくくなった（味覚低下）" },
+      { id: "absent", label: "味がまったくわからない（味覚消失）" },
+      { id: "distorted", label: "味が変わった、へんな味がする（異味症）" },
+      { id: "spontaneous", label: "何も食べていないのに味がする（自発性異常味覚）" }
     ]
   },
   {
     id: "neuro",
-    title: "\u5473\u899A\u4EE5\u5916\u306B\u3053\u308C\u3089\u306E\u75C7\u72B6\u306F\u3042\u308A\u307E\u3059\u304B\uFF1F",
-    subtitle: "\u6700\u3082\u5F53\u3066\u306F\u307E\u308B\u3082\u306E\u3092\u9078\u3093\u3067\u304F\u3060\u3055\u3044",
+    title: "味覚以外にこれらの症状はありますか？",
+    subtitle: "最も当てはまるものを選んでください",
     options: [
-      { id: "speech_palsy", label: "\u53E3\u304C\u307E\u308F\u308B\u3001\u9854\u306E\u7247\u5074\u304C\u52D5\u304B\u306A\u3044\uFF08\u9854\u9762\u795E\u7D4C\u9EBB\u75FA\uFF09" },
-      { id: "limb_weak", label: "\u624B\u8DB3\u306E\u8105\u3051\u3084\u75BA\u308C\u304C\u3042\u308B" },
-      { id: "numbness", label: "\u53E3\u307E\u308F\u308A\u3084\u624B\u8DB3\u306B\u30D2\u30EA\u30D2\u30EA\u611F\u3084\u3057\u3073\u308C\u304C\u3042\u308B" },
-      { id: "none", label: "\u4E0A\u8A18\u306E\u75C7\u72B6\u306F\u306A\u3044" }
+      { id: "speech_palsy", label: "口がまわる、顔の片側が動かない（顔面神経麻痺）" },
+      { id: "limb_weak", label: "手足の脅けや疺れがある" },
+      { id: "numbness", label: "口まわりや手足にヒリヒリ感やしびれがある" },
+      { id: "none", label: "上記の症状はない" }
     ]
   },
   {
     id: "onset",
-    title: "\u5473\u899A\u306E\u554F\u984C\u306F\u3044\u3064\u3054\u308D\u304B\u3089\u3067\u3059\u304B\uFF1F",
+    title: "味覚の問題はいつごろからですか？",
     subtitle: "",
     options: [
-      { id: "sudden", label: "\u6570\u65E5\u4EE5\u5185\u306B\u7A81\u7136\u304A\u304B\u3057\u304F\u306A\u3063\u305F" },
-      { id: "over2weeks", label: "\u30012\u9031\u9593\u4EE5\u4E0A\u7D9A\u3044\u3066\u3044\u308B" },
-      { id: "after_cold", label: "\u98A8\u90AA\u3084\u611F\u67D3\u75C7\u306E\u5F8C\u304B\u3089\u304A\u304B\u3057\u304F\u306A\u3063\u305F" },
-      { id: "with_covid", label: "\u65B0\u578B\u30B3\u30ED\u30CA\uFF08COVID-19\uFF09\u306B\u304B\u304B\u3063\u305F\u5F8C\u304B\u3089" }
+      { id: "sudden", label: "数日以内に突然おかしくなった" },
+      { id: "over2weeks", label: "、2週間以上続いている" },
+      { id: "after_cold", label: "風邪や感染症の後からおかしくなった" },
+      { id: "with_covid", label: "新型コロナ（COVID-19）にかかった後から" }
     ]
   },
   {
     id: "medication",
-    title: "\u73FE\u5728\u3001\u3053\u308C\u3089\u306E\u85AC\u3092\u98F2\u3093\u3067\u3044\u307E\u3059\u304B\uFF1F",
-    subtitle: "\u5F53\u3066\u306F\u307E\u308B\u3082\u306E\u3092\u9078\u3093\u3067\u304F\u3060\u3055\u3044",
+    title: "現在、これらの薬を飲んでいますか？",
+    subtitle: "当てはまるものを選んでください",
     options: [
-      { id: "ace_arb", label: "\u964D\u5727\u85AC\uFF08ACE\u963B\u5BB3\u85AC\u30FB ARB\u7B49\uFF09\u3092\u98F2\u3093\u3067\u3044\u308B" },
-      { id: "antibiotic", label: "\u6297\u751F\u7269\u8CEA\uFF08\u6297\u83CC\u85AC\uFF09\u3092\u98F2\u3093\u3067\u3044\u308B" },
-      { id: "anticancer", label: "\u6297\u304C\u3093\u5264\u3084\u514D\u75AB\u6291\u5236\u5264\u3092\u98F2\u3093\u3067\u3044\u308B" },
-      { id: "none", label: "\u3053\u308C\u3089\u306E\u85AC\u306F\u98F2\u3093\u3067\u3044\u306A\u3044" }
+      { id: "ace_arb", label: "降圧薬（ACE阻害薬・ ARB等）を飲んでいる" },
+      { id: "antibiotic", label: "抗生物質（抗菌薬）を飲んでいる" },
+      { id: "anticancer", label: "抗がん剤や免疫抑制剤を飲んでいる" },
+      { id: "none", label: "これらの薬は飲んでいない" }
     ]
   },
   {
     id: "zinc",
-    title: "\u6B21\u306E\u3046\u3061\u3001\u5F53\u3066\u306F\u307E\u308B\u3082\u306E\u306F\u3042\u308A\u307E\u3059\u304B\uFF1F",
-    subtitle: "\u4E9C\u9089\u4E0D\u8DB3\u306E\u30EA\u30B9\u30AF\u3092\u78BA\u8A8D\u3057\u307E\u3059",
+    title: "次のうち、当てはまるものはありますか？",
+    subtitle: "亜邉不足のリスクを確認します",
     options: [
-      { id: "poor_diet", label: "\u5504\u308A\u4E00\u8FBA\u5012\u3001\u91CE\u83DC\u3084\u8089\u3092\u3042\u307E\u308A\u98DF\u3079\u306A\u3044" },
-      { id: "elderly_alcohol", label: "\u9AD8\u9F62\uFF0865\u6B73\u4EE5\u4E0A\uFF09\u307E\u305F\u306F\u304A\u9152\u3092\u591A\u304F\u98F2\u3080" },
-      { id: "weight_loss", label: "\u4F53\u91CD\u304C\u6E1B\u3063\u3066\u3044\u308B\u3001\u98DF\u6B32\u304C\u843D\u3061\u305F" },
-      { id: "none", label: "\u3053\u308C\u3089\u306F\u5F53\u3066\u306F\u307E\u3089\u306A\u3044" }
+      { id: "poor_diet", label: "唄り一辺倒、野菜や肉をあまり食べない" },
+      { id: "elderly_alcohol", label: "高齢（65歳以上）またはお酒を多く飲む" },
+      { id: "weight_loss", label: "体重が減っている、食欲が落ちた" },
+      { id: "none", label: "これらは当てはまらない" }
     ]
   },
   {
     id: "drymouth",
-    title: "\u53E3\u306E\u5185\u5074\u306E\u4E3B\u306A\u72B6\u614B\u306F\uFF1F",
+    title: "口の内側の主な状態は？",
     subtitle: "",
     options: [
-      { id: "dry", label: "\u53E3\u304C\u4E00\u5E38\u306B\u5C71\u5CA5\u3044\uFF08\u53E3\u6E34\u75C7\uFF09" },
-      { id: "only_dry", label: "\u53E3\u304C\u4E00\u5CA5\u3044\u3068\u304D\u3060\u3051\u5473\u304C\u3046\u3059\u307E\u308C\u308B" },
-      { id: "normal", label: "\u53E3\u306E\u5185\u5074\u306F\u7279\u306B\u6C17\u306B\u306A\u3089\u306A\u3044" }
+      { id: "dry", label: "口が一常に山岥い（口渴症）" },
+      { id: "only_dry", label: "口が一岥いときだけ味がうすまれる" },
+      { id: "normal", label: "口の内側は特に気にならない" }
     ]
   }
 ];
@@ -132,7 +132,7 @@ function renderQuestion() {
   var pct = Math.round((currentStep / questions.length) * 100);
   document.getElementById("progressFill").style.width = pct + "%";
   var html = '<div class="step-card">';
-  html += '<span class="step-number">' + "\u8CEA\u554F " + (currentStep + 1) + " / " + questions.length + '</span>';
+  html += '<span class="step-number">' + "質問 " + (currentStep + 1) + " / " + questions.length + '</span>';
   html += '<h2>' + q.title + '</h2>';
   if (q.subtitle) { html += '<p>' + q.subtitle + '</p>'; }
   html += '<div class="options">';
@@ -182,81 +182,81 @@ function calcUrgency() {
 function buildResultHTML(urgency) {
   var data = {
     emergency_stroke: {
-      badge: "badge-red", badgeText: "\u4ECA\u3059\u3050119\u756A\u3078",
-      title: "\u8133\u6897\u585E\u30FB\u8133\u51FA\u8840\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
-      desc: "\u5473\u899A\u969C\u5BB3\u306B\u52A0\u3048\u3066\u53E3\u304C\u307E\u308F\u308B\u30FB\u9854\u306E\u7247\u5074\u9EBB\u75FA\u30FB\u624B\u8DB3\u306E\u8105\u3051\u304C\u3042\u308B\u5834\u5408\u3001\u8133\u5352\u4E2D\uFF08\u8133\u6897\u585E\u30FB\u8133\u51FA\u8840\uFF09\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u4E00\u523B\u3082\u65E9\u304F\u6551\u6025\u642C\u9001\u304C\u5FC5\u8981\u3067\u3059\u3002",
-      action: "<strong>\u4ECA\u3059\u3050119\u756A\u306B\u96FB\u8A71\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>",
-      dept: "\u6551\u6025\u79D1\uFF08119\u756A\uFF09\u30FB\u8133\u795E\u7D4C\u5185\u79D1"
+      badge: "badge-red", badgeText: "今すぐ119番へ",
+      title: "脳梗塞・脳出血の可能性があります",
+      desc: "味覚障害に加えて口がまわる・顔の片側麻痺・手足の脅けがある場合、脳卒中（脳梗塞・脳出血）の可能性があります。一刻も早く救急搬送が必要です。",
+      action: "<strong>今すぐ119番に電話してください。</strong>",
+      dept: "救急科（119番）・脳神経内科"
     },
     urgent_neuro: {
-      badge: "badge-yellow", badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
-      title: "\u795E\u7D4C\u75C7\u72B6\u3092\u4F34\u3046\u5473\u899A\u969C\u5BB3\u306F\u7CBE\u67FB\u304C\u5FC5\u8981\u3067\u3059",
-      desc: "\u53E3\u307E\u308F\u308A\u3084\u624B\u8DB3\u306E\u3057\u3073\u308C\u304C\u5473\u899A\u969C\u5BB3\u3068\u4E00\u7DD2\u306B\u8D77\u304D\u3066\u3044\u308B\u5834\u5408\u3001\u8133\u795E\u7D4C\u307E\u305F\u306F\u672B\u68A2\u795E\u7D4C\u306E\u75C5\u5909\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u75C7\u72B6\u304C\u65B0\u3057\u3044\u3046\u3061\u306B\u8A3A\u5BDF\u3092\u53D7\u3051\u307E\u3057\u3087\u3046\u3002",
-      action: "<strong>\u8133\u795E\u7D4C\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u982D\u90E8MRI\u306A\u3069\u306E\u753B\u50CF\u691C\u67FB\u304C\u5FC5\u8981\u306B\u306A\u308B\u5834\u5408\u304C\u3042\u308A\u307E\u3059\u3002",
-      dept: "\u8133\u795E\u7D4C\u5185\u79D1"
+      badge: "badge-yellow", badgeText: "早めに受診してください",
+      title: "神経症状を伴う味覚障害は精査が必要です",
+      desc: "口まわりや手足のしびれが味覚障害と一緒に起きている場合、脳神経または末梢神経の病変の可能性があります。症状が新しいうちに診察を受けましょう。",
+      action: "<strong>脳神経内科を受診してください。</strong>頭部MRIなどの画像検査が必要になる場合があります。",
+      dept: "脳神経内科"
     },
     urgent_anticancer: {
-      badge: "badge-yellow", badgeText: "\u65E9\u3081\u306B\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044",
-      title: "\u6297\u304C\u3093\u5264\u306B\u3088\u308B\u5473\u899A\u969C\u5BB3\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
-      desc: "\u6297\u304C\u3093\u5264\u30FB\u514D\u75AB\u6291\u5236\u5264\u306F\u5473\u899A\u969C\u5BB3\u306E\u4E3B\u8981\u306A\u539F\u56E0\u306E\u4E00\u3064\u3067\u3059\u3002\u6CBB\u7642\u4E2D\u306E\u5E83\u6C42\u601D\u5413\u6F5C\u5065\u5BDF\u30C1\u30FC\u30E0\u3042\u308B\u3044\u306F\u6295\u85AC\u96FB\u8A71\u76F8\u8AB0\u7A93\u53E3\u306B\u304A\u77E5\u3089\u305B\u304F\u3060\u3055\u3044\u3002",
-      action: "<strong>\u5E83\u6C42\u8C4C\u5F53\u8005\u306E\u5065\u5FEB\u3092\u653F\u5185\u5EAD\u306B\u6301\u3063\u305F\u3082\u306E\u3067\u306A\u304F\u3001\u75C7\u72B6\u3092\u62C5\u5F53\u533B\u306B\u4F1D\u3048\u307E\u3057\u3087\u3046\u3002</strong>",
-      dept: "\u62C5\u5F53\u533B\u30FB\u8033\u9F3B\u548C\u548C\u79D1"
+      badge: "badge-yellow", badgeText: "早めに受診してください",
+      title: "抗がん剤による味覚障害の可能性があります",
+      desc: "抗がん剤・免疫抑制剤は味覚障害の主要な原因の一つです。治療中の広求思吓潜健察チームあるいは投薬電話相誰窓口にお知らせください。",
+      action: "<strong>広求豌当者の健快を政内庭に持ったものでなく、症状を担当医に伝えましょう。</strong>",
+      dept: "担当医・耳鼻和和科"
     },
     urgent_medication: {
-      badge: "badge-yellow", badgeText: "\u53D7\u8A3A\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059",
-      title: "\u85AC\u5264\u306B\u3088\u308B\u5473\u899A\u969C\u5BB3\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
-      desc: "ACE\u963B\u5BB3\u85AC\u3084\u6297\u751F\u7269\u8CEA\u306F\u5473\u899A\u969C\u5BB3\u306E\u539F\u56E0\u306B\u306A\u308B\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u3002\u81EA\u5206\u52E5\u3081\u306B\u85AC\u3092\u4E2D\u6B62\u305B\u305A\u3001\u307E\u305A\u5206\u4E3B\u304B\u66FF\u3048\u85AC\u3092\u76F8\u8AC7\u3057\u307E\u3057\u3087\u3046\u3002",
-      action: "<strong>\u5206\u4E3B\u306B\u75C7\u72B6\u3092\u4F1D\u3048\u3001\u85AC\u306E\u5909\u66F4\u3092\u76F8\u8AC7\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>",
-      dept: "\u5185\u79D1\u30FB\u8033\u9F3B\u548C\u548C\u79D1"
+      badge: "badge-yellow", badgeText: "受診をおすすめします",
+      title: "薬剤による味覚障害の可能性があります",
+      desc: "ACE阻害薬や抗生物質は味覚障害の原因になることがあります。自分勥めに薬を中止せず、まず分主か替え薬を相談しましょう。",
+      action: "<strong>分主に症状を伝え、薬の変更を相談してください。</strong>",
+      dept: "内科・耳鼻和和科"
     },
     urgent_prolonged: {
-      badge: "badge-yellow", badgeText: "\u53D7\u8A3A\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059",
-      title: "2\u9031\u9593\u4EE5\u4E0A\u7D9A\u304F\u5473\u899A\u969C\u5BB3\u306F\u68C4\u7F6E\u3057\u306A\u3044\u3067",
-      desc: "\u5473\u899A\u969C\u5BB3\u304C2\u9031\u9593\u4EE5\u4E0A\u7D9A\u304F\u5834\u5408\u3001\u4E9C\u9089\u4E0D\u8DB3\u30FB\u5473\u899A\u795E\u7D4C\u969C\u5BB3\u30FB\u5E72\u7171\u75C7\u306A\u3069\u306E\u539F\u56E0\u304C\u8003\u3048\u3089\u308C\u307E\u3059\u3002\u65E9\u671F\u306B\u8A3A\u5BDF\u3092\u53D7\u3051\u308B\u3053\u3068\u3067\u6CBB\u7642\u304C\u82E5\u3044\u307E\u3059\u3002",
-      action: "<strong>\u8033\u9F3B\u548C\u548C\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>\u8840\u6DB2\u691C\u67FB\uFF08\u4E9C\u9089\u5024\u306A\u3069\uFF09\u304C\u5FC5\u8981\u306B\u306A\u308B\u5834\u5408\u304C\u3042\u308A\u307E\u3059\u3002",
-      dept: "\u8033\u9F3B\u548C\u548C\u79D1"
+      badge: "badge-yellow", badgeText: "受診をおすすめします",
+      title: "2週間以上続く味覚障害は棄置しないで",
+      desc: "味覚障害が2週間以上続く場合、亜邉不足・味覚神経障害・干煱症などの原因が考えられます。早期に診察を受けることで治療が若います。",
+      action: "<strong>耳鼻和和科を受診してください。</strong>血液検査（亜邉値など）が必要になる場合があります。",
+      dept: "耳鼻和和科"
     },
     urgent_weightloss: {
-      badge: "badge-yellow", badgeText: "\u53D7\u8A3A\u3092\u304A\u3059\u3059\u3081\u3057\u307E\u3059",
-      title: "\u4F53\u91CD\u6E1B\u5C11\u3092\u4F34\u3046\u5473\u899A\u969C\u5BB3\u306F\u691C\u67FB\u304C\u5FC5\u8981\u3067\u3059",
-      desc: "\u5473\u899A\u969C\u5BB3\u306B\u4F34\u3063\u3066\u98DF\u6B32\u4F4E\u4E0B\u3084\u4F53\u91CD\u6E1B\u5C11\u304C\u8D77\u304D\u3066\u3044\u308B\u5834\u5408\u3001\u6804\u990A\u4E0D\u8D77\u3084\u4ED6\u306E\u75BE\u60A3\u306E\u95A2\u4E0E\u3082\u8003\u3048\u3089\u308C\u307E\u3059\u3002\u65E9\u3081\u306B\u8A3A\u5BDF\u3092\u53D7\u3051\u307E\u3057\u3087\u3046\u3002",
-      action: "<strong>\u8033\u9F3B\u548C\u548C\u79D1\u307E\u305F\u306F\u5185\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>",
-      dept: "\u8033\u9F3B\u548C\u548C\u79D1\u30FB\u5185\u79D1"
+      badge: "badge-yellow", badgeText: "受診をおすすめします",
+      title: "体重減少を伴う味覚障害は検査が必要です",
+      desc: "味覚障害に伴って食欲低下や体重減少が起きている場合、栄養不起や他の疾患の関与も考えられます。早めに診察を受けましょう。",
+      action: "<strong>耳鼻和和科または内科を受診してください。</strong>",
+      dept: "耳鼻和和科・内科"
     },
     consult_drymouth: {
-      badge: "badge-yellow", badgeText: "\u53D7\u8A3A\u3092\u691C\u8A0E\u3057\u3066\u304F\u3060\u3055\u3044",
-      title: "\u53E3\u6E34\u75C7\u306B\u3088\u308B\u5473\u899A\u969C\u5BB3\u306E\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059",
-      desc: "\u552F\u6DB2\u306F\u5473\u899A\u3092\u4F1D\u3048\u308B\u305F\u3081\u306B\u5FC5\u8981\u3067\u3059\u3002\u53E3\u304C\u5E38\u306B\u4E7E\u3044\u3066\u3044\u308B\u5834\u5408\u3001\u30B7\u30A7\u30FC\u30B0\u30EC\u30F3\u75C7\u5019\u7FA4\u30FB\u5024\u6D3B\u75C7\u30FB\u85AC\u5270\u306E\u526F\u4F5C\u7528\u306A\u3069\u306B\u3088\u308B\u53E3\u6E34\u75C7\u304C\u5473\u899A\u969C\u5BB3\u3092\u5F15\u304D\u8D77\u3053\u3057\u3066\u3044\u308B\u5834\u5408\u304C\u3042\u308A\u307E\u3059\u3002",
-      action: "<strong>\u8033\u9F3B\u548C\u548C\u79D1\u307E\u305F\u306F\u53E3\u8154\u5916\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>",
-      dept: "\u8033\u9F3B\u548C\u548C\u79D1\u30FB\u53E3\u8154\u5916\u79D1"
+      badge: "badge-yellow", badgeText: "受診を検討してください",
+      title: "口渴症による味覚障害の可能性があります",
+      desc: "唯液は味覚を伝えるために必要です。口が常に乾いている場合、シェーグレン症候群・値活症・薬剰の副作用などによる口渴症が味覚障害を引き起こしている場合があります。",
+      action: "<strong>耳鼻和和科または口腔外科を受診してください。</strong>",
+      dept: "耳鼻和和科・口腔外科"
     },
     watch_covid: {
-      badge: "badge-green", badgeText: "\u69D8\u5B50\u3092\u898B\u3066\u3082\u5927\u4E08\u592B\u3067\u3059",
-      title: "COVID-19\u5F8C\u306E\u5473\u899A\u969C\u5BB3\u306F\u5F90\u3005\u306B\u56DE\u5FA9\u3059\u308B\u3053\u3068\u304C\u591A\u3044\u3067\u3059",
-      desc: "\u65B0\u578B\u30B3\u30ED\u30CA\u5F8C\u306E\u5473\u899A\u969C\u5BB3\uFF08\u9577\u671F\u30B3\u30ED\u30CA\u75C7\u72B6\uFF09\u306F\u6570\u9031\u9593\uFF5E\u6570\u30F6\u6708\u3067\u56DE\u5FA9\u3059\u308B\u5831\u544A\u304C\u591A\u3044\u3067\u3059\u3002\u5473\u306E\u7DF4\u7FD2\uFF08\u5473\u899A\u30EA\u30CF\u30D3\u30EA\uFF09\u304C\u52B9\u679C\u7684\u306A\u5834\u5408\u304C\u3042\u308A\u307E\u3059\u3002",
-      action: "<strong>2\u9031\u9593\u4EE5\u4E0A\u6539\u5584\u3057\u306A\u3044\u5834\u5408\u306F\u8033\u9F3B\u548C\u548C\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>",
-      dept: "\u75C7\u72B6\u304C\u7D9A\u304F\u5834\u5408\uFF1A\u8033\u9F3B\u548C\u548C\u79D1"
+      badge: "badge-green", badgeText: "様子を見ても大丈夫です",
+      title: "COVID-19後の味覚障害は徐々に回復することが多いです",
+      desc: "新型コロナ後の味覚障害（長期コロナ症状）は数週間～数ヶ月で回復する報告が多いです。味の練習（味覚リハビリ）が効果的な場合があります。",
+      action: "<strong>2週間以上改善しない場合は耳鼻和和科を受診してください。</strong>",
+      dept: "症状が続く場合：耳鼻和和科"
     },
     watch_postcold: {
-      badge: "badge-green", badgeText: "\u69D8\u5B50\u3092\u898B\u3066\u3082\u5927\u4E08\u592B\u3067\u3059",
-      title: "\u98A8\u90AA\u5F8C\u306E\u5473\u899A\u969C\u5BB3\u306F\u56DE\u5FA9\u3057\u3084\u3059\u3044\u3067\u3059",
-      desc: "\u98A8\u90AA\u30FB\u5C0F\u8A31\u3073\u305F\u5F8C\u306B\u9F3B\u8154\u30FB\u5049\u5C8C\u70CE\u306E\u708E\u75C7\u3067\u5473\u899A\u304C\u4F4E\u4E0B\u3059\u308B\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u3002\u5922\u306E\u708E\u75C7\u304C\u843D\u3061\u7740\u3051\u3070\u5473\u899A\u306F\u6539\u5584\u3059\u308B\u3053\u3068\u304C\u591A\u3044\u3067\u3059\u3002",
-      action: "<strong>1\u9031\u9593\u4EE5\u4E0A\u6539\u5584\u3057\u306A\u3044\u5834\u5408\u306F\u8033\u9F3B\u548C\u548C\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>",
-      dept: "\u75C7\u72B6\u304C\u7D9A\u304F\u5834\u5408\uFF1A\u8033\u9F3B\u548C\u548C\u79D1"
+      badge: "badge-green", badgeText: "様子を見ても大丈夫です",
+      title: "風邪後の味覚障害は回復しやすいです",
+      desc: "風邪・小許びた後に鼻腔・偉岌烎の炎症で味覚が低下することがあります。夢の炎症が落ち着けば味覚は改善することが多いです。",
+      action: "<strong>1週間以上改善しない場合は耳鼻和和科を受診してください。</strong>",
+      dept: "症状が続く場合：耳鼻和和科"
     },
     watch_drymouth_only: {
-      badge: "badge-green", badgeText: "\u69D8\u5B50\u3092\u898B\u3066\u3082\u5927\u4E08\u592B\u3067\u3059",
-      title: "\u53E3\u304C\u6E34\u3044\u3068\u304D\u3060\u3051\u5473\u304C\u3046\u3059\u307E\u308C\u308B\u5834\u5408\u306F\u6C34\u5206\u88DC\u7D66\u304C\u5148\u6C7A\u3067\u3059",
-      desc: "\u5553\u6DB2\u304C\u6E1B\u308B\u3068\u5473\u899A\u7269\u8CEA\u304C\u5473\u6995\u306B\u5C4A\u304D\u306B\u304F\u304F\u306A\u308A\u3001\u5473\u304C\u611F\u3058\u306B\u304F\u304F\u306A\u308A\u307E\u3059\u3002\u5341\u5206\u306A\u6C34\u5206\u6442\u53D6\u3084\u53E3\u5185\u3092\u6E7F\u308F\u305B\u308B\u3053\u3068\u3067\u6539\u5584\u3059\u308B\u3053\u3068\u304C\u3042\u308A\u307E\u3059\u3002",
-      action: "<strong>\u6C34\u5206\u3092\u5341\u5206\u306B\u6442\u308A\u3001\u75C7\u72B6\u304C\u7D9A\u304F\u5834\u5408\u306F\u8033\u9F3B\u548C\u548C\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>",
-      dept: "\u75C7\u72B6\u304C\u7D9A\u304F\u5834\u5408\uFF1A\u8033\u9F3B\u548C\u548C\u79D1"
+      badge: "badge-green", badgeText: "様子を見ても大丈夫です",
+      title: "口が渴いときだけ味がうすまれる場合は水分補給が先決です",
+      desc: "啓液が減ると味覚物質が味榕に届きにくくなり、味が感じにくくなります。十分な水分摂取や口内を湿わせることで改善することがあります。",
+      action: "<strong>水分を十分に摂り、症状が続く場合は耳鼻和和科を受診してください。</strong>",
+      dept: "症状が続く場合：耳鼻和和科"
     },
     watch_ok: {
-      badge: "badge-green", badgeText: "\u69D8\u5B50\u3092\u898B\u3066\u3082\u5927\u4E08\u592B\u3067\u3059",
-      title: "\u7DCA\u6025\u6027\u306F\u4F4E\u305D\u3046\u3067\u3059",
-      desc: "\u73FE\u6642\u70B9\u3067\u5371\u967A\u306A\u30B5\u30A4\u30F3\u306F\u898B\u3089\u308C\u307E\u305B\u3093\u3002\u5473\u899A\u969C\u5BB3\u304C1\u9031\u9593\u4EE5\u4E0A\u7D9A\u304F\u5834\u5408\u3084\u60AA\u5316\u3059\u308B\u5834\u5408\u306F\u8033\u9F3B\u548C\u548C\u79D1\u3092\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002",
-      action: "<strong>\u75C7\u72B6\u304C\u60AA\u5316\u3057\u305F\u308A\u3001\u65B0\u305F\u306A\u75C7\u72B6\u304C\u51FA\u305F\u3089\u53D7\u8A3A\u3057\u3066\u304F\u3060\u3055\u3044\u3002</strong>",
-      dept: "\u60AA\u5316\u6642\uFF1A\u8033\u9F3B\u548C\u548C\u79D1"
+      badge: "badge-green", badgeText: "様子を見ても大丈夫です",
+      title: "緊急性は低そうです",
+      desc: "現時点で危険なサインは見られません。味覚障害が1週間以上続く場合や悪化する場合は耳鼻和和科を受診してください。",
+      action: "<strong>症状が悪化したり、新たな症状が出たら受診してください。</strong>",
+      dept: "悪化時：耳鼻和和科"
     }
   };
 
@@ -266,17 +266,17 @@ function buildResultHTML(urgency) {
   html += '<h2 class="result-title">' + d.title + '</h2>';
   html += '<p class="result-desc">' + d.desc + '</p>';
   html += '<div class="result-action">' + d.action + '</div>';
-  html += '<div class="result-action"><strong>\u63A8\u5968\u8A3A\u7642\u79D1\uFF1A</strong>' + d.dept + '</div>';
+  html += '<div class="result-action"><strong>推奨診療科：</strong>' + d.dept + '</div>';
   html += '<div class="result-note">';
-  html += '<strong>\u3042\u306A\u305F\u306E\u56DE\u7B54\uFF1A</strong><br>';
-  html += "\u5473\u899A\u306E\u554F\u984C\uFF1A" + getLabelFor("type", answers.type) + '<br>';
-  html += "\u795E\u7D4C\u75C7\u72B6\uFF1A" + getLabelFor("neuro", answers.neuro) + '<br>';
-  html += "\u767A\u75C7\u6642\u671F\uFF1A" + getLabelFor("onset", answers.onset) + '<br>';
-  html += "\u85AC\u5270\uFF1A" + getLabelFor("medication", answers.medication) + '<br>';
-  html += "\u4E9C\u9089\u30EA\u30B9\u30AF\uFF1A" + getLabelFor("zinc", answers.zinc) + '<br>';
-  html += "\u53E3\u306E\u4E3B\u306A\u72B6\u614B\uFF1A" + getLabelFor("drymouth", answers.drymouth);
+  html += '<strong>あなたの回答：</strong><br>';
+  html += "味覚の問題：" + getLabelFor("type", answers.type) + '<br>';
+  html += "神経症状：" + getLabelFor("neuro", answers.neuro) + '<br>';
+  html += "発症時期：" + getLabelFor("onset", answers.onset) + '<br>';
+  html += "薬剰：" + getLabelFor("medication", answers.medication) + '<br>';
+  html += "亜邉リスク：" + getLabelFor("zinc", answers.zinc) + '<br>';
+  html += "口の主な状態：" + getLabelFor("drymouth", answers.drymouth);
   html += '</div></div>';
-  html += '<button class="restart-btn" onclick="restart()">\u3082\u3046\u4E00\u5EA6\u30C1\u30A7\u30C3\u30AF\u3059\u308B</button>';
+  html += '<button class="restart-btn" onclick="restart()">もう一度チェックする</button>';
   return html;
 }
 
