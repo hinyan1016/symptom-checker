@@ -48,6 +48,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic Pro
   <h1>首の痛みと神経セルフチェック</h1>
 </div>
 <div class="disclaimer">このツールは医療行為ではありません。結果は参考情報であり、診断に代わるものではありません。心配な場合は必ず医師にご相談ください。</div>
+<div class="blog-link" style="background:#e8f4fd;border-left:4px solid #2C5AA0;padding:10px 16px;margin:12px 16px 0;border-radius:4px;font-size:0.85rem;">📖 <a href="https://hinyan1016.hatenablog.com/entry/2026/05/14/140627" target="_blank" rel="noopener" style="color:#2C5AA0;text-decoration:underline;">ブログ記事「その首の痛み、実は神経が原因？ ― 整形外科と脳神経内科の境界線」で詳しく解説（頸椎症性神経根症・脊髄症が整形外科第一選択である理由を含む）</a></div>
 <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
 <div class="container">
   <div id="questionArea"></div>
@@ -197,14 +198,14 @@ function buildResultHTML(urgency) {
       title: "重篤な脊髄障害の可能性があります",
       desc: "歩けない・立てないほどの症状は、脊髄への重大な圧迫や損傷を示すことがあります。早急な診断と治療が必要です。",
       action: "<strong>今すぐ救急外来を受診してください。</strong>自力での移動が困難な場合は119番を呼んでください。",
-      dept: "救急科・脳神経内科・整形外科"
+      dept: "救急科・整形外科・脳神経内科"
     },
     urgent_myelopathy: {
       badge: "badge-yellow", badgeText: "早めに受診してください",
       title: "頸髄症（脊髄の圧迫）の可能性があります",
-      desc: "両手のしびれ・細かい動作の困難・歩行のふらつきが重なる場合、椎間板や骨棘による脊髄圧迫（頸髄症）が疑われます。進行すると排尿障害や歩行障害に至ることがあるため、早めの精査が必要です。",
-      action: "<strong>整形外科または脳神経内科を受診してください。</strong>頸部・胸椎のMRI検査が必要です。",
-      dept: "脳神経内科・整形外科"
+      desc: "両手のしびれ・細かい動作の困難・歩行のふらつきが重なる場合、椎間板や骨棘による脊髄圧迫（頸髄症）が疑われます。進行すると排尿障害や歩行障害に至ることがあるため、早めの精査が必要です。<strong>椎弓形成術などの手術が回復の選択肢となるため整形外科が第一選択</strong>です。脳神経内科でも対応可能で、必要に応じて整形外科に紹介してもらえます。",
+      action: "<strong>整形外科を受診してください。</strong>頸部・胸椎のMRI検査が必要です。脳神経内科でも構いません（迷ったらどちらでもOK、かかりつけ医に相談も正しい選択です）。",
+      dept: "整形外科（手術選択肢あり）・脳神経内科"
     },
     urgent_sudden: {
       badge: "badge-yellow", badgeText: "早めに受診してください",
@@ -223,9 +224,9 @@ function buildResultHTML(urgency) {
     urgent_radiculopathy: {
       badge: "badge-yellow", badgeText: "受診をお勧めします",
       title: "頸椎症性神経根症の可能性があります",
-      desc: "首から腕・手にかけての痛みやしびれは、椎間板ヘルニアや頸椎症による神経根への圧迫が原因のことがあります。2週間以上続く場合や日常生活に支障が出る場合は受診が必要です。",
-      action: "<strong>整形外科または脳神経内科を受診してください。</strong>レントゲン・MRI検査で原因を調べましょう。",
-      dept: "脳神経内科・整形外科"
+      desc: "首から腕・手にかけての痛みやしびれは、椎間板ヘルニアや頸椎症による神経根への圧迫が原因のことがあります。2週間以上続く場合や日常生活に支障が出る場合は受診が必要です。<strong>原因は神経の圧迫ですが、椎間板や骨が引き金で椎弓形成術・椎間板切除術などの手術が選択肢となるため整形外科が第一選択</strong>です。",
+      action: "<strong>整形外科を受診してください。</strong>レントゲン・MRI検査で原因を調べましょう。脳神経内科でも構いません（迷ったらどちらでもOK、かかりつけ医に相談も正しい選択です）。",
+      dept: "整形外科（手術選択肢あり）・脳神経内科"
     },
     watch_prolonged: {
       badge: "badge-yellow", badgeText: "受診を検討してください",
