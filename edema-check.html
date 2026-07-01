@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>むくみセルフチェック ― その症状、大丈夫？</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif; background: #f0f4f8; color: #333; line-height: 1.6; min-height: 100vh; }
+.app-header { background: linear-gradient(135deg, #1B3A5C, #2C5AA0); color: #fff; padding: 16px 20px; text-align: center; }
+.app-header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+.app-header .series { font-size: 0.8rem; opacity: 0.8; }
+.disclaimer { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin: 12px 16px; border-radius: 4px; font-size: 0.85rem; color: #856404; }
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+.step-card { background: #fff; border-radius: 12px; padding: 20px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.step-number { display: inline-block; background: #2C5AA0; color: #fff; font-size: 0.8rem; padding: 2px 10px; border-radius: 12px; margin-bottom: 8px; }
+.step-card h2 { font-size: 1.1rem; color: #1B3A5C; margin-bottom: 12px; }
+.step-card p { font-size: 0.95rem; color: #555; margin-bottom: 12px; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn { display: block; width: 100%; padding: 14px 16px; border: 2px solid #dee2e6; border-radius: 8px; background: #fff; font-size: 1rem; font-family: inherit; color: #333; text-align: left; cursor: pointer; transition: all 0.2s; }
+.option-btn:hover { border-color: #2C5AA0; background: #f0f6ff; }
+.option-btn.selected { border-color: #2C5AA0; background: #e8f4fd; color: #1B3A5C; font-weight: bold; }
+.hidden { display: none; }
+.result-card { background: #fff; border-radius: 12px; padding: 24px 20px; margin: 16px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+.result-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; }
+.badge-red { background: #f8d7da; color: #c0392b; }
+.badge-yellow { background: #fff3cd; color: #856404; }
+.badge-green { background: #d4edda; color: #155724; }
+.result-title { font-size: 1.2rem; color: #1B3A5C; margin-bottom: 8px; }
+.result-desc { font-size: 0.95rem; color: #555; margin-bottom: 16px; }
+.result-action { background: #f8f9fa; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; }
+.result-action strong { color: #2C5AA0; }
+.result-note { font-size: 0.85rem; color: #888; border-top: 1px solid #eee; padding-top: 12px; margin-top: 12px; }
+.restart-btn { display: block; width: 100%; padding: 14px; background: #2C5AA0; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-family: inherit; cursor: pointer; margin-top: 12px; }
+.restart-btn:hover { background: #1B3A5C; }
+.back-link { display: block; text-align: center; padding: 8px 16px; font-size: 0.85rem; color: #fff; text-decoration: none; background: rgba(255,255,255,0.15); }
+.back-link:hover { background: rgba(255,255,255,0.25); }
+.progress-bar { height: 4px; background: #dee2e6; margin: 0 16px; border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: #2C5AA0; transition: width 0.3s; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="app-header">
+  <a class="back-link" href="index.html">&larr; ツール一覧に戻る</a>
+  <div class="series">その症状、大丈夫？</div>
+  <h1>むくみセルフチェック</h1>
+</div>
+<div class="disclaimer">このツールは医療行為ではありません。結果は参考情報であり、診断に代わるものではありません。心配な場合は必ず医師にご相談ください。呼吸が苦しい・意識がおかしいなど緊急時は迷わず119番へ。</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="container">
+  <div id="questionArea"></div>
+  <div id="resultArea" class="hidden"></div>
+</div>
+<script>
+var questions = [
+  {
+    id: "location",
+    title: "むくみは主にどこにありますか？",
+    subtitle: "いちばん当てはまるものを選んでください",
+    options: [
+      { id: "one_side", label: "片方の手足だけ（左右で差がある）" },
+      { id: "both_legs", label: "両足（左右ともむくむ）" },
+      { id: "face", label: "顔・まぶた・くちびる・舌" },
+      { id: "whole", label: "全身（顔も手足も広くむくむ）" }
+    ]
+  },
+  {
+    id: "onset",
+    title: "むくみはいつ・どのくらいの速さで出ましたか？",
+    subtitle: "",
+    options: [
+      { id: "acute", label: "急に（数時間〜2〜3日で）" },
+      { id: "subacute", label: "数日〜数週間かけて" },
+      { id: "chronic", label: "ずっと前から（数ヶ月以上）" }
+    ]
+  },
+  {
+    id: "associated",
+    title: "一緒にある症状で、いちばん近いものは？",
+    subtitle: "",
+    options: [
+      { id: "airway", label: "くちびる・舌が腫れる／のどがつまる・息苦しい" },
+      { id: "leg_pain_red", label: "片方の足が痛い・赤い・熱をもっている" },
+      { id: "breath_weight", label: "息切れがする・横になると苦しい・体重が急に増えた" },
+      { id: "urine_face", label: "尿が泡立つ／朝に顔・まぶたがむくむ" },
+      { id: "cold_tired", label: "だるい・寒がり・便秘・声がかすれる" },
+      { id: "evening_leg", label: "夕方に足がむくむが、朝はすっきりしている" },
+      { id: "none", label: "特にない" }
+    ]
+  },
+  {
+    id: "background",
+    title: "思い当たるきっかけ・背景はありますか？",
+    subtitle: "いちばん近いものを選んでください",
+    options: [
+      { id: "drug", label: "最近くすりを始めた・変えた（血圧の薬・痛み止めなど）" },
+      { id: "cancer_op", label: "がんの治療・手術（リンパ節をとった）・放射線を受けた" },
+      { id: "immobile", label: "長時間の座りっぱなし（旅行・入院）や妊娠中" },
+      { id: "none", label: "特に思い当たらない" }
+    ]
+  }
+];
+
+var currentStep = 0;
+var answers = {};
+
+function renderQuestion() {
+  var area = document.getElementById("questionArea");
+  var q = questions[currentStep];
+  var pct = Math.round((currentStep / questions.length) * 100);
+  document.getElementById("progressFill").style.width = pct + "%";
+  var html = '<div class="step-card">';
+  html += '<span class="step-number">質問 ' + (currentStep + 1) + " / " + questions.length + '</span>';
+  html += '<h2>' + q.title + '</h2>';
+  if (q.subtitle) { html += '<p>' + q.subtitle + '</p>'; }
+  html += '<div class="options">';
+  for (var i = 0; i < q.options.length; i++) {
+    var opt = q.options[i];
+    html += '<button class="option-btn" onclick="selectAnswer(\'' + q.id + '\',\'' + opt.id + '\')">' + opt.label + '</button>';
+  }
+  html += '</div></div>';
+  area.innerHTML = html;
+}
+
+function selectAnswer(qId, optId) {
+  answers[qId] = optId;
+  currentStep++;
+  if (currentStep < questions.length) {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById("questionArea").classList.add("hidden");
+  document.getElementById("progressFill").style.width = "100%";
+  var r = calcResult();
+  var resultArea = document.getElementById("resultArea");
+  resultArea.classList.remove("hidden");
+  resultArea.innerHTML = buildResultHTML(r);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function calcResult() {
+  // 1) 気道の緊急（顔・くちびる・舌の腫れ＋のど症状）
+  if (answers.associated === "airway") { return "emergency_airway"; }
+  if (answers.location === "face" && answers.onset === "acute") { return "emergency_airway"; }
+
+  // 2) 片足の急なむくみ＋痛み・赤み → DVT・蜂窩織炎
+  if (answers.associated === "leg_pain_red") { return "emergency_leg"; }
+  if (answers.location === "one_side" && answers.onset === "acute") { return "emergency_leg"; }
+
+  // 3) 両足・全身＋息切れ・体重増 → 心臓
+  if (answers.associated === "breath_weight") { return "urgent_heart"; }
+
+  // 4) 泡立つ尿・朝の顔むくみ → 腎臓
+  if (answers.associated === "urine_face") { return "urgent_kidney"; }
+
+  // 5) だるい・寒がり → 甲状腺など
+  if (answers.associated === "cold_tired") { return "soon_thyroid"; }
+
+  // 6) がん治療後・慢性の片側 → リンパ浮腫
+  if (answers.background === "cancer_op") { return "soon_lymph"; }
+
+  // 7) くすりのきっかけ → 処方医に相談
+  if (answers.background === "drug") { return "soon_drug"; }
+
+  // 8) 長時間の座位・妊娠（急でなく痛みもない）→ 受診検討
+  if (answers.background === "immobile") { return "soon_immobile"; }
+
+  // 9) 夕方の足むくみ（生活性・静脈性）→ 様子見＋生活改善
+  if (answers.associated === "evening_leg") { return "watch_venous"; }
+
+  // 10) それ以外
+  return "watch";
+}
+
+function buildResultHTML(key) {
+  var data = {
+    emergency_airway: {
+      badge: "badge-red", badgeText: "今すぐ救急へ",
+      title: "顔・くちびる・舌の急なむくみは緊急のことがあります",
+      desc: "くちびる・舌・のどが急に腫れると、空気の通り道がふさがれて息ができなくなることがあります（血管性浮腫）。血圧の薬（ACE阻害薬）やアレルギーが原因になることがあります。",
+      action: "<strong>息苦しさ・のどのつまり・声のかすれがあれば、ためらわず119番へ。</strong>症状が軽くても、急に顔やくちびるが腫れたときは早めに救急外来を受診してください。",
+      dept: "救急科（気道症状があれば119番）"
+    },
+    emergency_leg: {
+      badge: "badge-red", badgeText: "早急に受診してください",
+      title: "片方の足の急なむくみ＋痛み・赤みは要注意です",
+      desc: "片方の足だけが急に腫れて痛む場合は、足の静脈に血のかたまりができる「深部静脈血栓症」の可能性があります。放置すると血のかたまりが肺に飛ぶことがあり危険です。赤く熱をもつ場合は「蜂窩織炎」という感染のこともあります。",
+      action: "<strong>その日のうちに医療機関（内科・救急外来）を受診してください。</strong>特に、息苦しさや胸の痛みを伴うときはすぐに119番へ。",
+      dept: "内科・救急科・血管外科"
+    },
+    urgent_heart: {
+      badge: "badge-yellow", badgeText: "早めに受診してください",
+      title: "両足のむくみ＋息切れは心臓のサインかもしれません",
+      desc: "両足が左右ともむくみ、息切れや横になると苦しい、体重が急に増えたといった症状があるときは、心臓のはたらきが弱っている（心不全）可能性があります。",
+      action: "<strong>早めに内科・循環器内科を受診してください。</strong>夜も横になれないほど苦しいときは、その日のうちに受診・救急も検討を。",
+      dept: "内科・循環器内科"
+    },
+    urgent_kidney: {
+      badge: "badge-yellow", badgeText: "早めに受診してください",
+      title: "泡立つ尿・朝の顔のむくみは腎臓のサインかもしれません",
+      desc: "尿がよく泡立つ、朝起きたときに顔やまぶたがむくむといった症状は、腎臓からたんぱく質がもれ出ている（ネフローゼ症候群など）可能性があります。",
+      action: "<strong>早めに内科・腎臓内科を受診してください。</strong>尿検査でたんぱく尿を調べます。",
+      dept: "内科・腎臓内科"
+    },
+    soon_thyroid: {
+      badge: "badge-yellow", badgeText: "受診をおすすめします",
+      title: "だるさ・寒がりを伴うむくみは甲状腺の可能性も",
+      desc: "むくみに加えて、だるい・寒がり・便秘・声がかすれるといった症状があるときは、甲状腺のはたらきが低下している（甲状腺機能低下症）ことがあります。指で押してもへこまないむくみが特徴です。",
+      action: "<strong>内科を受診してください。</strong>血液検査（甲状腺ホルモン・TSH）で調べられます。",
+      dept: "内科・内分泌内科"
+    },
+    soon_lymph: {
+      badge: "badge-yellow", badgeText: "受診をおすすめします",
+      title: "がん治療のあとの片側のむくみはリンパ浮腫かもしれません",
+      desc: "手術でリンパ節をとった・放射線治療を受けたあとに、その側の手や足がむくむことがあります（リンパ浮腫）。ゆっくり進み、痛みは少なく、指で押してもへこみにくいのが特徴です。",
+      action: "<strong>治療を受けた病院や、リンパ浮腫外来・内科に相談してください。</strong>早めのケア（弾性ストッキング・スキンケア・リンパドレナージ）で進行を抑えられます。急に赤く腫れて熱が出たときは感染のサインなので早めに受診を。",
+      dept: "もとの治療科・リンパ浮腫外来・内科"
+    },
+    soon_drug: {
+      badge: "badge-yellow", badgeText: "処方医に相談を",
+      title: "くすりが原因のむくみかもしれません",
+      desc: "血圧の薬（カルシウム拮抗薬）、痛み止め（NSAIDs）、ステロイド、一部の糖尿病薬や神経の薬などは、両足を中心にむくみを起こすことがあります。多くは危険なものではありませんが、自己判断で中止せず確認が必要です。",
+      action: "<strong>くすりを処方した医師・薬剤師に相談してください。</strong>自分でくすりをやめないでください。むくみの程度や他の症状もあわせて伝えましょう。",
+      dept: "処方元（かかりつけ医・薬剤師）"
+    },
+    soon_immobile: {
+      badge: "badge-yellow", badgeText: "様子を見つつ受診検討",
+      title: "長時間の同じ姿勢・妊娠に伴うむくみのことがあります",
+      desc: "長時間の座りっぱなし（旅行・入院）や妊娠では、足がむくみやすくなります。多くは一時的ですが、片足だけ急に腫れて痛むときは血のかたまり（血栓）に注意が必要です。妊娠中の急なむくみ・血圧上昇・頭痛は早めの相談を。",
+      action: "<strong>片方だけ・急に・痛みを伴うむくみがあれば受診してください。</strong>妊娠中の方は、むくみが強い・急な体重増加があれば産科に相談を。",
+      dept: "内科（妊娠中は産科）"
+    },
+    watch_venous: {
+      badge: "badge-green", badgeText: "生活の工夫でようすを見ましょう",
+      title: "夕方の足のむくみは生活性・静脈性のことが多いです",
+      desc: "夕方に足がむくみ、朝はすっきりしている場合は、長時間の立ち仕事・座り仕事や足の静脈の血のめぐりが関係していることが多く、多くは心配のいらないタイプです。",
+      action: "<strong>足を高くして休む・適度に歩く・弾性ストッキングを使うなどで和らぐことがあります。</strong>片足だけ・急に・痛みを伴う・なかなか引かない場合は内科を受診してください。",
+      dept: "改善しない・悪化する時：内科"
+    },
+    watch: {
+      badge: "badge-green", badgeText: "ようすを見ても大丈夫そうです",
+      title: "今すぐ心配なサインは見られません",
+      desc: "危険なサイン（片足の急な腫れと痛み、顔やのどの腫れ、息切れなど）は今のところなさそうです。ただし、むくみが続く・強くなる・新しい症状が出るときは原因を調べる価値があります。",
+      action: "<strong>むくみが数日以上続く、だんだん強くなる、他の症状が出てきた場合は内科を受診してください。</strong>",
+      dept: "気になる時：内科"
+    }
+  };
+
+  var d = data[key];
+  var html = '<div class="result-card">';
+  html += '<span class="result-badge ' + d.badge + '">' + d.badgeText + '</span>';
+  html += '<h2 class="result-title">' + d.title + '</h2>';
+  html += '<p class="result-desc">' + d.desc + '</p>';
+  html += '<div class="result-action">' + d.action + '</div>';
+  html += '<div class="result-action"><strong>受診の目安：</strong>' + d.dept + '</div>';
+  html += '<div class="result-note">';
+  html += '<strong>あなたの回答：</strong><br>';
+  html += 'むくむ場所：' + getLabelFor("location", answers.location) + '<br>';
+  html += '出かた：' + getLabelFor("onset", answers.onset) + '<br>';
+  html += '一緒の症状：' + getLabelFor("associated", answers.associated) + '<br>';
+  html += 'きっかけ：' + getLabelFor("background", answers.background);
+  html += '<br><br>※ この結果を印刷して受診時にお持ちいただくと、医師への説明がスムーズです。';
+  html += '</div></div>';
+  html += '<button class="restart-btn" onclick="restart()">もう一度チェックする</button>';
+  return html;
+}
+
+function getLabelFor(qId, optId) {
+  for (var i = 0; i < questions.length; i++) {
+    if (questions[i].id === qId) {
+      for (var j = 0; j < questions[i].options.length; j++) {
+        if (questions[i].options[j].id === optId) { return questions[i].options[j].label; }
+      }
+    }
+  }
+  return "";
+}
+
+function restart() {
+  currentStep = 0; answers = {};
+  document.getElementById("resultArea").classList.add("hidden");
+  document.getElementById("resultArea").innerHTML = "";
+  document.getElementById("questionArea").classList.remove("hidden");
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
