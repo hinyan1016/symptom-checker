@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2C5AA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>いつから出勤・登校できる？目安チェック ― その症状、大丈夫？</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='14' fill='%23173e3b'/%3E%3Cpath d='M24 10v28M10 24h28' stroke='%23f5f4ed' stroke-width='3.5'/%3E%3Ccircle cx='34' cy='14' r='4' fill='%23b8cf8e'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="canonical" href="https://check.ichisouzo-lab.com/return-to-work-check.html">
+<meta name="description" content="インフルエンザ・新型コロナ・かぜ・胃腸炎・溶連菌・はやり目で休んだあと、いつから仕事や学校・園に行けるかの目安を、発症した日と熱が下がった日から計算します。法令の基準か、国の目安か、参考かも分かります。">
+<meta property="og:title" content="いつから出勤・登校できる？目安チェック ― その症状、大丈夫？">
+<meta property="og:description" content="インフルエンザ・新型コロナ・かぜ・胃腸炎・溶連菌・はやり目で休んだあと、いつから仕事や学校・園に行けるかの目安を、発症した日と熱が下がった日から計算します。法令の基準か、国の目安か、参考かも分かります。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://check.ichisouzo-lab.com/return-to-work-check.html">
+<meta property="og:image" content="https://check.ichisouzo-lab.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="医知創造ラボ">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", sans-serif; background: #f0f4f8; color: #333; line-height: 1.6; min-height: 100vh; word-break: auto-phrase; }
+.app-header { background: linear-gradient(135deg, #1B3A5C, #2C5AA0); color: #fff; padding: 16px 20px; text-align: center; }
+.app-header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+.app-header .series { font-size: 0.8rem; opacity: 0.8; }
+.back-link { display: block; text-align: center; padding: 8px 16px; font-size: 0.85rem; color: #fff; text-decoration: none; background: rgba(255,255,255,0.15); }
+.back-link:hover { background: rgba(255,255,255,0.25); }
+.disclaimer { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px 16px; margin: 12px 16px; border-radius: 4px; font-size: 0.85rem; color: #856404; }
+.container { max-width: 600px; margin: 0 auto; padding: 0 16px 80px; }
+.step-card { background: #fff; border-radius: 12px; padding: 20px; margin: 16px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.step-number { display: inline-block; background: #2C5AA0; color: #fff; font-size: 0.8rem; padding: 2px 10px; border-radius: 12px; margin-bottom: 8px; }
+.step-card h2 { font-size: 1.1rem; color: #1B3A5C; margin-bottom: 8px; }
+.step-card p.sub { font-size: 0.9rem; color: #666; margin-bottom: 12px; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option-btn { display: block; width: 100%; padding: 13px 16px; border: 2px solid #dee2e6; border-radius: 8px; background: #fff; font-size: 1rem; font-family: inherit; color: #333; text-align: left; cursor: pointer; transition: all 0.2s; }
+.option-btn:hover { border-color: #2C5AA0; background: #f0f6ff; }
+.option-btn.selected { border-color: #2C5AA0; background: #e8f4fd; color: #1B3A5C; font-weight: bold; }
+.option-btn small { display: block; font-weight: normal; color: #777; font-size: 0.82rem; margin-top: 2px; }
+.field { margin-bottom: 16px; }
+.field label.ttl { display: block; font-weight: bold; color: #1B3A5C; margin-bottom: 4px; font-size: 0.98rem; }
+.field .hint { font-size: 0.85rem; color: #666; margin-bottom: 8px; }
+.field input[type=date], .field select { width: 100%; padding: 12px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 1rem; font-family: inherit; background: #fff; color: #333; }
+.choice-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.choice-row .option-btn { width: auto; flex: 1 1 140px; text-align: center; padding: 10px 12px; font-size: 0.95rem; }
+.hidden { display: none; }
+.go-btn, .restart-btn { display: block; width: 100%; padding: 14px; background: #2C5AA0; color: #fff; border: none; border-radius: 8px; font-size: 1.05rem; font-family: inherit; cursor: pointer; margin-top: 8px; }
+.go-btn:hover, .restart-btn:hover { background: #1B3A5C; }
+.error { background: #f8d7da; color: #842029; border-radius: 8px; padding: 10px 14px; font-size: 0.92rem; margin-top: 10px; }
+.result-card { background: #fff; border-radius: 12px; padding: 22px 20px; margin: 16px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+.badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; }
+.badge-law { background: #d4edda; color: #155724; }
+.badge-gov { background: #dbe9f9; color: #1B3A5C; }
+.badge-ref { background: #e9ecef; color: #495057; }
+.badge-explain { display: block; font-size: 0.85rem; color: #555; margin: -4px 0 12px; }
+.big-date { font-size: 1.5rem; font-weight: bold; color: #1B3A5C; margin: 4px 0 6px; }
+.big-label { font-size: 0.92rem; color: #555; }
+.status-now { display: inline-block; margin-top: 6px; background: #d4edda; color: #155724; border-radius: 6px; padding: 3px 10px; font-size: 0.88rem; }
+.status-pending { background: #fff3cd; color: #856404; border-radius: 8px; padding: 10px 14px; margin: 8px 0; font-size: 0.95rem; }
+.cond-list { list-style: none; margin: 14px 0 6px; }
+.cond-list li { padding: 10px 12px; border-radius: 8px; background: #f8f9fa; margin-bottom: 6px; font-size: 0.93rem; }
+.cond-list li b { color: #1B3A5C; }
+.timeline { width: 100%; border-collapse: collapse; margin: 10px 0 4px; font-size: 0.88rem; }
+.timeline th { background: #1B3A5C; color: #fff; font-weight: normal; padding: 6px 8px; text-align: left; }
+.timeline td { border-bottom: 1px solid #eee; padding: 6px 8px; vertical-align: top; }
+.timeline tr.ok td { background: #e8f6ec; font-weight: bold; color: #155724; }
+.timeline td.n { white-space: nowrap; color: #666; }
+.sec { margin-top: 16px; }
+.sec h3 { font-size: 1rem; color: #1B3A5C; border-left: 4px solid #2C5AA0; padding-left: 8px; margin-bottom: 8px; }
+.sec ul { padding-left: 1.2em; }
+.sec li { font-size: 0.93rem; margin-bottom: 6px; }
+.alert-box { background: #fdecea; border-left: 4px solid #c0392b; border-radius: 6px; padding: 10px 14px; font-size: 0.93rem; }
+.src { font-size: 0.8rem; color: #777; border-top: 1px solid #eee; padding-top: 12px; margin-top: 16px; }
+.src li { margin-bottom: 4px; }
+.src a { color: #2C5AA0; }
+.legend { font-size: 0.85rem; color: #555; }
+.legend li { margin-bottom: 4px; list-style: none; }
+</style>
+</head>
+<body>
+<nav id="ics-globalnav" style="background:#15324E;font-family:'Yu Gothic','游ゴシック','Segoe UI',sans-serif;font-size:14px;line-height:1.4;">
+<div style="max-width:1040px;margin:0 auto;padding:8px 12px;display:flex;align-items:center;gap:2px;flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;">
+<a href="https://ichisouzo-lab.com/" style="color:#fff;text-decoration:none;font-weight:700;letter-spacing:.04em;margin-right:auto;padding-right:8px;">医知創造ラボ</a>
+<a href="https://ichisouzo-lab.com/" style="color:#cfe0ee;text-decoration:none;padding:5px 7px;border-radius:6px;font-size:13px;">ホーム</a>
+<a href="https://blog.ichisouzo-lab.com/" style="color:#cfe0ee;text-decoration:none;padding:5px 7px;border-radius:6px;font-size:13px;">ブログ</a>
+<a href="https://tools.ichisouzo-lab.com/" style="color:#cfe0ee;text-decoration:none;padding:5px 7px;border-radius:6px;font-size:13px;">ツール</a>
+<a href="https://www.youtube.com/channel/UCmZ9m9j2T9isCuJpsoiY9qQ" style="color:#cfe0ee;text-decoration:none;padding:5px 7px;border-radius:6px;font-size:13px;">YouTube</a>
+</div>
+</nav>
+<div class="app-header">
+  <a class="back-link" href="index.html">&larr; ツール一覧に戻る</a>
+  <div class="series">その症状、大丈夫？</div>
+  <h1>いつから出勤・登校できる？目安チェック</h1>
+</div>
+<div class="disclaimer">このツールは医療行為ではありません。病気の診断はせず、医師に言われた病名をもとに目安の日を計算します。勤務先・学校・園に決まりがあるときは、そちらに従ってください。息が苦しい・意識がおかしいなど緊急のときは、迷わず119番へ。</div>
+<div class="container">
+  <div class="step-card">
+    <span class="step-number">1</span>
+    <h2>だれのことですか？</h2>
+    <div class="options" id="optWho"></div>
+  </div>
+  <div class="step-card hidden" id="cardDisease">
+    <span class="step-number">2</span>
+    <h2>医師に言われた病名は？</h2>
+    <p class="sub">検査で陽性と言われた場合も含みます。病名が分からないときは、先に医療機関に相談してください。</p>
+    <div class="options" id="optDisease"></div>
+  </div>
+  <div class="step-card hidden" id="cardDates">
+    <span class="step-number">3</span>
+    <h2 id="datesTitle">日付を教えてください</h2>
+    <div id="datesArea"></div>
+  </div>
+  <div class="step-card hidden" id="cardJob">
+    <span class="step-number">4</span>
+    <h2>どんな仕事ですか？</h2>
+    <p class="sub">仕事によっては、気をつけることが増えます。</p>
+    <div class="options" id="optJob"></div>
+  </div>
+  <div id="goArea" class="hidden">
+    <button class="go-btn" onclick="showResult()">目安を見る</button>
+    <div id="errorArea"></div>
+  </div>
+  <div id="resultArea"></div>
+</div>
+
+<script id="rtw-logic">
+/* 計算部分（画面に依存しない。テストは scratch/return-to-work-tool-plan-20261024/test_logic.js）
+   根拠のIDは scratch/return-to-work-tool-plan-20261024/LEDGER.md */
+var WEEK = ['日', '月', '火', '水', '木', '金', '土'];
+
+function parseYmd(s) {
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || '');
+  if (!m) { return null; }
+  var d = new Date(+m[1], +m[2] - 1, +m[3]);
+  if (d.getMonth() !== +m[2] - 1) { return null; }
+  return d;
+}
+function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+function diffDays(a, b) {
+  return Math.round((Date.UTC(b.getFullYear(), b.getMonth(), b.getDate()) - Date.UTC(a.getFullYear(), a.getMonth(), a.getDate())) / 86400000);
+}
+function toYmd(d) {
+  var m = d.getMonth() + 1, dd = d.getDate();
+  return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (dd < 10 ? '0' : '') + dd;
+}
+function fmtDate(d) { return (d.getMonth() + 1) + '月' + d.getDate() + '日（' + WEEK[d.getDay()] + '）'; }
+function fmtDateTime(d) { return fmtDate(d) + d.getHours() + '時'; }
+function laterOf(a, b) { return a.getTime() >= b.getTime() ? a : b; }
+
+/* 「〇〇した後△日を経過するまで」は〇〇の日の翌日を1日目と数える［D01］→ 最初の日＝〇〇の日＋(△＋1) */
+function afterDays(d, n) { return addDays(d, n + 1); }
+
+/* 区分は3つ：adult（大人）／school（小学生〜大学生・専門学校生。専修学校にも第19条を準用［G03・G04］）／
+   preschool（幼稚園・保育所・認定こども園。幼稚園と幼保連携型は法令［K01・G06］、保育所はガイドライン［H01］で、日数は同じ） */
+/* 幼児の扱い（インフルエンザの解熱後3日）［K01・H01］ */
+function isYoungChild(who) { return who === 'preschool'; }
+
+function computeReturn(inp) {
+  var today = parseYmd(inp.today);
+  var r = { mode: 'none', conds: [], error: '' };
+  function fail(msg) { r.mode = 'error'; r.error = msg; return r; }
+
+  if (inp.disease === 'flu') {
+    var onset = parseYmd(inp.onset);
+    if (!onset) { return fail('発症した日を入れてください。'); }
+    if (onset > today) { return fail('発症した日が、今日より後になっています。'); }
+    r.onset = onset;
+    var c1 = afterDays(onset, 5);                       /* 発症した後5日を経過［K01・D03］ */
+    r.conds.push({ key: 'onset', date: c1 });
+    if (inp.fever === 'none') {                         /* 熱が出なかった：症状が出た日を起点に［D05］ */
+      r.mode = 'date'; r.date = c1; r.noFever = true; return r;
+    }
+    if (inp.fever === 'notyet') {
+      r.conds.push({ key: 'fever', pending: true });
+      r.mode = 'pending'; return r;
+    }
+    var fe = parseYmd(inp.feverEnd);
+    if (!fe) { return fail('熱が下がった日を入れてください。'); }
+    if (fe < onset) { return fail('熱が下がった日が、発症した日より前になっています。'); }
+    if (fe > today) { return fail('熱が下がった日が、今日より後になっています。'); }
+    var n = isYoungChild(inp.who) ? 3 : 2;
+    var c2 = afterDays(fe, n);                          /* 解熱した後2日（幼児は3日）を経過［K01・H01］ */
+    r.feverEnd = fe; r.feverDays = n;
+    r.conds.push({ key: 'fever', date: c2 });
+    r.mode = 'date'; r.date = laterOf(c1, c2);
+    return r;
+  }
+
+  if (inp.disease === 'covid') {
+    if (inp.asymptomatic) {                             /* 無症状は検体採取日を0日目［D08・H02］ */
+      var sp = parseYmd(inp.sample);
+      if (!sp) { return fail('検体を採った日を入れてください。'); }
+      if (sp > today) { return fail('検体を採った日が、今日より後になっています。'); }
+      r.onset = sp; r.asymptomatic = true;
+      r.conds.push({ key: 'onset', date: afterDays(sp, 5) });
+      r.mode = 'date'; r.date = afterDays(sp, 5);
+      return r;
+    }
+    var on = parseYmd(inp.onset);
+    if (!on) { return fail('発症した日を入れてください。'); }
+    if (on > today) { return fail('発症した日が、今日より後になっています。'); }
+    r.onset = on;
+    var k1 = afterDays(on, 5);                          /* 発症した後5日を経過［K02・D06・A02］ */
+    r.conds.push({ key: 'onset', date: k1 });
+    if (inp.improved === 'notyet') {
+      r.conds.push({ key: 'improved', pending: true });
+      r.mode = 'pending'; return r;
+    }
+    var im = parseYmd(inp.improvedDate);
+    if (!im) { return fail('症状が良くなった日を入れてください。'); }
+    if (im < on) { return fail('症状が良くなった日が、発症した日より前になっています。'); }
+    if (im > today) { return fail('症状が良くなった日が、今日より後になっています。'); }
+    var k2 = afterDays(im, 1);                          /* 症状が軽快した後1日を経過［K02・D06］。大人の「24時間程度」もこれにそろえる（先生決定 2026-10-24） */
+    r.improvedDate = im;
+    r.conds.push({ key: 'improved', date: k2 });
+    r.mode = 'date'; r.date = laterOf(k1, k2);
+    return r;
+  }
+
+  if (inp.disease === 'strep') {
+    var sd = parseYmd(inp.abxDate);
+    var h = parseInt(inp.abxHour, 10);
+    if (!sd || isNaN(h)) { return fail('抗菌薬を飲み始めた日と時刻を入れてください。'); }
+    if (sd > today) { return fail('抗菌薬を飲み始めた日が、今日より後になっています。'); }
+    var start = new Date(sd.getFullYear(), sd.getMonth(), sd.getDate(), h);
+    r.abxStart = start;
+    r.mode = 'datetime';
+    r.from = new Date(start.getTime() + 24 * 3600 * 1000);   /* 開始後24時間［K07］ */
+    if (inp.who === 'preschool') { r.to = new Date(start.getTime() + 48 * 3600 * 1000); }  /* 幼稚園などは24時間［K07］、保育所は24〜48時間［H03］ */
+    return r;
+  }
+
+  return r;   /* かぜ・胃腸炎・はやり目は日付を出さない */
+}
+</script>
+
+<script>
+var WHO = [
+  { id: 'adult', label: '大人（仕事に行く）' },
+  { id: 'school', label: '小学生・中学生・高校生・大学生・専門学校生など', note: '高等専門学校・特別支援学校も含みます' },
+  { id: 'preschool', label: '幼稚園・保育所（保育園）・認定こども園の子ども' }
+];
+var DISEASE = [
+  { id: 'flu', label: 'インフルエンザ' },
+  { id: 'covid', label: '新型コロナウイルス感染症' },
+  { id: 'cold', label: 'かぜ', note: 'インフルエンザや新型コロナ以外の、のど・鼻・せきのかぜ' },
+  { id: 'gastro', label: '感染性胃腸炎（ノロウイルスなど）', note: '吐き気・嘔吐・下痢がおもな症状の胃腸炎' },
+  { id: 'strep', label: '溶連菌感染症', note: 'A群溶血性レンサ球菌による、のどの炎症など' },
+  { id: 'ekc', label: 'はやり目（流行性角結膜炎）' }
+];
+var JOB = [
+  { id: 'food', label: '食品を扱う仕事', note: '調理・盛り付け・配膳・食品の製造や販売など' },
+  { id: 'care', label: '医療・介護の仕事' },
+  { id: 'edu', label: '保育・教育の仕事' },
+  { id: 'other', label: 'それ以外の仕事' }
+];
+var SRC = {
+  L1: ['学校保健安全法施行規則 第19条（出席停止の期間の基準）', 'https://laws.e-gov.go.jp/law/333M50000080018'],
+  L7: ['学校保健安全法 第32条（専修学校への準用）', 'https://laws.e-gov.go.jp/law/333AC0000000056'],
+  L8: ['学校保健安全法施行規則 第30条（専修学校への準用）', 'https://laws.e-gov.go.jp/law/333M50000080018'],
+  L11: ['認定こども園法施行規則 第27条（幼保連携型認定こども園への準用）', 'https://laws.e-gov.go.jp/law/426M60000182002'],
+  L3: ['感染症法施行規則 第11条（就業制限）', 'https://laws.e-gov.go.jp/law/410M50000100099'],
+  M1: ['厚生労働省「インフルエンザ等の急性呼吸器感染症に関するQ&A」', 'https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/kenkou/kekkaku-kansenshou/infulenza/QA2025.html'],
+  M2: ['厚生労働省「新型コロナウイルス感染症の5類感染症移行後の対応について」', 'https://www.mhlw.go.jp/stf/corona5rui.html'],
+  M3: ['厚生労働省「大量調理施設衛生管理マニュアル」', 'https://www.mhlw.go.jp/file/06-Seisakujouhou-11130500-Shokuhinanzenbu/0000168026.pdf'],
+  M4: ['厚生労働省「ノロウイルスに関するQ&A」', 'https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/shokuhin/syokuchu/kanren/yobou/040204-1.html'],
+  C1: ['こども家庭庁「保育所における感染症対策ガイドライン（2018年改訂版）」', 'https://www.cfa.go.jp/assets/contents/node/basic_page/field_ref_resources/e4b817c9-5282-4ccc-b0d5-ce15d7b5018c/cd6e454e/20231010_policies_hoiku_25.pdf'],
+  S1: ['日本学校保健会「学校において予防すべき感染症の解説〈令和5年度改訂〉」', 'https://www.gakkohoken.jp/books/archives/282']
+};
+
+var state = { who: '', disease: '', job: '', fever: '', improved: '', asymptomatic: false };
+
+function todayYmd() { return toYmd(new Date()); }
+function findItem(list, id) { for (var i = 0; i < list.length; i++) { if (list[i].id === id) { return list[i]; } } return null; }
+
+function renderOptions(boxId, list, key, onPick) {
+  var html = '';
+  for (var i = 0; i < list.length; i++) {
+    var it = list[i];
+    html += '<button type="button" class="option-btn' + (state[key] === it.id ? ' selected' : '') + '" onclick="' + onPick + '(\'' + it.id + '\')">' + it.label;
+    if (it.note) { html += '<small>' + it.note + '</small>'; }
+    html += '</button>';
+  }
+  document.getElementById(boxId).innerHTML = html;
+}
+
+function clearResult() { document.getElementById('resultArea').innerHTML = ''; document.getElementById('errorArea').innerHTML = ''; }
+
+function pickWho(id) {
+  state.who = id; clearResult();
+  renderOptions('optWho', WHO, 'who', 'pickWho');
+  document.getElementById('cardDisease').classList.remove('hidden');
+  if (state.disease) { renderDates(); }
+  updateJobCard();
+}
+function pickDisease(id) {
+  state.disease = id; state.fever = ''; state.improved = ''; state.asymptomatic = false; clearResult();
+  renderOptions('optDisease', DISEASE, 'disease', 'pickDisease');
+  renderDates();
+  updateJobCard();
+  document.getElementById('goArea').classList.remove('hidden');
+}
+function pickJob(id) { state.job = id; clearResult(); renderOptions('optJob', JOB, 'job', 'pickJob'); }
+function updateJobCard() {
+  var card = document.getElementById('cardJob');
+  if (state.who === 'adult' && state.disease) { card.classList.remove('hidden'); renderOptions('optJob', JOB, 'job', 'pickJob'); }
+  else { card.classList.add('hidden'); }
+}
+
+function dateInput(id, val) {
+  return '<input type="date" id="' + id + '" max="' + todayYmd() + '" value="' + (val || '') + '" onchange="clearResult()">';
+}
+function choiceBtn(fn, val, cur, label) {
+  return '<button type="button" class="option-btn' + (cur === val ? ' selected' : '') + '" onclick="' + fn + '(\'' + val + '\')">' + label + '</button>';
+}
+function keep(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+
+function renderDates() {
+  var card = document.getElementById('cardDates');
+  var d = state.disease, html = '';
+  var onsetV = keep('inOnset'), feverV = keep('inFever'), impV = keep('inImproved'), sampleV = keep('inSample'), abxV = keep('inAbx'), hourV = keep('inHour');
+  if (d === 'flu') {
+    html += '<div class="field"><label class="ttl" for="inOnset">発症した日</label><div class="hint">ふつうは熱が出た日です。熱が出なかったときは、インフルエンザと分かるきっかけになった症状が出た日を入れてください。</div>' + dateInput('inOnset', onsetV) + '</div>';
+    html += '<div class="field"><label class="ttl">熱は下がりましたか？</label><div class="hint">解熱剤を使わずに平熱に戻った日を「熱が下がった日」とします。いったん下がってまた熱が出たときは、そのあと下がった日を入れてください。</div><div class="choice-row">';
+    html += choiceBtn('pickFever', 'done', state.fever, '下がった') + choiceBtn('pickFever', 'notyet', state.fever, 'まだ下がっていない') + choiceBtn('pickFever', 'none', state.fever, '熱は出なかった');
+    html += '</div>';
+    if (state.fever === 'done') { html += '<label class="ttl" for="inFever">熱が下がった日</label>' + dateInput('inFever', feverV); }
+    html += '</div>';
+  } else if (d === 'covid') {
+    html += '<div class="field"><label class="ttl">症状はありましたか？</label><div class="choice-row">';
+    html += choiceBtn('pickAsym', 'no', state.asymptomatic ? 'yes' : (state.improved || state.asymTouched ? 'no' : ''), '症状があった') + choiceBtn('pickAsym', 'yes', state.asymptomatic ? 'yes' : '', '症状はなく、検査で陽性だった');
+    html += '</div></div>';
+    if (state.asymptomatic) {
+      html += '<div class="field"><label class="ttl" for="inSample">検体を採った日</label><div class="hint">症状がない場合は、検査のために鼻やのどの検体を採った日を0日目と数えます。</div>' + dateInput('inSample', sampleV) + '</div>';
+    } else if (state.asymTouched) {
+      html += '<div class="field"><label class="ttl" for="inOnset">発症した日</label><div class="hint">熱やせきなど、症状が出た日です。</div>' + dateInput('inOnset', onsetV) + '</div>';
+      html += '<div class="field"><label class="ttl">症状は良くなりましたか？</label><div class="hint">解熱剤を使わずに熱が下がり、せきなどの症状も良くなってきた日を「症状が良くなった日」とします。</div><div class="choice-row">';
+      html += choiceBtn('pickImproved', 'done', state.improved, '良くなった') + choiceBtn('pickImproved', 'notyet', state.improved, 'まだ良くなっていない');
+      html += '</div>';
+      if (state.improved === 'done') { html += '<label class="ttl" for="inImproved">症状が良くなった日</label>' + dateInput('inImproved', impV); }
+      html += '</div>';
+    }
+  } else if (d === 'strep') {
+    html += '<div class="field"><label class="ttl" for="inAbx">抗菌薬を飲み始めた日</label>' + dateInput('inAbx', abxV) + '</div>';
+    html += '<div class="field"><label class="ttl" for="inHour">飲み始めたおおよその時刻</label><select id="inHour" onchange="clearResult()"><option value="">選んでください</option>';
+    for (var h = 0; h < 24; h++) { html += '<option value="' + h + '"' + (hourV === String(h) ? ' selected' : '') + '>' + h + '時ごろ</option>'; }
+    html += '</select></div>';
+  } else {
+    html += '<p class="sub">この病気には、日数で決まった目安がありません。このまま「目安を見る」を押すと、復帰を考えるときの目安を表示します。</p>';
+  }
+  document.getElementById('datesTitle').innerHTML = (d === 'flu' || d === 'covid' || d === 'strep') ? '日付を教えてください' : '日付の入力はいりません';
+  document.getElementById('datesArea').innerHTML = html;
+  card.classList.remove('hidden');
+}
+function pickFever(v) { state.fever = v; clearResult(); renderDates(); }
+function pickImproved(v) { state.improved = v; clearResult(); renderDates(); }
+function pickAsym(v) { state.asymptomatic = (v === 'yes'); state.asymTouched = true; state.improved = ''; clearResult(); renderDates(); }
+
+function collectInput() {
+  return {
+    today: todayYmd(), who: state.who, disease: state.disease,
+    onset: keep('inOnset'), fever: state.fever, feverEnd: keep('inFever'),
+    asymptomatic: state.asymptomatic, sample: keep('inSample'),
+    improved: state.improved, improvedDate: keep('inImproved'),
+    abxDate: keep('inAbx'), abxHour: keep('inHour')
+  };
+}
+
+function showResult() {
+  var errBox = document.getElementById('errorArea');
+  errBox.innerHTML = '';
+  if (!state.who || !state.disease) { errBox.innerHTML = '<div class="error">「だれのことか」と「病名」を選んでください。</div>'; return; }
+  if (state.disease === 'flu' && !state.fever) { errBox.innerHTML = '<div class="error">熱が下がったかどうかを選んでください。</div>'; return; }
+  if (state.disease === 'covid' && !state.asymTouched) { errBox.innerHTML = '<div class="error">症状があったかどうかを選んでください。</div>'; return; }
+  if (state.disease === 'covid' && !state.asymptomatic && !state.improved) { errBox.innerHTML = '<div class="error">症状が良くなったかどうかを選んでください。</div>'; return; }
+  if (state.who === 'adult' && !state.job) { errBox.innerHTML = '<div class="error">仕事の種類を選んでください。</div>'; return; }
+  var inp = collectInput();
+  var r = computeReturn(inp);
+  if (r.mode === 'error') { errBox.innerHTML = '<div class="error">' + r.error + '</div>'; return; }
+  var area = document.getElementById('resultArea');
+  area.innerHTML = buildResult(inp, r);
+  area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* 根拠の段階［計画書 §2・監査第1巡 B1〜B3・B7］ */
+function stageOf(who, disease) {
+  if (who === 'adult') { return disease === 'covid' ? 'gov' : 'ref'; }
+  if (disease === 'cold') { return 'ref'; }
+  var pre = (who === 'preschool') ? 'pre' : '';
+  if (disease === 'flu' || disease === 'covid') { return 'law' + pre; }   /* 施行規則第19条［K01・K02・G04・G06］ */
+  if (disease === 'ekc') { return 'third' + pre; }                        /* 第三種で医師の判断［K06・K09］ */
+  return 'guide' + pre;                                                   /* 胃腸炎・溶連菌は「その他の感染症」［K11］ */
+}
+function badgeHtml(stage, hasDate) {
+  var b = {
+    law: ['badge-law', '法令で決まっている基準', '学校保健安全法施行規則で決められた、出席停止の期間です。専門学校にも同じ基準が準用されます。'],
+    lawpre: ['badge-law', '法令・国のガイドラインの基準', '幼稚園と幼保連携型認定こども園では、学校保健安全法施行規則で決められた出席停止の期間です。保育所でも、こども家庭庁のガイドラインで同じ日数が登園の目安になっています。'],
+    third: ['badge-gov', '日本学校保健会の解説の目安', '法令では「医師が、うつすおそれがないと認めるまで」とされています。下の目安は、日本学校保健会の解説によるものです。'],
+    thirdpre: ['badge-gov', '学校保健会の解説・国のガイドラインの目安', '幼稚園などでは、法令で「医師が、うつすおそれがないと認めるまで」とされています。下の目安は、日本学校保健会の解説とこども家庭庁のガイドラインによるものです。'],
+    guide: ['badge-gov', '日本学校保健会の解説の目安', '法令で決まった期間はありません。下の目安は、日本学校保健会の解説によるものです。'],
+    guidepre: ['badge-gov', '学校保健会の解説・国のガイドラインの目安', '法令で決まった期間はありません。下の目安は、日本学校保健会の解説（幼稚園など）と、こども家庭庁のガイドライン（保育所）によるものです。'],
+    gov: ['badge-gov', '国が示している目安', '法令の決まりではありませんが、国（厚生労働省）が目安を示しています。'],
+    ref: ['badge-ref', '参考の目安', 'この場合は、法令で決まった日数も、国が示した日数の目安もありません。' + (hasDate ? '下の日付は参考です。' : '下の内容を参考にしてください。')]
+  }[stage];
+  return '<span class="badge ' + b[0] + '">' + b[1] + '</span><span class="badge-explain">' + b[2] + '</span>';
+}
+
+function condText(c, inp, r) {
+  if (c.key === 'onset') {
+    if (r.asymptomatic) { return '<b>検体を採った日を0日目として、5日を過ぎる</b>（6日目から）'; }
+    return '<b>発症した日を0日目として、5日を過ぎる</b>（6日目から）';
+  }
+  if (c.key === 'fever') {
+    var n = r.feverDays || (isYoungChild(inp.who) ? 3 : 2);
+    return '<b>熱が下がった日の翌日から数えて、' + n + '日を過ぎる</b>';
+  }
+  if (c.key === 'improved') { return '<b>症状が良くなった日の翌日から数えて、1日を過ぎる</b>'; }
+  return '';
+}
+
+function timelineHtml(r) {
+  var start = r.onset, end = r.date, total = diffDays(start, end);
+  if (total > 40) { return ''; }
+  var html = '<table class="timeline"><tr><th>日付</th><th>数え方</th></tr>';
+  for (var i = 0; i <= total; i++) {
+    var d = addDays(start, i), notes = [];
+    if (i === 0) { notes.push(r.asymptomatic ? '検体を採った日（0日目）' : '発症した日（0日目）'); }
+    else { notes.push((r.asymptomatic ? '採取から' : '発症から') + i + '日目'); }
+    if (r.feverEnd) {
+      var f = diffDays(r.feverEnd, d);
+      if (f === 0) { notes.push('熱が下がった日'); } else if (f > 0 && f <= r.feverDays) { notes.push('熱が下がってから' + f + '日目'); }
+    }
+    if (r.improvedDate) {
+      var g = diffDays(r.improvedDate, d);
+      if (g === 0) { notes.push('症状が良くなった日'); } else if (g === 1) { notes.push('良くなってから1日目'); }
+    }
+    var ok = (i === total);
+    if (ok) { notes.push('この日から'); }
+    html += '<tr' + (ok ? ' class="ok"' : '') + '><td class="n">' + fmtDate(d) + '</td><td>' + notes.join('・') + '</td></tr>';
+  }
+  return html + '</table>';
+}
+
+function goWord(who) { return who === 'adult' ? '出勤' : who === 'preschool' ? '登園' : '登校'; }
+
+function buildResult(inp, r) {
+  var who = inp.who, dis = inp.disease, st = stageOf(who, dis), go = goWord(who);
+  var pre = (who === 'preschool'), kid = (who !== 'adult');
+  var dname = findItem(DISEASE, dis).label, srcs = [];
+  function use(k) { if (srcs.indexOf(k) < 0) { srcs.push(k); } }
+  var today = parseYmd(inp.today);
+  var html = '<div class="result-card">' + badgeHtml(st, r.mode !== 'none');
+  html += '<div class="big-label">' + findItem(WHO, who).label + '／' + dname + '</div>';
+  if (st === 'law' || st === 'third') { use('L1'); use('L7'); use('L8'); }
+  if (st === 'lawpre' || st === 'thirdpre') { use('L1'); use('L11'); use('C1'); }
+
+  /* 1. 目安の日 */
+  if (r.mode === 'date') {
+    html += '<div class="big-date">' + fmtDate(r.date) + 'から</div><div class="big-label">' + go + 'の目安です</div>';
+    if (r.date <= today) { html += '<span class="status-now">目安の日はすでに来ています</span>'; }
+    html += '<ul class="cond-list">';
+    for (var i = 0; i < r.conds.length; i++) { html += '<li>' + condText(r.conds[i], inp, r) + '<br>→ ' + fmtDate(r.conds[i].date) + 'から</li>'; }
+    html += '</ul>';
+    if (r.conds.length > 1) { html += '<p class="legend">2つの条件の両方を満たす、遅いほうの日が目安です。</p>'; }
+    if (r.noFever) { html += '<p class="legend">熱が出なかったときは、症状が出た日を起点にして数えることが考えられます。判断に迷うときは、医師に相談してください。</p>'; }
+    html += timelineHtml(r);
+  } else if (r.mode === 'pending') {
+    html += '<div class="status-pending">まだ日付は決まりません。' + (dis === 'flu' ? '熱が下がった日' : '症状が良くなった日') + 'が分かったら、もう一度入れてください。</div>';
+    html += '<ul class="cond-list"><li>' + condText(r.conds[0], inp, r) + '<br>→ ' + fmtDate(r.conds[0].date) + 'から</li>';
+    html += '<li>' + condText({ key: dis === 'flu' ? 'fever' : 'improved' }, inp, r) + '<br>→ まだ</li></ul>';
+    html += '<p class="legend">この2つの条件の両方を満たす日が目安になります。</p>';
+  } else if (r.mode === 'datetime') {
+    if (r.to) {
+      html += '<div class="big-date">' + fmtDateTime(r.from) + '〜<br>' + fmtDateTime(r.to) + 'ごろ</div><div class="big-label">抗菌薬を飲み始めてから、幼稚園などでは24時間、保育所では<span style="white-space:nowrap">24〜48時間たつころです。</span>この目安を参考に、かかりつけ医の診断に従ってください。</div>';
+      html += '<ul class="cond-list"><li><b>幼稚園など：抗菌薬を飲み始めてから24時間</b><br>→ ' + fmtDateTime(r.from) + 'ごろから</li>';
+      html += '<li><b>保育所：抗菌薬を飲み始めてから<span style="white-space:nowrap">24〜48時間</span></b><br>→ ' + fmtDateTime(r.from) + '〜' + fmtDateTime(r.to) + 'ごろ</li></ul>';
+      html += '<p class="legend">' + fmtDateTime(r.abxStart) + 'ごろに飲み始めたとして計算しています。</p>';
+    } else {
+      html += '<div class="big-date">' + fmtDateTime(r.from) + 'ごろ以降</div><div class="big-label">' + go + 'の目安です</div>';
+      html += '<ul class="cond-list"><li><b>抗菌薬を飲み始めてから24時間がたつ</b>（' + fmtDateTime(r.abxStart) + 'ごろに開始）</li></ul>';
+    }
+    html += '<p class="legend">抗菌薬は、症状が良くなっても決められた日数を最後まで飲み切ってください。</p>';
+  } else {
+    html += '<div class="big-date" style="font-size:1.2rem">日数で決まった目安はありません</div>';
+  }
+
+  /* 2. 病気ごとの説明 */
+  var notes = [];
+  var maskPre = '乳幼児のマスクは、2歳未満では息苦しさや体調不良を訴えたり自分で外したりすることが難しく、窒息や熱中症の危険が高まるため勧められていません。保育所のガイドラインでは、2歳以上についてもマスクの着用は求めていません。';
+  if (dis === 'flu') {
+    use('S1');
+    if (who === 'adult') {
+      use('L1'); use('M1');
+      notes.push('国は、大人がインフルエンザで休む日数の目安を示していません。上の日付は、学校の出席停止の基準（発症した後5日、かつ熱が下がった後2日）と同じ数え方で出した参考です。');
+      notes.push('インフルエンザは、発症の前の日から発症後3〜7日ほど、鼻やのどからウイルスが出るといわれています。熱が下がってもウイルスが出ることがあるので、せきやくしゃみが続くあいだは不織布マスクをつけましょう。');
+    } else {
+      notes.push('抗インフルエンザウイルス薬で早く熱が下がっても、うつす力は残っています。発症した後5日を過ぎるまでは休みます。');
+      notes.push((pre ? '幼稚園などでは、' : '') + '病状によって、医師が「うつすおそれがない」と認めたときは、この限りではありません。');
+    }
+  }
+  if (dis === 'covid') {
+    if (who === 'adult') {
+      use('M2');
+      notes.push('2023年5月8日からは、法律にもとづく外出の自粛は求められていません。外出を控えるかどうかは、本人の判断にまかされています。');
+      notes.push('国の目安では、発症した日を0日目として5日間は外出を控え、5日目にまだ症状があるときは、熱が下がり、たんやのどの痛みなどが良くなって24時間ほどたつまで様子を見ます。上の日付は、学校の基準と同じく「良くなった日の翌日から数えて1日を過ぎる」日として出しています。');
+      notes.push('この期間にどうしても外出するときは、症状がないことを確かめ、マスクをきちんとつけてください。');
+      notes.push('発症から10日たつまでは、ウイルスが出ている可能性があります。不織布マスクをつけ、高齢の人など重症になりやすい人との接触は控えましょう。');
+    } else {
+      use('S1');
+      if (r.asymptomatic) { use('M2'); use('C1'); notes.push('症状がない場合の数え方は法令には書かれていないため、厚生労働省とこども家庭庁の目安（検体を採った日を0日目）で数えています。'); }
+      if (!r.asymptomatic) { notes.push('「症状が良くなった」とは、解熱剤を使わずに熱が下がり、せきなどの呼吸器の症状が良くなってきていることです。'); }
+      notes.push((pre ? '幼稚園などでは、' : '') + '医師の判断でこの期間を短くすることは、基本的に想定されていません。');
+      if (pre) { use('C1'); notes.push(maskPre); }
+      else { notes.push('登校を再開したあとも、発症から10日たつまではマスクをつけることが勧められています。'); }
+    }
+  }
+  if (dis === 'cold') {
+    use('M1');
+    notes.push('かぜには、法令で決まった日数も、国が示した日数の目安もありません。');
+    if (pre) { use('C1'); notes.push('せきやくしゃみが続くあいだは、周りの人にうつさないよう気をつけましょう。' + maskPre); }
+    else { notes.push('せきやくしゃみが続いているあいだは、不織布マスクをつけるなどして、周りの人にうつさないようにしましょう。'); }
+    notes.push('医師から外出を控えるよう言われたときは、その期間は外出を控えてください。');
+  }
+  if (dis === 'gastro') {
+    use('S1');
+    if (who === 'adult') {
+      use('C1');
+      notes.push('参考までに、子どもの目安は、学校では下痢や嘔吐が軽くなって全身の状態が良いこと、保育所では嘔吐や下痢が治まって普段の食事がとれることです。');
+      notes.push('治ったあとも、しばらくは便からウイルスが出ることがあります。トイレのあとの手洗いを続けてください。');
+    } else if (pre) {
+      use('C1');
+      notes.push('幼稚園などでは、下痢や嘔吐が軽くなり、全身の状態が良ければ登園できます。保育所の登園の目安は「嘔吐、下痢等の症状が治まり、普段の食事がとれること」です。');
+      notes.push('登園を再開したあとも、ウイルスは便の中に3週間以上出ることがあるので、トイレのあとやおむつ替えのあとの手洗いをしっかり行ってください。');
+    } else {
+      notes.push('下痢や嘔吐が軽くなり、全身の状態が良ければ登校できます。治ったあとも数週間ほど便からウイルスが出ることがあるので、トイレのあとの手洗いを続けてください。');
+    }
+    if (kid) { notes.push('O157などの細菌が原因と言われたときは、医師の指示に従ってください。'); }
+  }
+  if (dis === 'strep') {
+    use('S1');
+    if (who === 'adult') { notes.push('上の時刻は、学校の目安（適切な抗菌薬を飲み始めて24時間たてば、うつす力はなくなる）による参考です。'); }
+    else if (pre) { use('C1'); notes.push('幼稚園などでは、適切な抗菌薬を飲み始めて24時間以内にうつす力はなくなるとされ、それ以降は登園できます。保育所の登園の目安は「抗菌薬の内服後24〜48時間が経過していること」です。'); }
+    else { notes.push('適切な抗菌薬を飲み始めて24時間以内に、ほかの人にうつす力はなくなるとされています。'); }
+  }
+  if (dis === 'ekc') {
+    use('S1');
+    if (who === 'adult') { notes.push('学校では、目の症状が軽くなってもうつす力が残ることがあるため、医師が「うつすおそれがない」と認めるまで休むことになっています。復帰の時期は、診察した医師に相談してください。'); }
+    else if (pre) { use('C1'); notes.push('幼稚園などでは、目の症状が軽くなってもうつす力が残ることがあるため、医師が「うつすおそれがない」と認めるまで休みます。保育所の登園の目安は「結膜炎の症状が消失していること」です。'); }
+    else { notes.push('目の症状が軽くなってもうつす力が残ることがあるため、医師が「うつすおそれがない」と認めるまで休みます。'); }
+    notes.push('このウイルスは、便の中に1か月ほど出ることも珍しくありません。復帰したあとも手洗いを続けてください。');
+  }
+  if (notes.length) { html += '<div class="sec"><h3>知っておきたいこと</h3><ul><li>' + notes.join('</li><li>') + '</li></ul></div>'; }
+
+  /* 3. 仕事・学校・園の決まりと証明書 */
+  var rules = [];
+  var ari = (dis === 'flu' || dis === 'covid' || dis === 'cold' || dis === 'strep');
+  if (who === 'adult') {
+    rules.push('<b>勤務先の決まりがあるときは、そちらが優先します。</b>');
+    if (ari) { use('M1'); rules.push('職場が、治ったことや検査が陰性だったことの証明書を求めるのは望ましくないとされており、提出は不要です。'); }
+    if (inp.job === 'food') {
+      use('M3');
+      rules.push('下痢・嘔吐・発熱があるあいだは、調理の作業をしないでください。');
+      if (dis === 'gastro') {
+        use('M4'); use('L3');
+        rules.push('ノロウイルスと診断されたときは、検便でウイルスがないことを確かめるまで、食品に直接触れる調理の作業を控えることが望ましいとされています。');
+        rules.push('ノロウイルスは、下痢などが治ってからも、ふつう1週間ほど、長いときは1か月ほど便から出ることがあります。症状が良くなったあとも、しばらくは食品を直接扱う作業を控えましょう。');
+        rules.push('O157などの細菌が原因と言われたときは、法律で食品を扱う仕事が制限されることがあります。保健所と医師の指示に従ってください。');
+      }
+    }
+    if (inp.job === 'care') {
+      rules.push('医療機関や介護施設では、施設ごとに職員の就業の決まりを設けていることがあります。必ず職場の決まりを確かめてください。');
+      if (dis === 'covid') { use('M2'); rules.push('新型コロナでは、国が医療機関や高齢者施設に、感染した職員の就業制限を考えるよう求めています。'); }
+    }
+    if (inp.job === 'edu') { rules.push('保育所や学校では、職員についての決まりを設けていることがあります。職場の決まりを確かめてください。'); }
+  } else if (pre) {
+    use('C1');
+    if (ari) { use('M1'); rules.push('幼稚園では、治ったことや検査が陰性だったことの証明書は必要ありません。'); }
+    if (dis === 'covid') { rules.push('保育所でも、新型コロナで登園を再開するときに、検査が陰性だったことの証明書を出す必要はありません。'); }
+    if (dis === 'flu' || dis === 'covid' || dis === 'ekc') { rules.push('保育所では、園によって登園の再開に医師の「意見書」を求めることがあります。ただし、すべての園で必要なものではありません。'); }
+    if (dis === 'strep' || dis === 'gastro') { rules.push('保育所では、園によって、医師の診断を受けたうえで保護者が書く「登園届」を求めることがあります。ただし、すべての園で必要なものではありません。'); }
+  } else {
+    if (ari) { use('M1'); rules.push('学校に戻るときに、治ったことや検査が陰性だったことの証明書は必要ありません。'); }
+  }
+  var place = who === 'adult' ? '職場' : pre ? '園' : '学校';
+  if (rules.length) { html += '<div class="sec"><h3>' + (who === 'adult' ? '職場で気をつけること' : place + 'とのやりとり') + '</h3><ul><li>' + rules.join('</li><li>') + '</li></ul></div>'; }
+
+  /* 4. 受診の目安（M1 Q16 は急性呼吸器感染症の文脈なので、胃腸炎・はやり目では一般的な案内にする） */
+  html += '<div class="sec"><h3>こんなときは受診を</h3>';
+  if (ari) {
+    use('M1');
+    html += '<div class="alert-box">高熱が続く、呼吸が苦しい、意識がおかしいなど、具合が悪いときは早めに医療機関を受診してください。</div>';
+    var care = [];
+    if (dis === 'flu' && kid) { care.push('インフルエンザと診断された子どもや未成年の人は、急に走り出すなどの異常な行動をとることがあります。治療を始めてから少なくとも2日間は、一人にしないでください。'); }
+    care.push('水分は、お茶でもスープでも、飲みたいものでよいので十分にとりましょう。');
+    html += '<ul style="margin-top:8px"><li>' + care.join('</li><li>') + '</li></ul>';
+  } else {
+    html += '<div class="alert-box">症状が重いときや長引くときは、早めに医療機関に相談してください。</div>';
+  }
+  html += '</div>';
+  html += '<div class="sec"><p class="legend">目安の日を過ぎても、体調が戻っていないときは無理をして' + place + 'に行かないようにしましょう。</p></div>';
+
+  /* 5. 出典 */
+  html += '<div class="src"><b>この結果の根拠</b><ul>';
+  for (var s = 0; s < srcs.length; s++) { html += '<li><a href="' + SRC[srcs[s]][1] + '" target="_blank" rel="noopener">' + SRC[srcs[s]][0] + '</a></li>'; }
+  html += '</ul>2026年10月24日に資料を確認しました。</div>';
+  html += '</div><button class="restart-btn" onclick="restart()">最初からやり直す</button>';
+  return html;
+}
+
+function restart() {
+  state = { who: '', disease: '', job: '', fever: '', improved: '', asymptomatic: false };
+  renderOptions('optWho', WHO, 'who', 'pickWho');
+  renderOptions('optDisease', DISEASE, 'disease', 'pickDisease');
+  document.getElementById('cardDisease').classList.add('hidden');
+  document.getElementById('cardDates').classList.add('hidden');
+  document.getElementById('cardJob').classList.add('hidden');
+  document.getElementById('goArea').classList.add('hidden');
+  document.getElementById('datesArea').innerHTML = '';
+  clearResult();
+  window.scrollTo(0, 0);
+}
+
+renderOptions('optWho', WHO, 'who', 'pickWho');
+renderOptions('optDisease', DISEASE, 'disease', 'pickDisease');
+</script>
+</body>
+</html>
