@@ -322,7 +322,7 @@ function renderDates() {
   var d = state.disease, html = '';
   var onsetV = keep('inOnset'), feverV = keep('inFever'), impV = keep('inImproved'), sampleV = keep('inSample'), abxV = keep('inAbx'), hourV = keep('inHour');
   if (d === 'flu') {
-    html += '<div class="field"><label class="ttl" for="inOnset">発症した日</label><div class="hint">ふつうは熱が出た日です。熱が出なかったときは、インフルエンザと分かるきっかけになった症状が出た日を入れてください。</div>' + dateInput('inOnset', onsetV) + '</div>';
+    html += '<div class="field"><label class="ttl" for="inOnset">発症した日</label><div class="hint">熱などの症状が出た日です。熱が出なかったときは、インフルエンザと分かるきっかけになった症状が出た日を入れてください。</div>' + dateInput('inOnset', onsetV) + '</div>';
     html += '<div class="field"><label class="ttl">熱は下がりましたか？</label><div class="hint">解熱剤を使わずに平熱に戻った日を「熱が下がった日」とします。いったん下がってまた熱が出たときは、そのあと下がった日を入れてください。</div><div class="choice-row">';
     html += choiceBtn('pickFever', 'done', state.fever, '下がった') + choiceBtn('pickFever', 'notyet', state.fever, 'まだ下がっていない') + choiceBtn('pickFever', 'none', state.fever, '熱は出なかった');
     html += '</div>';
